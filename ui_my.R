@@ -11,32 +11,39 @@ library(tidyverse)
 # ui
 # dashboard_header ----------------------------------
 header <- dashboardHeader(
-  title="My LIMS",
-  dropdownMenu(
-    type="messages",
-    #add Items
-    messageItem(
-      # message source
-      from="system",
-      # message content
-      message="process ended",
-      # icon for the message
-      icon=icon(name="envelope")
-    )
-  )
-)
+            title="My LIMS",
+            dropdownMenu(
+              type="messages",
+              #add Items
+              messageItem(
+                # message source
+                from="system",
+                # message content
+                message="process finished",
+                # icon for the message
+                icon=icon(name="envelope")
+                )
+              )
+            )
 
 # dashboard_sidebar -----------------------------------
 sidebar <- dashboardSidebar(
   sidebarMenu(
-    menuItem("Home", tabName = "home", icon = icon(name="home")),
-    menuItem("My Project", icon = icon(name="dna"), tabName = "myproject",
-             #badgeLabel = "new", badgeColor = "green"
-             menuItem("Creat New Project", tabName = "creat_new_project", icon = icon(name = "plus-circle")),
-             menuItem("My Current Projects", tabName = "current_project", icon = icon(name = "th-list"))
-             ),
-    menuItem("About Us", tabName = "aboutus", icon = icon(name="user-friends")),
-    menuItem("FAQ", tabName = "FAQ", icon = icon(name="question-circle"))
+    menuItem("Home", tabName = "home", 
+             icon = icon(name="home")),
+    menuItem("My Project", icon = icon(name="dna"), 
+             tabName = "myproject",
+        menuItem("Creat New Project", 
+                 tabName = "creat_new_project", 
+                 icon = icon(name = "plus-circle")),
+        menuItem("My Current Projects", 
+                 tabName = "current_project", 
+                 icon = icon(name = "th-list"))
+    ),
+    menuItem("About Us", tabName = "aboutus", 
+             icon = icon(name="user-friends")),
+    menuItem("FAQ", tabName = "FAQ", 
+             icon = icon(name="question-circle"))
   )
 )
 
@@ -76,28 +83,26 @@ body <- dashboardBody(
             ## log in
             submitButton(text = " Submit ",
                          icon = icon(name = "sign-in-alt"),
-                         width = "100px")
+                         width = "100px"
+                         )
     ),
     
     tabItem(tabName = "current_project",
-            h2("My Current Projects"),
-            
+            h2("My Current Projects")
             # list of current projects
-            
-            
-            
             ),
     
     tabItem(tabName = "aboutus",
-            h2("About Us")
+            h2("About Us"),
+            h4("")
     ),
       
     tabItem(tabName = "FAQ",
-            h2("FAQ")
+            h2("FAQ"),
+            h4("")
     )
   )
 )
-
 
 
 #ui
@@ -109,7 +114,6 @@ ui <- dashboardPage(
 
 ---------------------------------------------------------
 
-# Define server logic required to draw a histogram
 server <- function(input, output) {
   
   output$distPlot <- renderPlot({
