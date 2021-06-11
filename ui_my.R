@@ -2,6 +2,12 @@
 # This is my laboratory information management system (LIMS)
 # Shiny web application --- ui
 # 
+#--------------------------------------------------------------------
+# bugs:
+# 1 not list the selected rows and columns
+# 2 how to set log in page    ???ui<-secure_app(ui)
+# 3 table not saved after edit
+#---------------------------------------------------------------------
 
 
 library(shinydashboard)
@@ -11,9 +17,44 @@ library(shinymanager)
 library(DT)
 
 
+## Functions --------------------------------------------------------------------
+
+# 1 dt_output
+# output table (id:outputId)
+dt_output = function(title, id) {
+  h1(paste0('Table:', title)) #我们本来期望的是提取两个“(1st)”和“(2nd)”组合，不料整个地提取了“(1st) other (2nd)”。这就是因为.+的贪婪匹配。如果要求尽可能短的匹配， 使用*?, +?, {3,}?等“懒惰型”重复模式。 在无上限重复标志后面加问号表示懒惰性重复。
+  hr()
+  DTOutput(id)
+}
+
+# 2 render_dt
+# select rows and columns
+# edit table by cell/row/column/all
+render_dt = function(data, editable = 'cell', server = TRUE, ...) {
+  renderDT(data, selection = 'none', server = server, editable = editable, ...)
+  # selection = list(target = 'row+column')
+  # selection = 'none'
+}
+
+# 3 print_rows_cols
+# print row+column selected
+print_rows_cols = function(id) {
+  # projects selected
+  cat('Rows selected:\n')
+  print(input[[paste0(id, '_rows_selected')]])
+  # parameters selected
+  cat('Columns selected:\n')
+  print(input[[paste0(id, '_columns_selected')]])
+}
+
+#----------------------------------------------------------------functions-------
+
+
+
+
 
 # ui
-# dashboard_header ----------------------------------
+# dashboard_header -------------------------------------------------------------
 header <- dashboardHeader(
   titleWidth = '180px',
   title="My LIMS",
@@ -33,9 +74,7 @@ header <- dashboardHeader(
 
 
 
-
-
-# dashboard_sidebar -----------------------------------
+# dashboard_sidebar ------------------------------------------------------------
 sidebar <- dashboardSidebar(
   width = '180px',
   sidebarMenu(
@@ -58,12 +97,7 @@ sidebar <- dashboardSidebar(
   )
 )
 
-
-
-
-
-
-# dashboard_body ------------------------------------------
+# dashboard_body ---------------------------------------------------------------
 body <- dashboardBody(
   tabItems(
     tabItem(tabName = "home",
@@ -110,15 +144,20 @@ body <- dashboardBody(
     ),
     
     
-    
     tabItem(tabName = "current_project",
             h2("My Current Projects"),
             hr(),
-            # list of current projects
-            DT::dataTableOutput(outputId='x1'),   ## iris test table
+            DTOutput(outputId='x1'),   ## iris test table
+            
+          # dt_output('server-side processing (editable = "cell")', 'x5'),
+          # dt_output('server-side processing (editable = "column")', 'x7'),
+          # dt_output('server-side processing (editable = "all")', 'x8'),
+          #  dt_output('server-side processing (editable = "row")', 'x1'),
+            
+          
+          # list the selected rows and columns / list of current projects
             verbatimTextOutput(outputId='y1')
-            
-            
+          
     ),
     
     
@@ -132,35 +171,38 @@ body <- dashboardBody(
   )
 )
 
-
-
 ui <- dashboardPage(
         header,
         sidebar,
         body
 )
+#--------------------------------------------------------- ui ------------------
 
-#---------------------------------------------------------
 
 
+
+
+#server ------------------------------------------------------------------------
 server <- function(input, output) {
   
-  options(DT.options = list(pageLength = 10))
-  # row+column selection
-  print_rows_cols = function(id) {
-    cat('Rows selected:\n')
-    print(input[[paste0(id, '_rows_selected')]])
-    cat('Columns selected:\n')
-    print(input[[paste0(id, '_columns_selected')]])
-  }
-  output$x1 <- DT::renderDataTable(iris, selection = list(target ='row+column'))
-  output$y1 <- renderPrint(print_rows_cols('x1'))
-  
+# My Current Projects 
+  options(DT.options = list(pageLength = 5))
+  d1=iris
+  output$x1 <- render_dt(d1, list(target = 'row', disable = list(columns = c(0))))
+  # print the selected indices ???????????????????????????????????????????????
+  output$y1 <- renderPrint(print_rows_cols('x1'))  
+
+  # edit a row
+  observeEvent(input$x1_cell_edit, {
+    d1 <- editData(d1, input$x1_cell_edit, 'x1')
+  })
+  # server-side processing
+  # output$x1 <- renderDT(iris, selection = list(target = 'row+column'))
   
   
 }
 
-
+#----------------------------------------------------- server ------------------
 
 # Run the application 
-shinyApp(ui = ui, server = server)
+shinyApp(ui, server)
