@@ -8,6 +8,9 @@ library(shinydashboard)
 library(shiny)
 library(tidyverse)
 library(shinymanager)
+library(DT)
+
+
 
 # ui
 # dashboard_header ----------------------------------
@@ -28,6 +31,10 @@ header <- dashboardHeader(
   )
 )
 
+
+
+
+
 # dashboard_sidebar -----------------------------------
 sidebar <- dashboardSidebar(
   width = '180px',
@@ -36,12 +43,13 @@ sidebar <- dashboardSidebar(
              icon = icon(name="home")),
     menuItem("My Project", icon = icon(name="dna"), 
              tabName = "myproject",
-        menuItem("Creat New Project", 
+        menuSubItem("Creat New Project", 
                  tabName = "creat_new_project", 
                  icon = icon(name = "plus-circle")),
-        menuItem("My Current Projects", 
+        menuSubItem("My Current Projects", 
                  tabName = "current_project", 
-                 icon = icon(name = "th-list"))
+                 icon = icon(name = "th-list")),
+        startExpanded = TRUE
     ),
     menuItem("About Us", tabName = "aboutus", 
              icon = icon(name="user-friends")),
@@ -49,6 +57,11 @@ sidebar <- dashboardSidebar(
              icon = icon(name="question-circle"))
   )
 )
+
+
+
+
+
 
 # dashboard_body ------------------------------------------
 body <- dashboardBody(
@@ -96,10 +109,18 @@ body <- dashboardBody(
             )
     ),
     
+    
+    
     tabItem(tabName = "current_project",
-            h2("My Current Projects")
+            h2("My Current Projects"),
+            hr(),
             # list of current projects
+            DT::dataTableOutput(outputId='x1'),   ## iris test table
+            verbatimTextOutput(outputId='y1')
+            
+            
     ),
+    
     
     tabItem(tabName = "aboutus",
             h2("About Us"),
@@ -113,7 +134,6 @@ body <- dashboardBody(
 
 
 
-#ui
 ui <- dashboardPage(
         header,
         sidebar,
@@ -122,17 +142,24 @@ ui <- dashboardPage(
 
 #---------------------------------------------------------
 
+
 server <- function(input, output) {
   
-  output$distPlot <- renderPlot({
-    # generate bins based on input$bins from ui.R
-    x    <- faithful[, 2]
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    
-    # draw the histogram with the specified number of bins
-    hist(x, breaks = bins, col = 'darkgray', border = 'white')
-  })
+  options(DT.options = list(pageLength = 10))
+  # row+column selection
+  print_rows_cols = function(id) {
+    cat('Rows selected:\n')
+    print(input[[paste0(id, '_rows_selected')]])
+    cat('Columns selected:\n')
+    print(input[[paste0(id, '_columns_selected')]])
+  }
+  output$x1 <- DT::renderDataTable(iris, selection = list(target ='row+column'))
+  output$y1 <- renderPrint(print_rows_cols('x1'))
+  
+  
+  
 }
+
 
 
 # Run the application 
