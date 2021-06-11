@@ -1,33 +1,36 @@
 #
 # This is my laboratory information management system (LIMS)
-# Shiny web application
-#
+# Shiny web application --- ui
+# 
 
 
 library(shinydashboard)
 library(shiny)
 library(tidyverse)
+library(shinymanager)
 
 # ui
 # dashboard_header ----------------------------------
 header <- dashboardHeader(
-            title="My LIMS",
-            dropdownMenu(
-              type="messages",
-              #add Items
-              messageItem(
-                # message source
-                from="system",
-                # message content
-                message="process finished",
-                # icon for the message
-                icon=icon(name="envelope")
-                )
-              )
-            )
+  titleWidth = '180px',
+  title="My LIMS",
+  dropdownMenu(
+    type="messages",
+    #add Items
+    messageItem(
+    # message source
+    from="system",
+    # message content
+    message="process finished",
+    # icon for the message
+    icon=icon(name="envelope")
+    )
+  )
+)
 
 # dashboard_sidebar -----------------------------------
 sidebar <- dashboardSidebar(
+  width = '180px',
   sidebarMenu(
     menuItem("Home", tabName = "home", 
              icon = icon(name="home")),
@@ -65,44 +68,49 @@ body <- dashboardBody(
             submitButton(text = " Log in / Register",
                          icon = icon(name = "sign-in-alt"),
                          width = "200px")
-            ),
+    ),
     
     tabItem(tabName = "creat_new_project",
             h2("Creat New Project"),
             ## project_name
             textInput(inputId = "project_name", 
-                      label = "Project Name :"),
+                      label = "New Project Name :"),
             ## project_password
             passwordInput(inputId = "project_password", 
                           label = "Project Password :"),
             ## administrator
             textInput(inputId = "administrator",
                       label = "Administrator :"),
-            fileInput(inputId = "fileinput",
-                      label = "Upload files:"),
+            fileInput(inputId = "uploadfile",
+                      label = "Upload files:",
+                      multiple = TRUE,
+                      accept = c('text/csv','text/comma-separated-values','.csv','.tsv')
+                      ),
+            h5('List of uploaded files:'),
+            verbatimTextOutput('fileList'),
+    
             ## log in
             submitButton(text = " Submit ",
                          icon = icon(name = "sign-in-alt"),
                          width = "100px"
-                         )
+            )
     ),
     
     tabItem(tabName = "current_project",
             h2("My Current Projects")
             # list of current projects
-            ),
+    ),
     
     tabItem(tabName = "aboutus",
             h2("About Us"),
-            h4("")
     ),
       
     tabItem(tabName = "FAQ",
             h2("FAQ"),
-            h4("")
     )
   )
 )
+
 
 
 #ui
@@ -112,7 +120,7 @@ ui <- dashboardPage(
         body
 )
 
----------------------------------------------------------
+#---------------------------------------------------------
 
 server <- function(input, output) {
   
