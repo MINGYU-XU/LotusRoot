@@ -7,6 +7,8 @@
 # 1 not list the selected rows and columns
 # 2 how to set log in page    ???ui<-secure_app(ui)
 # 3 table not saved after edit
+# 4 how to add "pick" radio button as the first column   ???server=T/F
+# 5 design the information table!!!
 #---------------------------------------------------------------------
 
 
@@ -31,7 +33,7 @@ dt_output = function(title, id) {
 # select rows and columns
 # edit table by cell/row/column/all
 render_dt = function(data, editable = 'cell', server = TRUE, ...) {
-  renderDT(data, selection = 'none', server = server, editable = editable, ...)
+  renderDT(data, selection = list(target = 'row+column'), server = server, editable = editable, ...)
   # selection = list(target = 'row+column')
   # selection = 'none'
 }
@@ -185,13 +187,13 @@ ui <- dashboardPage(
 #server ------------------------------------------------------------------------
 server <- function(input, output) {
   
-# My Current Projects 
+  # My Current Projects 
   options(DT.options = list(pageLength = 5))
   d1=iris
   output$x1 <- render_dt(d1, list(target = 'row', disable = list(columns = c(0))))
   # print the selected indices ???????????????????????????????????????????????
   output$y1 <- renderPrint(print_rows_cols('x1'))  
-
+  
   # edit a row
   observeEvent(input$x1_cell_edit, {
     d1 <- editData(d1, input$x1_cell_edit, 'x1')
