@@ -2,13 +2,12 @@
 # questionnaire
 # forms
 #
-#
 
 library(shiny)
 library(shinyforms)
 ### devtools::install_github("daattali/shinyforms")
 library(googlesheets)
-# 创建一个新的 google 
+# creat a new google 
 ##sheetsdf <- data.frame(name = "", age = 0, favourite_pkg = "", terms = TRUE)
 ##google_df <- gs_new("responses", input = df, trim = TRUE, verbose = FALSE)
 
