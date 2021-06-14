@@ -305,17 +305,17 @@ server <- function(input, output) {
                         #editable = 'row',  ## can edit a whole row
                         editable = list(target = "row", disable = list(columns = c(0))) ## cannot edit column1
   )
-  #or use a function
-  #output$x1 <- render_dt(d1, list(target = 'row', disable = list(columns = c(0))))
+  ###or use a function
+  ###output$x1 <- render_dt(d1, list(target = 'row', disable = list(columns = c(0))))
   
   # print the selected indices ??????????
-  #print_rows_cols = function(id) {
-  #  cat('Rows selected:\n')
-  #  print(input[[paste0(id, '_rows_selected')]])     ##?????NULL
-  #  cat('Columns selected:\n')
-  #  print(input[[paste0(id, '_columns_selected')]])  ##????NULL
-  #}
-  #output$y2 <- renderPrint(print_rows_cols('x2'))
+  print_rows_cols = function(id) {
+    cat('Rows selected:\n')
+    print(input[[paste0(id, '_rows_selected')]])     ##?????NULL
+    cat('Columns selected:\n')
+    print(input[[paste0(id, '_columns_selected')]])  ##????NULL
+  }
+  output$y2 <- renderPrint(print_rows_cols('x2'))
   
   
   
