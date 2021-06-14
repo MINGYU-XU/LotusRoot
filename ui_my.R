@@ -8,7 +8,7 @@
 # 2 how to set log in page    ???ui<-secure_app(ui)
 # 3 table not saved after edit
 # 4 how to add "pick" radio button as the first column   ???server=T/F
-# 5 design the information table!!!
+# 5 design the information table ??? cannot show up 
 #---------------------------------------------------------------------
 
 
@@ -41,10 +41,8 @@ render_dt = function(data, editable = 'cell', server = TRUE, ...) {
 # 3 print_rows_cols
 # print row+column selected
 print_rows_cols = function(id) {
-  # projects selected
   cat('Rows selected:\n')
   print(input[[paste0(id, '_rows_selected')]])
-  # parameters selected
   cat('Columns selected:\n')
   print(input[[paste0(id, '_columns_selected')]])
 }
@@ -53,12 +51,10 @@ print_rows_cols = function(id) {
 
 
 
-
-
 # ui
 # dashboard_header -------------------------------------------------------------
 header <- dashboardHeader(
-  titleWidth = '180px',
+  #titleWidth = '15%',
   title="My LIMS",
   dropdownMenu(
     type="messages",
@@ -78,7 +74,7 @@ header <- dashboardHeader(
 
 # dashboard_sidebar ------------------------------------------------------------
 sidebar <- dashboardSidebar(
-  width = '180px',
+  #width = '15%',
   sidebarMenu(
     menuItem("Home", tabName = "home", 
              icon = icon(name="home")),
@@ -89,9 +85,12 @@ sidebar <- dashboardSidebar(
                  icon = icon(name = "plus-circle")),
         menuSubItem("My Current Projects", 
                  tabName = "current_project", 
-                 icon = icon(name = "th-list")),
+                 icon = icon(name = "list")),
         startExpanded = TRUE
     ),
+    
+    menuItem("Raw Datasets", tabName = "datasets", 
+             icon = icon(name="database")),
     menuItem("About Us", tabName = "aboutus", 
              icon = icon(name="user-friends")),
     menuItem("FAQ", tabName = "FAQ", 
@@ -101,9 +100,20 @@ sidebar <- dashboardSidebar(
 
 # dashboard_body ---------------------------------------------------------------
 body <- dashboardBody(
+  
+
+  # zoom the web
+  tags$style("
+              body {
+             -moz-transform: scale(0.8, 0.8); /* Moz-browsers */
+             zoom: 0.9; /* Other non-webkit browsers */
+             zoom: 90%; /* Webkit browsers */
+             }
+             "),
+  
   tabItems(
     tabItem(tabName = "home",
-            h2("Home"),
+            h3("Home"),
             ## user_name
             textInput(inputId = "user_name", 
                       label = "User Name :"),
@@ -120,7 +130,7 @@ body <- dashboardBody(
     ),
     
     tabItem(tabName = "creat_new_project",
-            h2("Creat New Project"),
+            h3("Creat New Project"),
             ## project_name
             textInput(inputId = "project_name", 
                       label = "New Project Name :"),
@@ -147,28 +157,71 @@ body <- dashboardBody(
     
     
     tabItem(tabName = "current_project",
-            h2("My Current Projects"),
+            h3("My Current Projects"),
             hr(),
-            DTOutput(outputId='x1'),   ## iris test table
-            
+            DTOutput(outputId='x1'),   ## projects table
+            #div(DTOutput("x1"), style ="font-size:75%"), ## change font size
+          
           # dt_output('server-side processing (editable = "cell")', 'x5'),
           # dt_output('server-side processing (editable = "column")', 'x7'),
           # dt_output('server-side processing (editable = "all")', 'x8'),
           #  dt_output('server-side processing (editable = "row")', 'x1'),
-            
-          
-          # list the selected rows and columns / list of current projects
-            verbatimTextOutput(outputId='y1')
+ 
+            verbatimTextOutput(outputId='y1') ## list the selected rows and columns / list of current projects
           
     ),
     
     
+    tabItem(tabName = "datasets",
+            h3("Datasets"),
+            
+            # input datasets information
+            textInput('name', 'Sample name:', placeholder = 'sample name'),
+            textInput('description', 'Description:', placeholder = 'you can descrip the date'),
+            dateInput('date', 'Date:',format = "yyyy-mm-dd",startview = 'month', language = 'en'),
+            textInput('location', 'Location:', placeholder = 'where the date stored'),
+            selectInput("datatype", 
+                        "Data type:",
+                        c("Cell" = "cel",
+                          "Tissue" = "tis",
+                          "Species" = "spe"), 
+                        selected = 'cel'),
+            
+            textInput('lab', 'Lab/Research:', placeholder = 'lab/research obtained the data'),
+            selectInput("status", 
+                        "Status:",
+                        c("Private" = "pri",
+                          "Publish" = "pub",
+                          "Archived" = "arc"), 
+                        selected = 'pri'),
+            
+            fileInput('file', 'Choose file:'),
+            
+    
+            actionButton('submit', 'Submit Now'),
+    
+            DTOutput(outputId='tableout'),
+            br(),
+    
+            DTOutput(outputId='x2'),  ## the place to output datasets table
+            verbatimTextOutput(outputId='y2'),  ## the place to output text
+            
+            
+            
+            ## other input type
+            #passwordInput('passwd', 'Your password is: ', placeholder = 'Your password please', width = '100%')
+            #sliderInput('num', 'Choose a number: ', min = 0, max = 100, value = 30),
+            #radioButtons('gender', 'Gender', c('Male'='m', 'Female'='f','Transgender'='trans'),inline = T),
+            #conditionalPanel("input.gender == 'f'",
+            #radioButtons('gender1', 'Gender', c('Male'='m', 'Female'='f','Transgender'='trans'),inline = T)),
+    ),
+    
     tabItem(tabName = "aboutus",
-            h2("About Us"),
+            h3("About Us"),
     ),
       
     tabItem(tabName = "FAQ",
-            h2("FAQ"),
+            h3("FAQ"),
     )
   )
 )
@@ -186,20 +239,84 @@ ui <- dashboardPage(
 
 #server ------------------------------------------------------------------------
 server <- function(input, output) {
+  options(DT.options = list(pageLength = 5)) ## The initial display is 5 rows
+
   
-  # My Current Projects 
-  options(DT.options = list(pageLength = 5))
-  d1=iris
-  output$x1 <- render_dt(d1, list(target = 'row', disable = list(columns = c(0))))
-  # print the selected indices ???????????????????????????????????????????????
-  output$y1 <- renderPrint(print_rows_cols('x1'))  
+#My Current Projects 
+  #df=projects
+  output$x1 <- renderDT(projects,  ## data frame
+                        selection = list(target = 'row+column'), ## Multiple selection: rows and columns
+                        server = TRUE,     ## Server-side processing 
+                        #editable = 'row',  ## can edit a whole row
+                        editable = list(target = "row", disable = list(columns = c(0))) ## cannot edit column1
+                        )
+  
+  #or use a function
+  #output$x1 <- render_dt(d1, list(target = 'row', disable = list(columns = c(0))))
+  
+  # print the selected indices ??????????
+  print_rows_cols = function(id) {
+    cat('Rows selected:\n')
+    print(input[[paste0(id, '_rows_selected')]])     ##?????NULL
+    cat('Columns selected:\n')
+    print(input[[paste0(id, '_columns_selected')]])  ##????NULL
+  }
+  output$y1 <- renderPrint(print_rows_cols('x1'))
+  
   
   # edit a row
-  observeEvent(input$x1_cell_edit, {
-    d1 <- editData(d1, input$x1_cell_edit, 'x1')
-  })
+  #observeEvent(input$x1_cell_edit, {
+  #  df <- editData(df, input$x1_cell_edit, 'x1')
+  #})
   # server-side processing
   # output$x1 <- renderDT(iris, selection = list(target = 'row+column'))
+  
+ 
+  
+  
+# Raw Datasets 
+  #df=datasets
+  
+  output$tableout <- renderDT({
+    if(input$submit == 0){
+      return()
+    }
+    
+    isolate(
+        data.frame(
+        Sample_Name = input$name,
+        Description = input$description,
+        Date = as.character(input$date),
+        Location = input$location,
+        Data_Type = input$datatype,
+        Lab_Research = input$lab,
+        Status = input$status, 
+        Files = as.character(input$file$name),
+        stringsAsFactors = F)
+        #'Value' = c(input$name, input$description, as.character(input$date), input$location,  input$datatype, input$lab, input$status, as.character(input$file$name)),
+        )
+    })
+
+  
+  
+  output$x2 <- renderDT(datasets,  ## data frame
+                        selection = list(target = 'row+column'), ## Multiple selection: rows and columns
+                        server = TRUE,     ## Server-side processing 
+                        #editable = 'row',  ## can edit a whole row
+                        editable = list(target = "row", disable = list(columns = c(0))) ## cannot edit column1
+  )
+  #or use a function
+  #output$x1 <- render_dt(d1, list(target = 'row', disable = list(columns = c(0))))
+  
+  # print the selected indices ??????????
+  #print_rows_cols = function(id) {
+  #  cat('Rows selected:\n')
+  #  print(input[[paste0(id, '_rows_selected')]])     ##?????NULL
+  #  cat('Columns selected:\n')
+  #  print(input[[paste0(id, '_columns_selected')]])  ##????NULL
+  #}
+  #output$y2 <- renderPrint(print_rows_cols('x2'))
+  
   
   
 }
