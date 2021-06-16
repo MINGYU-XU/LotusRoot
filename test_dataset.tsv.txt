@@ -1,0 +1,7 @@
+	Sample name	Description	Date	Location	Datatype	Lab	Status	Projectlinked
+1	hum_1	human_f	2020-11-11	C	cell	mac	publish	1,2
+2	hum_2	human_m	2020-11-12	C	cell	mac	publish	1,2
+3	hum_3	human_m	2020-11-12	C	cell	mac	private	1,2,3	
+4	mic_2	mice_f	2021-02-09	D	species	nor	private 3
+5	fox_3	fox_f	2021-04-30	E	tissue	nor	archived	4,5
+6	fox_1	fox_m	2021-04-29	E	tissue	nor	archived	4,5
