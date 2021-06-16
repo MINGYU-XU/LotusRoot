@@ -1,0 +1,7 @@
+,Sample name,Description,Date,Location,Datatype,Lab,Status,Projectlinked
+1,hum_1,human_f,11/11/2020,C,cell,mac,publish,"1,2"
+2,hum_2,human_m,12/11/2020,C,cell,mac,publish,"1,2"
+3,hum_3,human_m,12/11/2020,C,cell,mac,private,"1,2,3"
+4,mic_2,mice_f,09/02/2021,D,species,nor,private 3,
+5,fox_3,fox_f,30/04/2021,E,tissue,nor,archived,"4,5"
+6,fox_1,fox_m,29/04/2021,E,tissue,nor,archived,"4,5"
