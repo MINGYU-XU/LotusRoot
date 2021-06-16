@@ -1,4 +1,4 @@
-Sample name,Description,Date,Location,Datatype,Lab,Status,Projectlinked
+Sample_name,Description,Date,Location,Datatype,Lab,Status,Projectlinked
 hum_1,human_f,11/11/2020,C,cell,mac,publish,"1,2"
 hum_2,human_m,12/11/2020,C,cell,mac,publish,"1,2"
 hum_3,human_m,12/11/2020,C,cell,mac,private,"1,2,3"
