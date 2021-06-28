@@ -204,8 +204,8 @@ body <- dashboardBody(
             #fileInput('file', 'Choose file:'),
             
     
-            actionButton('action', 'actionbutton'),
-            submitButton('submit','submitbutton'),
+            actionButton('actiondata', 'actionbutton'),
+            submitButton('submitdata','submitbutton'),
             br(),
 
     
@@ -288,7 +288,8 @@ server <- function(input, output) {
   #    return()
   #  }
   
-  eventReactive(input$action,{
+  observeEvent(input$submitdata,  #???or input$actiondata
+    {
     newrow <- data.frame(Sample_Name = input$name, 
                          Status = input$status, 
                          Date = as.character(input$date),
@@ -298,9 +299,10 @@ server <- function(input, output) {
                          Lab = input$lab, 
                          Projectlinked = input$projectid,
                          stringsAsFactors = F)
-  })
+    test0 <- rbind(test0,newrow)
+    
   
-  test0 <- rbind(test0,newrow)
+  
   output$x2 <- renderDT(test0,
                         selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
                         server = TRUE,      ## Server-side processing 
@@ -309,7 +311,7 @@ server <- function(input, output) {
   )
   
                         
-  
+   })
   
   
   ###or use a function
