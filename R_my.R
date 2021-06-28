@@ -205,7 +205,8 @@ body <- dashboardBody(
             
     
             actionButton('action', 'actionbutton'),
-            #submitButton('submit','submitbutton'),
+            submitButton('submit','submitbutton'),
+            br(),
 
     
             DTOutput(outputId='x2'),  ## the place to output datasets table
@@ -282,45 +283,33 @@ server <- function(input, output) {
 # Raw Datasets 
   #df=datasets
   
-  output$tableout <- renderDT({
-    if(input$submit == 0){
-      return()
-    }
-    
-    isolate(
-        data.frame(
-        Sample_Name = input$name,
-        Description = input$description,
-        Date = as.character(input$date),
-        Location = input$location,
-        Data_Type = input$datatype,
-        Lab_Research = input$lab,
-        Status = input$status, 
-        Files = as.character(input$file$name),
-        stringsAsFactors = F)
-        #'Value' = c(input$name, input$description, as.character(input$date), input$location,  input$datatype, input$lab, input$status, as.character(input$file$name)),
-        )
-    })
-
+  #output$tableout <- renderDT({
+  #  if(input$submit == 0){
+  #    return()
+  #  }
   
-  
-  output$x2 <- renderDT(datasets,  ## data frame
-                        selection = list(target = 'row+column'), ## Multiple selection: rows and columns
-                        server = TRUE,     ## Server-side processing 
-                        #editable = 'row',  ## can edit a whole row
-                        editable = list(target = "row", disable = list(columns = c(0))) ## cannot edit column1
-  )
-  
-  eventReactive(input$actionbutton,{
-    newrow <- data.frame(
-      Sample_Name = input$name, Status = input$status, Date = as.character(input$date),
-      Description = input$description, Location = input$location, Datatype = input$datatype,
-      Lab = input$lab, Projectlinked = input$projectid,
-      stringsAsFactors = F)
+  eventReactive(input$action,{
+    newrow <- data.frame(Sample_Name = input$name, 
+                         Status = input$status, 
+                         Date = as.character(input$date),
+                         Description = input$description, 
+                         Location = input$location, 
+                         Datatype = input$datatype,
+                         Lab = input$lab, 
+                         Projectlinked = input$projectid,
+                         stringsAsFactors = F)
   })
   
   test0 <- rbind(test0,newrow)
-  output$x2 <- renderDT(test0)
+  output$x2 <- renderDT(test0,
+                        selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
+                        server = TRUE,      ## Server-side processing 
+                        #editable = 'cell', 
+                        editable = list(target = "cell", disable = list(columns = c(0))) ## cannot edit column1
+  )
+  
+                        
+  
   
   
   ###or use a function
