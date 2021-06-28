@@ -259,7 +259,8 @@ server <- function(input, output) {
                         
                         extensions = 'Buttons', 
                         options = list(dom = 'Bfrtip',
-                                       buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+                                       buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                                       searchHighlight = TRUE
                         )
                         )
   
@@ -317,8 +318,17 @@ server <- function(input, output) {
                         editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
                         
                         extensions = 'Buttons', 
+                        # search options
+                        filter = list(position = 'top', clear = FALSE),
                         options = list(dom = 'Bfrtip',
-                                       buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+                                       buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                                       
+                                       pageLength = 10,
+                                       
+                                       searchHighlight = TRUE,
+                                       
+                                       search = list(regex = TRUE),
+                                       #columnDefs = list(list(targets = c(1), searchable = FALSE))  #Disable Searching for Individual Columns禁用搜索第一列
                                        )
   
                         
