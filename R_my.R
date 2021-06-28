@@ -299,9 +299,9 @@ server <- function(input, output) {
                          Lab = input$lab, 
                          Projectlinked = input$projectid,
                          stringsAsFactors = F)
-    test0 <- rbind(test0,newrow)
-    
-  
+    })
+     
+  test0 <- rbind(testfile_dataset,newrow)
   
   output$x2 <- renderDT(test0,
                         selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
@@ -311,7 +311,7 @@ server <- function(input, output) {
   )
   
                         
-   })
+   
   
   
   ###or use a function
