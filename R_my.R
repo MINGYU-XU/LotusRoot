@@ -250,11 +250,11 @@ server <- function(input, output) {
   
 #My Current Projects 
   #df=projects
-  output$x1 <- renderDT(projects,  ## data frame
+  output$x1 <- renderDT(testfile_project,  ## data frame
                         selection = list(target = 'row+column'), ## Multiple selection: rows and columns
                         server = TRUE,     ## Server-side processing 
                         #editable = 'row',  ## can edit a whole row
-                        editable = list(target = "row", disable = list(columns = c(0))) ## cannot edit column1
+                        editable = list(target = "cell", disable = list(columns = c(0))) ## cannot edit column1
                         )
   
   #or use a function
