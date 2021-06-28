@@ -253,8 +253,14 @@ server <- function(input, output) {
   output$x1 <- renderDT(testfile_project,  ## data frame
                         selection = list(target = 'row+column'), ## Multiple selection: rows and columns
                         server = TRUE,     ## Server-side processing 
+                        
                         #editable = 'row',  ## can edit a whole row
-                        editable = list(target = "cell", disable = list(columns = c(0))) ## cannot edit column1
+                        editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
+                        
+                        extensions = 'Buttons', 
+                        options = list(dom = 'Bfrtip',
+                                       buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+                        )
                         )
   
   #or use a function
@@ -306,9 +312,17 @@ server <- function(input, output) {
   output$x2 <- renderDT(test0,
                         selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
                         server = TRUE,      ## Server-side processing 
+                        
                         #editable = 'cell', 
-                        editable = list(target = "cell", disable = list(columns = c(0))) ## cannot edit column1
-  )
+                        editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
+                        
+                        extensions = 'Buttons', 
+                        options = list(dom = 'Bfrtip',
+                                       buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+                                       )
+  
+                        
+                        )
   
                         
    
