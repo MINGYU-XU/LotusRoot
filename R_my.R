@@ -173,7 +173,7 @@ body <- dashboardBody(
             verbatimTextOutput('fileList'),
     
             ## log in
-            submitButton(text = " Submit ",
+            actionButton("action_creat",'action',
                          icon = icon(name = "sign-in-alt"),
                          width = "100px"
             )
@@ -223,7 +223,7 @@ body <- dashboardBody(
             
     
             actionButton('actiondata', 'actionbutton'),
-            submitButton('submitdata','submitbutton'),
+        
             br(),
 
     
@@ -387,7 +387,7 @@ server <- function(input, output) {
   #    return()
   #  }
   
-  observeEvent(input$submitdata,  #???or input$actiondata
+  observeEvent(input$actiondata,  #???or input$actiondata
     {
     newrow <- data.frame(Sample_Name = input$name, 
                          Status = input$status, 
