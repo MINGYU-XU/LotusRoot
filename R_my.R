@@ -57,6 +57,18 @@ testfile_project <- read.csv('csv_test_project.csv',sep = ',')
 
 
 
+
+# data.frame with credentials info ??
+credentials <- data.frame(
+  user = c("test", "xmy", "zzz", "shiny"),
+  password = c("test", "123", "zzz", "shinypw"),
+  # comment = c("alsace", "auvergne", "bretagne"), %>% 
+  stringsAsFactors = FALSE
+)
+
+
+
+
 # ui
 # dashboard_header -------------------------------------------------------------
 header <- dashboardHeader(
@@ -116,24 +128,30 @@ body <- dashboardBody(
              zoom: 90%; /* Webkit browsers */
              }
              "),
+
   
+  
+  # ui- Home- Log in page  
   tabItems(
     tabItem(tabName = "home",
             h3("Home"),
             ## user_name
-            textInput(inputId = "user_name", 
+            textInput(inputId = "userName", 
                       label = "User Name :"),
             ## password
-            passwordInput(inputId = "password", 
+            passwordInput(inputId = "passwd", 
                           label = "Password :"),
             ## email
-            textInput(inputId = "email",
-                      label = "Email :"),
+            #textInput(inputId = "email",
+            #          label = "Email :"),
+            br(),
             ## log in
-            submitButton(text = " Log in / Register",
+            actionButton("login",
+                         " Log in / Register",
                          icon = icon(name = "sign-in-alt"),
                          width = "200px")
     ),
+ 
     
     tabItem(tabName = "creat_new_project",
             h3("Creat New Project"),
@@ -237,19 +255,93 @@ ui <- dashboardPage(
         sidebar,
         body
 )
+
+ui <- secure_app(ui)
 #--------------------------------------------------------- ui ------------------
 
 
 
 
 
+
+Logged = FALSE;
+my_username <- "test"
+my_password <- "test"
+
+
 #server ------------------------------------------------------------------------
+
 server <- function(input, output) {
-  options(DT.options = list(pageLength = 5)) ## The initial display is 5 rows
+  
+  ##############
+  #log in page  
+  
+  USER <- reactiveValues(Logged = Logged, LoginPass = LoginPass)
+  
+  observe({
+    if (USER$Logged == FALSE) {
+      if (!is.null(input$Login)) {
+        if (input$Login > 0) {
+          username <- isolate(input$userName)
+          password <- isolate(input$passwd)
+          
+          user_yn = TRUE
+          power_yn = login_auth(username, password)
+          
+          if (user_yn & power_yn) {
+            USER$Logged <<- TRUE
+            USER$LoginPass <<- 1
+            USER$username <<- username
+            logdf = data.frame(uid = USER$username,
+                               p = password,
+                               login_time = Sys.time())
+            shinyjs::removeClass(selector = "body", class = "sidebar-collapse")
+            shinyjs::addClass(selector = "header", class = "main-header")
+            
+            write.table(logdf, "data/user-login.txt", append = T)
+            print(paste0("user:", username, "; 登录时间:", Sys.time()))
+          }
+          USER$LoginPass <<- -1
+        }
+      }
+    }
+  })
+  
+  
+  
+  output$sidebarpanel <- renderUI({
+    if (USER$Logged == TRUE) {
+      div(source("ui/sidebar.R", local = TRUE)$value)
+    }
+  })
+  
+  output$body <- renderUI({
+    if (USER$Logged == TRUE) {
+      mainbody
+    }
+    else {
+      if(USER$LoginPass >= 0) {
+        login
+      }
+      else {
+        loginfail
+      }
+    }
+  })
+  
+  
+  shinyjs::addClass(selector = "body", class = "sidebar-collapse")
+  shinyjs::removeClass(selector = "header", class = "main-header")
+  # ###################
+  
+  
 
   
-#My Current Projects 
-  #df=projects
+  #################
+  #My Current Projects 
+  
+  options(DT.options = list(pageLength = 5)) ## The initial display is 5 rows
+  
   output$x1 <- renderDT(testfile_project,  ## data frame
                         selection = list(target = 'row+column'), ## Multiple selection: rows and columns
                         server = TRUE,     ## Server-side processing 
@@ -311,17 +403,28 @@ server <- function(input, output) {
   test0 <- rbind(testfile_dataset,newrow)
   
   output$x2 <- renderDT(test0,
+                        
+                        #selection = 'none',
                         selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
+                        
                         server = TRUE,      ## Server-side processing 
                         
                         #editable = 'cell', 
                         editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
                         
-                        extensions = 'Buttons', 
+                    
                         # search options
                         filter = list(position = 'top', clear = FALSE),
-                        options = list(dom = 'Bfrtip',
-                                       buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                        
+                        extensions = c('Select','Buttons','SearchPanes'),
+                        options = list(#dom = 'Blfrtip',
+                                       dom = 'PBlfrtip',
+                                       style = 'os', items = 'row',
+                                       
+                                       #buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                                       buttons = c('selectAll', 'selectNone','csv', 'excel', 'pdf', 'print'), 
+                                                   #'selectRows', 'selectColumns', 'selectCells',
+                                       #buttons = c('csv', 'excel', 'pdf', 'print'),
                                        
                                        pageLength = 10,
                                        
@@ -329,10 +432,12 @@ server <- function(input, output) {
                                        
                                        search = list(regex = TRUE),
                                        #columnDefs = list(list(targets = c(1), searchable = FALSE))  #Disable Searching for Individual Columns禁用搜索第一列
-                                       )
+                                       
+                                       columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:4))
+                        )
   
                         
-                        )
+    )
   
                         
    
