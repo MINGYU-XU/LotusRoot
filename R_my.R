@@ -55,7 +55,7 @@ print_rows_cols = function(id) {
 testfile_dataset <- read_csv('csv_test_dataset.csv') #sep = ','
 testfile_project <- read_csv('csv_test_project.csv')
 
-proj<-testfile_project #!!!EDIT
+proj <- testfile_project #!!!EDIT
 
 
 # data.frame with credentials info ??
@@ -277,27 +277,50 @@ ui <- dashboardPage(
 
 server <- function(input, output) {
   
-
-  #My Current Projects 
-  
   options(DT.options = list(pageLength = 5)) ## The initial display is 5 rows
   
-  output$x1 <- renderDT(testfile_project,  ## data frame
-                        ## Multiple selection: rows and columns
-                        #selection = list(target = 'row+column'),
-                        selection = 'none',
-                        server = FALSE,     ## client-side processing 
-                        
-                        #editable = 'row',  ## can edit a whole row
-                        editable = list(target = "cell", disable = list(columns = c(0))), 
-                        ## cannot edit column1
-                        
-                        extensions = 'Buttons', 
-                        options = list(dom = 'Bfrtip',
-                                       buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
-                                       searchHighlight = TRUE
-                        )
-                        )
+  
+  #My Current Projects 
+  proj <- reactiveVal(proj)
+  output$x1 <- renderDT(proj(),
+                        server = TRUE,     ## client-side processing 
+                        #selection = 'none',
+                        selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
+                        #editable = 'cell', 
+                        editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
+                        # search options
+                        filter = list(position = 'top', clear = FALSE),
+              
+              
+              ## The Select extension can't work properly with DT's own selection implemention and is only recommended in the client mode. 
+              ## If you really want to use the Select extension please set `selection = 'none'
+              ## recommended to use the Select extension only in the client-side processing mode (by setting `server = FALSE` in `DT::renderDT()`) 
+              ## or use DT's own selection implementations
+              extensions = c('Select','Buttons','SearchPanes'), 
+              ## No SearchPanes: it needs server = FALSE
+              options = list(
+                #dom = 'Blfrtip',
+                dom = 'PBlfrtip',
+                style = 'os', items = 'row',
+                
+                #buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                buttons = c('selectAll', 'selectNone',
+                            'csv', 'excel', 'pdf', 'print'),   #'selectRows', 'selectColumns', 'selectCells',
+                
+                pageLength = 10,
+                
+                searchHighlight = TRUE,
+                
+                search = list(regex = TRUE),
+                #columnDefs = list(list(targets = c(1), searchable = FALSE))  
+                #Disable Searching for Individual Columns禁用搜索第一列
+                
+                
+                ## ??? no searchPanes
+                columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3)))
+    )
+    
+
   
 
   # print the selected indices
@@ -338,7 +361,7 @@ server <- function(input, output) {
                               Location = input$dataLocation, 
                               Datatype = input$datatype,
                               Lab = input$dataLab, 
-                              Projectlinked = input$projectid,
+                              Projectlinked = input$projectid
                               
                               ),testfile_dataset)
     
