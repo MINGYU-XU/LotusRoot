@@ -1,22 +1,22 @@
 #
 # This is my laboratory information management system (LIMS)
-# Shiny web application --- ui
+# Shiny web application
 # 
 #--------------------------------------------------------------------
-# bugs:
-# 1 not list the selected rows and columns
-# 2 how to set log in page    ???ui<-secure_app(ui)
-# 3 table not saved after edit
-# 4 how to add "pick" radio button as the first column   ???server=T/F
-# 5 design the information table ??? cannot show up 
+# problems:
+#  table not saved after edit
+#  添加和删除行delete and add new row
+#  no SearchPanes: cannot show this pane
+#  interaction of datasets and projects
+#  how to set log in page    ???ui<-secure_app(ui)
 #---------------------------------------------------------------------
 
-
-library(shinydashboard)
 library(shiny)
+library(shinydashboard)
 library(tidyverse)
 library(shinymanager)
 library(DT)
+library(readr)
 
 
 ## Functions --------------------------------------------------------------------
@@ -24,7 +24,7 @@ library(DT)
 # 1 dt_output
 # output table (id:outputId)
 dt_output = function(title, id) {
-  h1(paste0('Table:', title)) #我们本来期望的是提取两个“(1st)”和“(2nd)”组合，不料整个地提取了“(1st) other (2nd)”。这就是因为.+的贪婪匹配。如果要求尽可能短的匹配， 使用*?, +?, {3,}?等“懒惰型”重复模式。 在无上限重复标志后面加问号表示懒惰性重复。
+  h1(paste0('Table:', title)) 
   hr()
   DTOutput(id)
 }
@@ -47,15 +47,15 @@ print_rows_cols = function(id) {
   print(input[[paste0(id, '_columns_selected')]])
 }
 
-#----------------------------------------------------------------functions-------
+#----------------------------------------------------------functions-------
 
 
 
 #read test files
-testfile_dataset <- read.csv('csv_test_dataset.csv',sep = ',')
-testfile_project <- read.csv('csv_test_project.csv',sep = ',')
+testfile_dataset <- read_csv('csv_test_dataset.csv') #sep = ','
+testfile_project <- read_csv('csv_test_project.csv')
 
-
+proj<-testfile_project #!!!EDIT
 
 
 # data.frame with credentials info ??
@@ -156,15 +156,15 @@ body <- dashboardBody(
     tabItem(tabName = "creat_new_project",
             h3("Creat New Project"),
             ## project_name
-            textInput(inputId = "project_name", 
+            textInput(inputId = "projectName", 
                       label = "New Project Name :"),
             ## project_password
-            passwordInput(inputId = "project_password", 
+            passwordInput(inputId = "projectPW", 
                           label = "Project Password :"),
             ## administrator
-            textInput(inputId = "administrator",
+            textInput(inputId = "projectAdministrator",
                       label = "Administrator :"),
-            fileInput(inputId = "uploadfile",
+            fileInput(inputId = "projectUploadfile",
                       label = "Upload files:",
                       multiple = TRUE,
                       accept = c('text/csv','text/comma-separated-values','.csv','.tsv')
@@ -173,10 +173,10 @@ body <- dashboardBody(
             verbatimTextOutput('fileList'),
     
             ## log in
-            actionButton("action_creat",'action',
-                         icon = icon(name = "sign-in-alt"),
-                         width = "100px"
-            )
+            #actionButton("action_creat",'action',
+            #             icon = icon(name = "sign-in-alt"),
+            #             width = "100px"
+            #)
     ),
     
     
@@ -200,10 +200,10 @@ body <- dashboardBody(
             h3("Datasets"),
             
             # input datasets information
-            textInput('name', 'Sample name:', placeholder = 'sample name'),
-            textInput('description', 'Description:', placeholder = 'you can descrip the date'),
-            dateInput('date', 'Date:',format = "yyyy-mm-dd",startview = 'month', language = 'en'),
-            textInput('location', 'Location:', placeholder = 'where the date stored'),
+            textInput('dataName', 'Sample name:', placeholder = 'sample name'),
+            textInput('dataDscription', 'Description:', placeholder = 'you can descrip the date'),
+            dateInput('dataDate', 'Date:',format = "yyyy-mm-dd",startview = 'month', language = 'en'),
+            textInput('dataLocation', 'Location:', placeholder = 'where the date stored'),
             selectInput("datatype", 
                         "Data type:",
                         c("Cell" = "cel",
@@ -211,8 +211,8 @@ body <- dashboardBody(
                           "Species" = "spe"), 
                         selected = 'cel'),
             
-            textInput('lab', 'Lab/Research:', placeholder = 'lab/research obtained the data'),
-            selectInput("status", 
+            textInput('dataLab', 'Lab/Research:', placeholder = 'lab/research obtained the data'),
+            selectInput("dataStatus", 
                         "Status:",
                         c("Private" = "pri",
                           "Publish" = "pub",
@@ -222,12 +222,16 @@ body <- dashboardBody(
             #fileInput('file', 'Choose file:'),
             
     
-            actionButton('actiondata', 'actionbutton'),
-        
+            actionButton('add_data', 'Add'),
+            
             br(),
 
     
             DTOutput(outputId='x2'),  ## the place to output datasets table
+            
+            actionButton('delete_data', 'Delete'),
+            h1(),
+            
             verbatimTextOutput(outputId='y2'),  ## the place to output text
             
             
@@ -256,7 +260,7 @@ ui <- dashboardPage(
         body
 )
 
-ui <- secure_app(ui)
+#ui <- secure_app(ui)
 #--------------------------------------------------------- ui ------------------
 
 
@@ -264,90 +268,29 @@ ui <- secure_app(ui)
 
 
 
-Logged = FALSE;
-my_username <- "test"
-my_password <- "test"
+#Logged = FALSE;
+#my_username <- "test"
+#my_password <- "test"
 
 
 #server ------------------------------------------------------------------------
 
 server <- function(input, output) {
   
-  ##############
-  #log in page  
-  
-  USER <- reactiveValues(Logged = Logged, LoginPass = LoginPass)
-  
-  observe({
-    if (USER$Logged == FALSE) {
-      if (!is.null(input$Login)) {
-        if (input$Login > 0) {
-          username <- isolate(input$userName)
-          password <- isolate(input$passwd)
-          
-          user_yn = TRUE
-          power_yn = login_auth(username, password)
-          
-          if (user_yn & power_yn) {
-            USER$Logged <<- TRUE
-            USER$LoginPass <<- 1
-            USER$username <<- username
-            logdf = data.frame(uid = USER$username,
-                               p = password,
-                               login_time = Sys.time())
-            shinyjs::removeClass(selector = "body", class = "sidebar-collapse")
-            shinyjs::addClass(selector = "header", class = "main-header")
-            
-            write.table(logdf, "data/user-login.txt", append = T)
-            print(paste0("user:", username, "; 登录时间:", Sys.time()))
-          }
-          USER$LoginPass <<- -1
-        }
-      }
-    }
-  })
-  
-  
-  
-  output$sidebarpanel <- renderUI({
-    if (USER$Logged == TRUE) {
-      div(source("ui/sidebar.R", local = TRUE)$value)
-    }
-  })
-  
-  output$body <- renderUI({
-    if (USER$Logged == TRUE) {
-      mainbody
-    }
-    else {
-      if(USER$LoginPass >= 0) {
-        login
-      }
-      else {
-        loginfail
-      }
-    }
-  })
-  
-  
-  shinyjs::addClass(selector = "body", class = "sidebar-collapse")
-  shinyjs::removeClass(selector = "header", class = "main-header")
-  # ###################
-  
-  
 
-  
-  #################
   #My Current Projects 
   
   options(DT.options = list(pageLength = 5)) ## The initial display is 5 rows
   
   output$x1 <- renderDT(testfile_project,  ## data frame
-                        selection = list(target = 'row+column'), ## Multiple selection: rows and columns
-                        server = TRUE,     ## Server-side processing 
+                        ## Multiple selection: rows and columns
+                        #selection = list(target = 'row+column'),
+                        selection = 'none',
+                        server = FALSE,     ## client-side processing 
                         
                         #editable = 'row',  ## can edit a whole row
-                        editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
+                        editable = list(target = "cell", disable = list(columns = c(0))), 
+                        ## cannot edit column1
                         
                         extensions = 'Buttons', 
                         options = list(dom = 'Bfrtip',
@@ -356,104 +299,106 @@ server <- function(input, output) {
                         )
                         )
   
-  #or use a function
-  #output$x1 <- render_dt(d1, list(target = 'row', disable = list(columns = c(0))))
-  
-  # print the selected indices ??????????
-  print_rows_cols = function(id) {
-    cat('Rows selected:\n')
-    print(input[[paste0(id, '_rows_selected')]])     ##?????NULL
-    cat('Columns selected:\n')
-    print(input[[paste0(id, '_columns_selected')]])  ##????NULL
-  }
+
+  # print the selected indices
   output$y1 <- renderPrint(print_rows_cols('x1'))
   
-  
-  # edit a row
-  #observeEvent(input$x1_cell_edit, {
-  #  df <- editData(df, input$x1_cell_edit, 'x1')
-  #})
-  # server-side processing
-  # output$x1 <- renderDT(iris, selection = list(target = 'row+column'))
-  
- 
-  
+  # edit a cell
+  observeEvent(input$x1_cell_edit, {
+    proj <<- editData(proj(), input$x1_cell_edit, 'x1') ## double <
+  })
+
+
   
 # Raw Datasets 
-  #df=datasets
-  
+
   #output$tableout <- renderDT({
   #  if(input$submit == 0){
   #    return()
   #  }
   
-  observeEvent(input$actiondata,  #???or input$actiondata
-    {
-    newrow <- data.frame(Sample_Name = input$name, 
-                         Status = input$status, 
-                         Date = as.character(input$date),
-                         Description = input$description, 
-                         Location = input$location, 
-                         Datatype = input$datatype,
-                         Lab = input$lab, 
-                         Projectlinked = input$projectid,
-                         stringsAsFactors = F)
+  observeEvent(input$add_data,{
+    #newrow <- data.frame(Sample_Name = input$name, 
+    #                     Status = input$status, 
+    #                     Date = as.character(input$date),
+    #                     Description = input$description, 
+    #                     Location = input$location, 
+    #                     Datatype = input$datatype,
+    #                     Lab = input$lab, 
+    #                     Projectlinked = input$projectid,
+    #                     stringsAsFactors = F)
+    
+    
+    #Error in data.frame: arguments imply differing number of rows: 1, 0
+    
+    test0 <- rbind(data.frame(Sample_Name = input$dataName, 
+                              Status = input$dataStatus, 
+                              Date = as.character(input$dataDate),
+                              Description = input$dataDescription, 
+                              Location = input$dataLocation, 
+                              Datatype = input$datatype,
+                              Lab = input$dataLab, 
+                              Projectlinked = input$projectid,
+                              
+                              ),testfile_dataset)
+    
+    testfile_dataset <<- test0
     })
      
-  test0 <- rbind(testfile_dataset,newrow)
+  #test0 <- rbind(testfile_dataset,newrow)
   
-  output$x2 <- renderDT(test0,
-                        
-                        #selection = 'none',
-                        selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
-                        
-                        server = TRUE,      ## Server-side processing 
-                        
-                        #editable = 'cell', 
-                        editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
-                        
-                    
-                        # search options
-                        filter = list(position = 'top', clear = FALSE),
-                        
-                        extensions = c('Select','Buttons','SearchPanes'),
-                        options = list(#dom = 'Blfrtip',
-                                       dom = 'PBlfrtip',
-                                       style = 'os', items = 'row',
-                                       
-                                       #buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
-                                       buttons = c('selectAll', 'selectNone','csv', 'excel', 'pdf', 'print'), 
-                                                   #'selectRows', 'selectColumns', 'selectCells',
-                                       #buttons = c('csv', 'excel', 'pdf', 'print'),
-                                       
-                                       pageLength = 10,
-                                       
-                                       searchHighlight = TRUE,
-                                       
-                                       search = list(regex = TRUE),
-                                       #columnDefs = list(list(targets = c(1), searchable = FALSE))  #Disable Searching for Individual Columns禁用搜索第一列
-                                       
-                                       columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:4))
-                        )
-  
-                        
-    )
-  
-                        
+  output$x2 <- renderDT({
+    server = FALSE     ## client-side processing 
+    datatable(testfile_dataset, 
+              #selection = 'none',
+              selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
+              
+              
+              #editable = 'cell', 
+              editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
+              
+              # search options
+              filter = list(position = 'top', clear = FALSE),
+              
+              
+              ## The Select extension can't work properly with DT's own selection implemention and is only recommended in the client mode. 
+              ## If you really want to use the Select extension please set `selection = 'none'
+              ## recommended to use the Select extension only in the client-side processing mode (by setting `server = FALSE` in `DT::renderDT()`) 
+              ## or use DT's own selection implementations
+              extensions = c('Select','Buttons','SearchPanes'), 
+              ## No SearchPanes: it needs server = FALSE
+              options = list(
+                #dom = 'Blfrtip',
+                dom = 'PBlfrtip',
+                style = 'os', items = 'row',
+                
+                #buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                buttons = c('selectAll', 'selectNone',
+                            'csv', 'excel', 'pdf', 'print'),   #'selectRows', 'selectColumns', 'selectCells',
+                
+                pageLength = 10,
+                
+                searchHighlight = TRUE,
+                
+                search = list(regex = TRUE),
+                #columnDefs = list(list(targets = c(1), searchable = FALSE))  
+                #Disable Searching for Individual Columns禁用搜索第一列
+                
+                
+                ## ??? no searchPanes
+                columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3)))
+              )
    
-  
-  
-  ###or use a function
-  ###output$x1 <- render_dt(d1, list(target = 'row', disable = list(columns = c(0))))
-  
-  # print the selected indices ??????????
-  #print_rows_cols = function(id) {
-  #  cat('Rows selected:\n')
-  #  print(input[[paste0(id, '_rows_selected')]])     ##?????NULL
-  #  cat('Columns selected:\n')
-  #  print(input[[paste0(id, '_columns_selected')]])  ##????NULL
-  #}
-  #output$y2 <- renderPrint(print_rows_cols('x2'))
+  })
+    
+  # print the selected datasets 
+  print_rows_cols = function(id) {
+    cat('Rows selected:\n')
+    print(input[[paste0(id, '_rows_selected')]])     
+    cat('Columns selected:\n')
+    print(input[[paste0(id, '_columns_selected')]])  
+  }
+  output$y2 <- renderPrint(print_rows_cols('x2'))
   
   
   
