@@ -4,10 +4,16 @@
 # 
 #--------------------------------------------------------------------
 # problems:
-#  table not saved after edit
+#  table not saved after edit 
+#  但只能改一次，第二次改就会报错
+#  Error in datas: could not find function "datas"##Error in proj.default: argument "object" is missing, with no default
+
 #  添加和删除行delete and add new row
+
 #  no SearchPanes: cannot show this pane
+
 #  interaction of datasets and projects
+
 #  how to set log in page    ???ui<-secure_app(ui)
 #---------------------------------------------------------------------
 
@@ -52,10 +58,11 @@ print_rows_cols = function(id) {
 
 
 #read test files
-testfile_dataset <- read_csv('csv_test_dataset.csv') #sep = ','
-testfile_project <- read_csv('csv_test_project.csv')
+#testfile_dataset <- read_csv('csv_test_dataset.csv') #sep = ','
+#testfile_project <- read_csv('csv_test_project.csv')
 
-proj <- testfile_project #!!!EDIT
+datas <- testfile_dataset
+proj <- testfile_project  #!!!EDIT
 
 
 # data.frame with credentials info ??
@@ -333,13 +340,18 @@ server <- function(input, output) {
 
 
   
+  
+  
+  
 # Raw Datasets 
-
+  
+  
   #output$tableout <- renderDT({
   #  if(input$submit == 0){
   #    return()
   #  }
   
+  # add new row
   observeEvent(input$add_data,{
     #newrow <- data.frame(Sample_Name = input$name, 
     #                     Status = input$status, 
@@ -354,65 +366,81 @@ server <- function(input, output) {
     
     #Error in data.frame: arguments imply differing number of rows: 1, 0
     
-    test0 <- rbind(data.frame(Sample_Name = input$dataName, 
-                              Status = input$dataStatus, 
-                              Date = as.character(input$dataDate),
+    t <- rbind(data.frame(Sample_Name = input$dataName, 
                               Description = input$dataDescription, 
+                              Date = as.character(input$dataDate),
                               Location = input$dataLocation, 
                               Datatype = input$datatype,
                               Lab = input$dataLab, 
+                              Status = input$dataStatus, 
                               Projectlinked = input$projectid
                               
-                              ),testfile_dataset)
+                              ),datas)
     
-    testfile_dataset <<- test0
+    datas <<- t
     })
-     
-  #test0 <- rbind(testfile_dataset,newrow)
   
-  output$x2 <- renderDT({
-    server = FALSE     ## client-side processing 
-    datatable(testfile_dataset, 
-              #selection = 'none',
-              selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
-              
-              
-              #editable = 'cell', 
-              editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
-              
-              # search options
-              filter = list(position = 'top', clear = FALSE),
-              
-              
-              ## The Select extension can't work properly with DT's own selection implemention and is only recommended in the client mode. 
-              ## If you really want to use the Select extension please set `selection = 'none'
-              ## recommended to use the Select extension only in the client-side processing mode (by setting `server = FALSE` in `DT::renderDT()`) 
-              ## or use DT's own selection implementations
-              extensions = c('Select','Buttons','SearchPanes'), 
-              ## No SearchPanes: it needs server = FALSE
-              options = list(
-                #dom = 'Blfrtip',
-                dom = 'PBlfrtip',
-                style = 'os', items = 'row',
-                
-                #buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
-                buttons = c('selectAll', 'selectNone',
-                            'csv', 'excel', 'pdf', 'print'),   #'selectRows', 'selectColumns', 'selectCells',
-                
-                pageLength = 10,
-                
-                searchHighlight = TRUE,
-                
-                search = list(regex = TRUE),
-                #columnDefs = list(list(targets = c(1), searchable = FALSE))  
-                #Disable Searching for Individual Columns禁用搜索第一列
-                
-                
-                ## ??? no searchPanes
-                columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3)))
-              )
-   
+  # delete row
+  observeEvent(input$delete_data, {
+    t = datas
+    print(nrow(t))
+    if (!is.null(input$x2_rows_selected)) {
+      t <- t[-as.numeric(input$x2_rows_selected),]
+    }
+    datas <<- t
   })
+  
+  
+  # edit a cell
+  observeEvent(input$x2_cell_edit, {
+    datas <<- editData(datas(), input$x2_cell_edit, 'x2') ## double <
+  })
+  
+  
+  # output dataset table
+  datas <- reactiveVal(datas)
+  output$x2 <- renderDT(datas(),
+                        server = FALSE,     ## client-side processing
+                        selection = 'none',
+                        #selection = 'single',
+                        #selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
+                        
+                        
+                        #editable = 'cell', 
+                        editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
+                        
+                        # search options
+                        filter = list(position = 'top', clear = FALSE),
+                        
+                        
+                        ## The Select extension can't work properly with DT's own selection implemention and is only recommended in the client mode. 
+                        ## If you really want to use the Select extension please set `selection = 'none'
+                        ## recommended to use the Select extension only in the client-side processing mode (by setting `server = FALSE` in `DT::renderDT()`) 
+                        ## or use DT's own selection implementations
+                        extensions = c('Select','Buttons','SearchPanes'), 
+                        ## No SearchPanes: it needs server = FALSE
+                        options = list(
+                          #dom = 'Blfrtip',
+                          dom = 'PBlfrtip',
+                          style = 'os', items = 'row',
+                          
+                          #buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                          buttons = c('selectAll', 'selectNone',
+                                      'csv', 'excel', 'pdf', 'print'),   #'selectRows', 'selectColumns', 'selectCells',
+                          
+                          pageLength = 10,
+                          
+                          searchHighlight = TRUE,
+                          
+                          search = list(regex = TRUE),
+                          #columnDefs = list(list(targets = c(1), searchable = FALSE))  
+                          #Disable Searching for Individual Columns禁用搜索第一列
+                          
+                          
+                          ## ??? no searchPanes
+                          columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3)))
+              )
+  
     
   # print the selected datasets 
   print_rows_cols = function(id) {
@@ -422,7 +450,6 @@ server <- function(input, output) {
     print(input[[paste0(id, '_columns_selected')]])  
   }
   output$y2 <- renderPrint(print_rows_cols('x2'))
-  
   
   
 }
