@@ -394,62 +394,70 @@ server <- function(input, output) {
   # edit a cell
   observeEvent(input$x2_cell_edit, {
     datas <<- editData(datas(), input$x2_cell_edit, 'x2') ## double <
+    
   })
   
   
   # output dataset table
   datas <- reactiveVal(datas)
-  output$x2 <- renderDT(datas(),
-                        server = FALSE,     ## client-side processing
-                        selection = 'none',
-                        #selection = 'single',
-                        #selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
+  
+  output$x2 <- renderDT({
+    server = FALSE     ## client-side processing
+    datatable(datas(),
+              
+              #selection = 'none',
+              selection = 'single',
+              #selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
+              
+              
+              #editable = 'cell', 
+              editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
+              
+              # search options
+              filter = list(position = 'top', clear = FALSE),
+              
+              
+              ## The Select extension can't work properly with DT's own selection implemention and is only recommended in the client mode. 
+              ## If you really want to use the Select extension please set `selection = 'none'
+              ## recommended to use the Select extension only in the client-side processing mode (by setting `server = FALSE` in `DT::renderDT()`) 
+              ## or use DT's own selection implementations
+              #extensions = c('Select','Buttons','SearchPanes'), 
+              ## No SearchPanes: it needs server = FALSE
+              options = list(
+                #dom = 'Blfrtip',
+                dom = 'PBlfrtip',
+                style = 'os', items = 'row',
+                
+                #buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                buttons = c('selectAll', 'selectNone',
+                            'csv', 'excel', 'pdf', 'print'),   #'selectRows', 'selectColumns', 'selectCells',
+                
+                pageLength = 10,
+                
+                searchHighlight = TRUE,
+                
+                search = list(regex = TRUE),
+                #columnDefs = list(list(targets = c(1), searchable = FALSE))  
+                #Disable Searching for Individual Columns禁用搜索第一列
+                
+                
+                ## ??? no searchPanes
+                columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3)))
+    )
+  })
+              
+    
                         
-                        
-                        #editable = 'cell', 
-                        editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
-                        
-                        # search options
-                        filter = list(position = 'top', clear = FALSE),
-                        
-                        
-                        ## The Select extension can't work properly with DT's own selection implemention and is only recommended in the client mode. 
-                        ## If you really want to use the Select extension please set `selection = 'none'
-                        ## recommended to use the Select extension only in the client-side processing mode (by setting `server = FALSE` in `DT::renderDT()`) 
-                        ## or use DT's own selection implementations
-                        extensions = c('Select','Buttons','SearchPanes'), 
-                        ## No SearchPanes: it needs server = FALSE
-                        options = list(
-                          #dom = 'Blfrtip',
-                          dom = 'PBlfrtip',
-                          style = 'os', items = 'row',
-                          
-                          #buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
-                          buttons = c('selectAll', 'selectNone',
-                                      'csv', 'excel', 'pdf', 'print'),   #'selectRows', 'selectColumns', 'selectCells',
-                          
-                          pageLength = 10,
-                          
-                          searchHighlight = TRUE,
-                          
-                          search = list(regex = TRUE),
-                          #columnDefs = list(list(targets = c(1), searchable = FALSE))  
-                          #Disable Searching for Individual Columns禁用搜索第一列
-                          
-                          
-                          ## ??? no searchPanes
-                          columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3)))
-              )
   
     
   # print the selected datasets 
-  print_rows_cols = function(id) {
-    cat('Rows selected:\n')
-    print(input[[paste0(id, '_rows_selected')]])     
-    cat('Columns selected:\n')
-    print(input[[paste0(id, '_columns_selected')]])  
-  }
-  output$y2 <- renderPrint(print_rows_cols('x2'))
+  #print_rows_cols = function(id) {
+  #  cat('Rows selected:\n')
+  #  print(input[[paste0(id, '_rows_selected')]])     
+  #  cat('Columns selected:\n')
+  #  print(input[[paste0(id, '_columns_selected')]])  
+  #}
+  #output$y2 <- renderPrint(print_rows_cols('x2'))
   
   
 }
