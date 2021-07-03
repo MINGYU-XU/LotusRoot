@@ -9,10 +9,14 @@
 #  Error in datas: could not find function "datas"##Error in proj.default: argument "object" is missing, with no default
 
 #  添加和删除行delete and add new row
+#Error in data.frame: arguments imply differing number of rows: 1, 0
+
 
 #  no SearchPanes: cannot show this pane
 
 #  interaction of datasets and projects
+
+
 
 #  how to set log in page    ???ui<-secure_app(ui)
 #---------------------------------------------------------------------
@@ -162,23 +166,31 @@ body <- dashboardBody(
     
     tabItem(tabName = "creat_new_project",
             h3("Creat New Project"),
-            ## project_name
-            textInput(inputId = "projectName", 
-                      label = "New Project Name :"),
-            ## project_password
-            passwordInput(inputId = "projectPW", 
-                          label = "Project Password :"),
-            ## administrator
-            textInput(inputId = "projectAdministrator",
-                      label = "Administrator :"),
-            fileInput(inputId = "projectUploadfile",
-                      label = "Upload files:",
-                      multiple = TRUE,
-                      accept = c('text/csv','text/comma-separated-values','.csv','.tsv')
-                      ),
-            h5('List of uploaded files:'),
-            verbatimTextOutput('fileList'),
-    
+            fluidRow(
+              box(
+                ## project_name
+                textInput(inputId = "projectName", 
+                          label = "New Project Name :"),
+                ## project_password
+                passwordInput(inputId = "projectPW", 
+                              label = "Project Password :"),
+                ## administrator
+                textInput(inputId = "projectAdministrator",
+                          label = "Administrator :")
+              ),
+                       
+              box(
+                fileInput(inputId = "projectUploadfile",
+                          label = "Upload files:",
+                          multiple = TRUE,
+                          accept = c('text/csv','text/comma-separated-values','.csv','.tsv')
+                ),
+                h5('List of uploaded files:'),
+                verbatimTextOutput('fileList')
+              )
+                       
+            )
+            
             ## log in
             #actionButton("action_creat",'action',
             #             icon = icon(name = "sign-in-alt"),
@@ -206,40 +218,49 @@ body <- dashboardBody(
     tabItem(tabName = "datasets",
             h3("Datasets"),
             
-            # input datasets information
-            textInput('dataName', 'Sample name:', placeholder = 'sample name'),
-            textInput('dataDscription', 'Description:', placeholder = 'you can descrip the date'),
-            dateInput('dataDate', 'Date:',format = "yyyy-mm-dd",startview = 'month', language = 'en'),
-            textInput('dataLocation', 'Location:', placeholder = 'where the date stored'),
-            selectInput("datatype", 
-                        "Data type:",
-                        c("Cell" = "cel",
-                          "Tissue" = "tis",
-                          "Species" = "spe"), 
-                        selected = 'cel'),
+            fluidRow(
+              box(
+                # input datasets information
+                textInput('dataName', 'Sample name:', placeholder = 'sample name'),
+                textInput('dataDscription', 'Description:', placeholder = 'you can descrip the date'),
+                dateInput('dataDate', 'Date:',format = "yyyy-mm-dd",startview = 'month', language = 'en'),
+                textInput('dataLocation', 'Location:', placeholder = 'where the date stored')
+              ),
+              
+              box(
+                selectInput("datatype", 
+                            "Data type:",
+                            c("Cell" = "cel",
+                              "Tissue" = "tis",
+                              "Species" = "spe"), 
+                            selected = 'cel'),
+                
+                textInput('dataLab', 'Lab/Research:', placeholder = 'lab/research obtained the data'),
+                selectInput("dataStatus", 
+                            "Status:",
+                            c("Private" = "pri",
+                              "Publish" = "pub",
+                              "Archived" = "arc"), 
+                            selected = 'pri'),
+                textInput('projectid', 'Project_linked:', placeholder = 'project id')
+                #fileInput('file', 'Choose file:'),
+              )
+            ),
             
-            textInput('dataLab', 'Lab/Research:', placeholder = 'lab/research obtained the data'),
-            selectInput("dataStatus", 
-                        "Status:",
-                        c("Private" = "pri",
-                          "Publish" = "pub",
-                          "Archived" = "arc"), 
-                        selected = 'pri'),
-            textInput('projectid', 'Project_linked:', placeholder = 'project id'),
-            #fileInput('file', 'Choose file:'),
-            
-    
             actionButton('add_data', 'Add'),
-            
-            br(),
+            h1(),
 
-    
-            DTOutput(outputId='x2'),  ## the place to output datasets table
+            fluidRow(
+              box(width = 12,
+                DTOutput(outputId='x2')  ## the place to output datasets table
+              )
+            ),
+            
             
             actionButton('delete_data', 'Delete'),
             h1(),
             
-            verbatimTextOutput(outputId='y2'),  ## the place to output text
+            #verbatimTextOutput(outputId='y2'),  ## the place to output text
             
             
             
@@ -258,8 +279,8 @@ body <- dashboardBody(
     tabItem(tabName = "FAQ",
             h3("FAQ"),
     )
-  )
-)
+    ))
+
 
 ui <- dashboardPage(
         header,
