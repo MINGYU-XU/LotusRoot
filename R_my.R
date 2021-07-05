@@ -1,24 +1,18 @@
-#
+# UTF8
 # This is my laboratory information management system (LIMS)
 # Shiny web application
 # 
 #--------------------------------------------------------------------
 # problems:
-#  table not saved after edit 
-#  但只能改一次，第二次改就会报错
-#  Error in datas: could not find function "datas"##Error in proj.default: argument "object" is missing, with no default
+#  table only save the last edit 
 
-#  添加和删除行delete and add new row
+#  delete and add new row
 #Error in data.frame: arguments imply differing number of rows: 1, 0
-
-
-#  no SearchPanes: cannot show this pane
 
 #  interaction of datasets and projects
 
-
-
 #  how to set log in page    ???ui<-secure_app(ui)
+
 #---------------------------------------------------------------------
 
 library(shiny)
@@ -67,8 +61,8 @@ print_rows_cols = function(id) {
 
 datas <- testfile_dataset
 proj <- testfile_project  #!!!EDIT
-dataVal <- testfile_dataset
-projVal <- testfile_project
+dataVal <- datas
+projVal <- proj
 
 # data.frame with credentials info ??
 credentials <- data.frame(
@@ -204,15 +198,7 @@ body <- dashboardBody(
             h3("My Current Projects"),
             hr(),
             DTOutput(outputId='x1'),   ## projects table
-            #div(DTOutput("x1"), style ="font-size:75%"), ## change font size
-          
-          # dt_output('server-side processing (editable = "cell")', 'x5'),
-          # dt_output('server-side processing (editable = "column")', 'x7'),
-          # dt_output('server-side processing (editable = "all")', 'x8'),
-          #  dt_output('server-side processing (editable = "row")', 'x1'),
- 
             verbatimTextOutput(outputId='y1') ## list the selected rows and columns / list of current projects
-          
     ),
     
     
@@ -259,11 +245,9 @@ body <- dashboardBody(
             
             
             actionButton('delete_data', 'Delete'),
-            h1(),
+            h1()
             
             #verbatimTextOutput(outputId='y2'),  ## the place to output text
-            
-            
             
             ## other input type
             #passwordInput('passwd', 'Your password is: ', placeholder = 'Your password please', width = '100%')
@@ -274,11 +258,11 @@ body <- dashboardBody(
     ),
     
     tabItem(tabName = "aboutus",
-            h3("About Us"),
+            h3("About Us")
     ),
       
     tabItem(tabName = "FAQ",
-            h3("FAQ"),
+            h3("FAQ")
     )
     ))
 
@@ -293,10 +277,6 @@ ui <- dashboardPage(
 #--------------------------------------------------------- ui ------------------
 
 
-
-
-
-
 #Logged = FALSE;
 #my_username <- "test"
 #my_password <- "test"
@@ -306,63 +286,54 @@ ui <- dashboardPage(
 
 server <- function(input, output) {
   
-  options(DT.options = list(pageLength = 5)) ## The initial display is 5 rows
-  
+  options(DT.options = list(pageLength = 10)) ## The initial display is 5 rows
   
   #My Current Projects 
   
-  projVal <- reactiveVal(proj)
-  
   # edit a cell
   observeEvent(input$x1_cell_edit, {
-    proj <<- editData(projVal(), input$x1_cell_edit, 'x1') ## double <
+    projVal <<- editData(proj(), input$x1_cell_edit, 'x1') ## double <
+    
   })
   
-  output$x1 <- renderDT(projVal(),
+  proj <- reactiveVal(projVal)
+  output$x1 <- renderDT(proj(),
                         server = FALSE,     ## client-side processing 
                         #selection = 'none',
-                        selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
-                        #editable = 'cell', 
+                        selection = list(target = 'row'),   ## Multiple selection: rows
                         editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
                         # search options
                         filter = list(position = 'top', clear = FALSE),
                         
-                        extensions = c('Select','Buttons','SearchPanes'), 
-                        ## No SearchPanes: it needs server = FALSE
+                        extensions = c('Buttons'),
+                        ## 'SearchPanes':No SearchPanes: it needs server = FALSE
+                        ## 'Select'
                         options = list(
-                          #dom = 'Blfrtip',
-                          dom = 'PBlfrtip',
+                          dom = 'Blfrtip', #dom = 'PBlfrtip',
                           style = 'os', items = 'row',
-                          
-                          #buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
-                          buttons = c('selectAll', 'selectNone',
-                                      'csv', 'excel', 'pdf', 'print'),   #'selectRows', 'selectColumns', 'selectCells',
-                          
-                          pageLength = 10,
-                          
+                          buttons = c(#'selectAll', 'selectNone',
+                                      'csv', 'excel', 'pdf', 'print'),   #'selectRows', 'selectColumns', 'selectCells','copy',
                           searchHighlight = TRUE,
-                          
-                          search = list(regex = TRUE),
-                          #columnDefs = list(list(targets = c(1), searchable = FALSE))  
-                          #Disable Searching for Individual Columns禁用搜索第一列
-                          
+                          search = list(regex = TRUE)
+                          #columnDefs = list(list(targets = c(1), searchable = FALSE)) #Disable Searching for Individual Columns禁用搜索第一列
                           
                           ## ??? no searchPanes
-                          columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3)))
+                          #columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3))
+                          )
   )
               
   
-  # print the selected indices
-  output$y1 <- renderPrint(print_rows_cols('x1'))
+  # print the selected projects
+  output$y1 <- renderPrint({
+    cat('Projects selected:\n')
+    input$x1_rows_selected
+    })
   
 
 
-
   
   
-  
-  
-# Raw Datasets 
+  # Raw Datasets 
   
   
   #output$tableout <- renderDT({
@@ -420,68 +391,47 @@ server <- function(input, output) {
   # output dataset table
   datas <- reactiveVal(dataVal)
   
-  output$x2 <- renderDT({
-    server = FALSE     ## client-side processing
-    datatable(datas(),
-              
-              #selection = 'none',
-              selection = 'single',
-              #selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
-              
-              
-              #editable = 'cell', 
-              editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
-              
-              # search options
-              filter = list(position = 'top', clear = FALSE),
-              
-              
-              ## The Select extension can't work properly with DT's own selection implemention and is only recommended in the client mode. 
-              ## If you really want to use the Select extension please set `selection = 'none'
-              ## recommended to use the Select extension only in the client-side processing mode (by setting `server = FALSE` in `DT::renderDT()`) 
-              ## or use DT's own selection implementations
-              #extensions = c('Select','Buttons','SearchPanes'), 
-              ## No SearchPanes: it needs server = FALSE
-              options = list(
-                #dom = 'Blfrtip',
-                dom = 'PBlfrtip',
-                style = 'os', items = 'row',
-                
-                #buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
-                buttons = c('selectAll', 'selectNone',
-                            'csv', 'excel', 'pdf', 'print'),   #'selectRows', 'selectColumns', 'selectCells',
-                
-                pageLength = 10,
-                
-                searchHighlight = TRUE,
-                
-                search = list(regex = TRUE),
-                #columnDefs = list(list(targets = c(1), searchable = FALSE))  
-                #Disable Searching for Individual Columns禁用搜索第一列
-                
-                
-                ## ??? no searchPanes
-                columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3)))
-    )
-  })
-              
+  output$x2 <- renderDT(
+    datas(),
+    server = FALSE,     ## client-side processing
     
-                        
-  
+    #selection = 'single',  #selection = 'none',
+    selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
     
-  # print the selected datasets 
-  #print_rows_cols = function(id) {
-  #  cat('Rows selected:\n')
-  #  print(input[[paste0(id, '_rows_selected')]])     
-  #  cat('Columns selected:\n')
-  #  print(input[[paste0(id, '_columns_selected')]])  
-  #}
-  #output$y2 <- renderPrint(print_rows_cols('x2'))
-  
-  
+    #editable = 'cell', 
+    editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
+    
+    # search options
+    filter = list(position = 'top', clear = FALSE),
+    
+    extensions = c('Buttons'),
+    options = list(
+      
+      dom = 'Blfrtip',  ##dom = 'PBlfrtip',
+      style = 'os', items = 'row',
+      
+      #buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+      buttons = c(#'selectAll', 'selectNone',
+        'csv', 'excel', 'pdf', 'print'),   #'selectRows', 'selectColumns', 'selectCells',
+      
+      searchHighlight = TRUE,
+      
+      search = list(regex = TRUE)
+      #columnDefs = list(list(targets = c(1), searchable = FALSE))  
+      #Disable Searching for Individual Columns
+      
+      
+      ## ??? no searchPanes
+      #columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3))
+    )         
+    
+  )
+              
 }
 
 #----------------------------------------------------- server ------------------
 
-# Run the application 
-shinyApp(ui, server)
+
+
+  # Run the application 
+  shinyApp(ui, server)
