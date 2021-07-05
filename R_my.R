@@ -67,7 +67,8 @@ print_rows_cols = function(id) {
 
 datas <- testfile_dataset
 proj <- testfile_project  #!!!EDIT
-
+dataVal <- testfile_dataset
+projVal <- testfile_project
 
 # data.frame with credentials info ??
 credentials <- data.frame(
@@ -309,55 +310,52 @@ server <- function(input, output) {
   
   
   #My Current Projects 
-  proj <- reactiveVal(proj)
-  output$x1 <- renderDT(proj(),
-                        server = TRUE,     ## client-side processing 
+  
+  projVal <- reactiveVal(proj)
+  
+  # edit a cell
+  observeEvent(input$x1_cell_edit, {
+    proj <<- editData(projVal(), input$x1_cell_edit, 'x1') ## double <
+  })
+  
+  output$x1 <- renderDT(projVal(),
+                        server = FALSE,     ## client-side processing 
                         #selection = 'none',
                         selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
                         #editable = 'cell', 
                         editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
                         # search options
                         filter = list(position = 'top', clear = FALSE),
+                        
+                        extensions = c('Select','Buttons','SearchPanes'), 
+                        ## No SearchPanes: it needs server = FALSE
+                        options = list(
+                          #dom = 'Blfrtip',
+                          dom = 'PBlfrtip',
+                          style = 'os', items = 'row',
+                          
+                          #buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                          buttons = c('selectAll', 'selectNone',
+                                      'csv', 'excel', 'pdf', 'print'),   #'selectRows', 'selectColumns', 'selectCells',
+                          
+                          pageLength = 10,
+                          
+                          searchHighlight = TRUE,
+                          
+                          search = list(regex = TRUE),
+                          #columnDefs = list(list(targets = c(1), searchable = FALSE))  
+                          #Disable Searching for Individual Columns禁用搜索第一列
+                          
+                          
+                          ## ??? no searchPanes
+                          columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3)))
+  )
               
-              
-              ## The Select extension can't work properly with DT's own selection implemention and is only recommended in the client mode. 
-              ## If you really want to use the Select extension please set `selection = 'none'
-              ## recommended to use the Select extension only in the client-side processing mode (by setting `server = FALSE` in `DT::renderDT()`) 
-              ## or use DT's own selection implementations
-              extensions = c('Select','Buttons','SearchPanes'), 
-              ## No SearchPanes: it needs server = FALSE
-              options = list(
-                #dom = 'Blfrtip',
-                dom = 'PBlfrtip',
-                style = 'os', items = 'row',
-                
-                #buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
-                buttons = c('selectAll', 'selectNone',
-                            'csv', 'excel', 'pdf', 'print'),   #'selectRows', 'selectColumns', 'selectCells',
-                
-                pageLength = 10,
-                
-                searchHighlight = TRUE,
-                
-                search = list(regex = TRUE),
-                #columnDefs = list(list(targets = c(1), searchable = FALSE))  
-                #Disable Searching for Individual Columns禁用搜索第一列
-                
-                
-                ## ??? no searchPanes
-                columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3)))
-    )
-    
-
   
-
   # print the selected indices
   output$y1 <- renderPrint(print_rows_cols('x1'))
   
-  # edit a cell
-  observeEvent(input$x1_cell_edit, {
-    proj <<- editData(proj(), input$x1_cell_edit, 'x1') ## double <
-  })
+
 
 
   
@@ -414,13 +412,13 @@ server <- function(input, output) {
   
   # edit a cell
   observeEvent(input$x2_cell_edit, {
-    datas <<- editData(datas(), input$x2_cell_edit, 'x2') ## double <
+    dataVal <<- editData(datas(), input$x2_cell_edit, 'x2') ## double <
     
   })
   
   
   # output dataset table
-  datas <- reactiveVal(datas)
+  datas <- reactiveVal(dataVal)
   
   output$x2 <- renderDT({
     server = FALSE     ## client-side processing
