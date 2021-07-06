@@ -9,7 +9,8 @@
 #  CAN delete and add new dataset row
 #  BUT after refresh, it return to the original table
 
-#  Error in add project row
+#  try to save as .rds but ERROR
+
 
 #  interaction of datasets and projects
 #  related datasets CANNOT shown
@@ -64,9 +65,9 @@ print_rows_cols = function(id) {
 
 
 #datas<-readRDS("df_data.rds") ### error
-datas <- testfile_dataset
+datas <- df_data #####Error in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
 
-proj <- testfile_project  #!!!EDIT
+proj <- df_proj#!!!EDIT
 
 dataVal <- datas
 
@@ -112,8 +113,8 @@ sidebar <- dashboardSidebar(
              icon = icon(name="home")),
     menuItem("My Project", icon = icon(name="dna"), 
              tabName = "myproject",
-        menuSubItem("Creat New Project", 
-                 tabName = "creat_new_project", 
+        menuSubItem("Create New Project", 
+                 tabName = "create_new_project", 
                  icon = icon(name = "plus-circle")),
         menuSubItem("My Current Projects", 
                  tabName = "current_project", 
@@ -167,8 +168,8 @@ body <- dashboardBody(
     ),
  
     
-    tabItem(tabName = "creat_new_project",
-            h3("Creat New Project"),
+    tabItem(tabName = "create_new_project",
+            h3("Create New Project"),
             fluidRow(
               box(
                 
@@ -229,7 +230,7 @@ body <- dashboardBody(
             )
             
             ## log in
-            #actionButton("action_creat",'action',
+            #actionButton("action_create",'action',
             #             icon = icon(name = "sign-in-alt"),
             #             width = "100px"
             #)
@@ -239,8 +240,14 @@ body <- dashboardBody(
     tabItem(tabName = "current_project",
             h3("My Current Projects"),
             hr(),
+            actionButton('delete_proj', 'Delete'),
+            actionButton('save_proj','Save'),
+            h5(),
             DTOutput(outputId='x1'),   ## projects table
+            #actionButton('save_proj','Save'),
             verbatimTextOutput(outputId='y1'), ## list the selected rows and columns / list of current projects
+            
+            
             h3("Related Datasets"),
             DTOutput(outputId='related_datasets')
     ),
@@ -304,11 +311,14 @@ body <- dashboardBody(
     ),
     
     tabItem(tabName = "aboutus",
-            h3("About Us")
+            h3("About Us"),
+            h5("LIMS is a modularised web-based laboratory information management system built to centrally track projects and data with standardised metadata, while still maintaining appropriate access and permissions to users and groups."), 
+            h5("This system will make our analyses more findable, accessible, interoperable and reproducible based on the FAIR data principles.")
     ),
       
     tabItem(tabName = "FAQ",
-            h3("FAQ")
+            h3("FAQ"),
+            h5()
     )
     ))
 
@@ -332,7 +342,7 @@ ui <- dashboardPage(
 
 server <- function(input, output) {
   
-  options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
+  options(DT.options = list(pageLength = 7)) ## The initial display is 10 rows
   
   # Create new project
   ### Error in rep: attempt to replicate an object of type 'closure' ??????????????????????
@@ -346,7 +356,7 @@ server <- function(input, output) {
                           Location = input$projLocation, 
                           LabResearchers = input$projLab, 
                           Sample.ID = input$projSample,
-                          Status = input$projStatus),projVal)
+                          Status = input$projStatus),projVal())
     
     projVal(p)
   })
@@ -368,7 +378,7 @@ server <- function(input, output) {
   # edit a cell ##############################################
   ###最好是让用户选择一行，点击“编辑”按钮，然后在另一个框中编辑并保存更改。###
   observeEvent(input$x1_cell_edit, {
-    projVal <<- editData(proj(), input$x1_cell_edit, 'x1') ## double <
+    proj <<- editData(projVal(), input$x1_cell_edit, 'x1') ## double <
     
   })
   
@@ -440,29 +450,18 @@ server <- function(input, output) {
   
   output$x1 <- renderDT(projVal(),
                         server = FALSE,     ## client-side processing 
-                        #selection = 'none',
                         selection = list(target = 'row'),   ## Multiple selection: rows
                         editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
-                        # search options
                         filter = list(position = 'top', clear = FALSE),
-                        
                         extensions = c('Buttons'),
-                        ## 'SearchPanes':No SearchPanes: it needs server = FALSE
-                        ## 'Select'
                         options = list(
-                          dom = 'Blfrtip', #dom = 'PBlfrtip',
-                          style = 'os', items = 'row',
-                          buttons = c(#'selectAll', 'selectNone',
-                                      'csv', 'excel', 'pdf', 'print'),   #'selectRows', 'selectColumns', 'selectCells','copy',
+                          dom = 'Blfrtip', 
+                          style = 'os', 
+                          items = 'row',
+                          buttons = c('csv', 'excel', 'pdf', 'print'),
                           searchHighlight = TRUE,
-                          search = list(regex = TRUE),
-                          columnDefs = list(list(targets = c(3), searchable = FALSE)) #Disable Searching for Individual Columns
-                          
-                          ## ??? no searchPanes
-                          #columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3))
-                          
-                          # aLengthMenu = c(1,5,10,20,50) #???
-                          
+                          search = list(regex = TRUE)
+                          #columnDefs = list(list(targets = c(3), searchable = FALSE)) #Disable Searching for Individual Columns
                           )
   )
   
@@ -476,7 +475,7 @@ server <- function(input, output) {
   
   
 
-  # creat new project
+  # create new project
   output$x0 <- renderDT(projVal(),
                         selection = 'none')
   
@@ -521,6 +520,17 @@ server <- function(input, output) {
     }
     dataVal(t)
   })
+  
+  observeEvent(input$delete_proj, {
+    r = projVal()
+    print(nrow(r))
+    if (!is.null(input$x1_rows_selected)) {
+      r <- r[-as.numeric(input$x1_rows_selected),]
+    }
+    projVal(r)
+  })
+  
+  
   
   
   # edit a cell
@@ -568,16 +578,35 @@ server <- function(input, output) {
   )
   
   
+  
+## SAVE the table into a file, and then load the file
+  ## Error in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
+  
+  observeEvent(input$save_data,{
+    write.csv(dataVal,'df_data.csv',row.names = FALSE)
+    
+    #df_data<-read.csv('df_data.csv')
+    
+    })
+  
+  observeEvent(input$save_proj,{  
+    write.csv(projVal,'df_proj.csv',row.names = FALSE)     ### ERROR in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
+    
+    #df_proj<-read.csv('df_proj.csv')
+    
+  })
+  
+  
+  
   ### Error in <Anonymous>: 'data' must be 2-dimensional (e.g. data frame or matrix) ???
   #observeEvent(input$save_data,{
   #  saveRDS(dataVal,"df_data.rds")
   #  df_data<-readRDS("df_data.rds")
-    
-    ####saveRDS(df,"df.rds")
-    ####df<-readRDS ("df.rds")
+  
+  ####saveRDS(df,"df.rds")
+  ####df<-readRDS ("df.rds")
   #})
   
-              
 }
 
 #----------------------------------------------------- server ------------------
