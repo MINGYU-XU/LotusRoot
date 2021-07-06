@@ -12,6 +12,7 @@
 #  Error in add project row
 
 #  interaction of datasets and projects
+#  related datasets CANNOT shown
 
 #  how to set log in page    ???ui<-secure_app(ui)
 
@@ -58,8 +59,8 @@ print_rows_cols = function(id) {
 
 
 #read test files
-#testfile_dataset <- read_csv('csv_test_dataset.csv') #sep = ','
-#testfile_project <- read_csv('csv_test_project.csv')
+testfile_dataset <- read.csv('csv_test_dataset.csv') #sep = ','
+testfile_project <- read.csv('csv_test_project.csv')
 
 datas <- testfile_dataset
 proj <- testfile_project  #!!!EDIT
@@ -184,15 +185,17 @@ body <- dashboardBody(
               ),
                        
               box(
-                fileInput(inputId = "projUploadfile",
-                          label = "Upload files:",
-                          multiple = TRUE,
-                          accept = c('text/csv','text/comma-separated-values','.csv','.tsv')
-                ),
+                #fileInput(inputId = "projUploadfile",
+                #          label = "Upload files:",
+                #          multiple = TRUE,
+                #          accept = c('text/csv','text/comma-separated-values','.csv','.tsv')
+                #),
                 
                 textInput('projLocation', 'Location:', placeholder = 'where the project stored'),
                 
                 textInput('projLab', 'Lab/Research:', placeholder = 'lab/research where the project carried out'),
+                
+                textInput('projSample', 'Sample ID:', placeholder = 'sample ID'),
                 
                 selectInput("projStatus", 
                             "Status:",
@@ -229,7 +232,8 @@ body <- dashboardBody(
             h3("My Current Projects"),
             hr(),
             DTOutput(outputId='x1'),   ## projects table
-            verbatimTextOutput(outputId='y1') ## list the selected rows and columns / list of current projects
+            verbatimTextOutput(outputId='y1'), ## list the selected rows and columns / list of current projects
+            DTOutput(outputId='related_datasets')
     ),
     
     
@@ -239,7 +243,7 @@ body <- dashboardBody(
             fluidRow(
               box(
                 # input datasets information
-                textInput('dataName', 'Sample name:', placeholder = 'sample name'),
+                textInput('dataID', 'Sample ID:', placeholder = 'sample ID'),
                 textInput('dataDescription', 'Description:', placeholder = 'you can descrip the date'),
                 dateInput('dataDate', 'Date:',format = "yyyy/mm/dd",startview = 'month', language = 'en'),
                 textInput('dataLocation', 'Location:', placeholder = 'where the date stored')
@@ -330,9 +334,8 @@ server <- function(input, output) {
                           Description = input$projDescription, 
                           Date = as.character(input$projDate),
                           Location = input$projLocation, 
-                          Datasets = '666',#???
                           LabResearchers = input$projLab, 
-                          ExternalLinks = '666',#???
+                          Sample.ID = '666',#???
                           Status = input$projStatus),proj)
     
     proj(p)
@@ -352,16 +355,79 @@ server <- function(input, output) {
   
   #My Current Projects 
   
-  # edit a cell
+  # edit a cell ##############################################
+  
   observeEvent(input$x1_cell_edit, {
     projVal <<- editData(proj(), input$x1_cell_edit, 'x1') ## double <
     
   })
   
   
+  
+  
+  # Associating two tables ########################################
+  
+  # Expected function: selecte a proj then the Datasets included in it are displayed  
+  # 预期功能：选中一个proj后，显示该项目中包含的datasets
+  
+  
+  ## if no row selected, display all datasets 如果未选中任何一行，则显示所有的datasets（x2）
+  ## if select one row, display the datasets included in that proj 如果选择了某含，则显示该proj的datasets
+  ## return：pids is the project ID
+  
+  pids<-reactive({
+    if(length(input$x1_rows_selected)==0){
+      pids<-proj[input$x1_rows_all[1],]
+    }
+    else{
+      pids<-proj[input$x1_rows_selected[1],]
+      #pids<-proj[1,]
+    }
+    return(pids)
+  })
+  
+  ## Project.ID列 $ProjectID 给dsub
+  ## return：dsub is the Associated datas
+  rd <- reactive({
+    pid<-pids()  ## selected proj row
+    dsub<-subset(datas,datas$Project.ID %in% pid$ProjectID) %>% spread(measurement,value)  ## Associated by project.id
+    return(dsub)
+  })
+  
+  
+  ### Error: object of type 'closure' is not subsettable ??????????
+  output$related_datasets <- renderDT({
+    dsub <- rd()
+    #if(dim(dsub)[1]==0){
+    #  return(NULL)
+    #}
+    dt <- DT::datatable(dsub,
+                        selection="single",
+                        filter="bottom",
+                        options = list(#bSortClasses = TRUE,
+                                       #aLengthMenu = c(1,5,10,20,50), ##???
+                                       pageLength = 50
+                    )
+          )
+    
+    #dt <- dt %>% formatStyle('pval',
+    #                         target = 'row',
+    #                         backgroundColor = styleInterval(c(0.05), c(cols[1], cols[2]))
+    #      )
+    dt
+  })
+  
+  
+  
+  
+  
+  
+  
+  
+  # output proj table #########################
+  
   proj <- reactiveVal(projVal)
   
-  # output proj table
   output$x1 <- renderDT(proj(),
                         server = FALSE,     ## client-side processing 
                         #selection = 'none',
@@ -422,16 +488,14 @@ server <- function(input, output) {
   
   observeEvent(input$add_data,{
 
-    t <- rbind(data.frame(Sample_name = input$dataName, 
-                              Description = input$dataDescription, 
-                              Date = as.character(input$dataDate),
-                              Location = input$dataLocation, 
-                              Datatype = input$datatype,
-                              Lab = input$dataLab, 
-                              Status = input$dataStatus, 
-                              Projectlinked = input$projectid
-                              
-                              ),datas())
+    t <- rbind(data.frame(Sample.ID = input$dataID, 
+                          Description = input$dataDescription, 
+                          Date = as.character(input$dataDate),
+                          Location = input$dataLocation, 
+                          Datatype = input$datatype,
+                          Lab = input$dataLab, 
+                          Status = input$dataStatus, 
+                          Project.ID = input$projectid),datas())    
     
     datas(t)
     })
