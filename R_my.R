@@ -6,8 +6,8 @@
 # problems:
 #  table only save the last edit 
 
-#  delete and add new row
-#Error in data.frame: arguments imply differing number of rows: 1, 0
+#  CAN delete and add new row
+#  BUT after refresh, it return to the original table
 
 #  interaction of datasets and projects
 
@@ -163,27 +163,56 @@ body <- dashboardBody(
             h3("Creat New Project"),
             fluidRow(
               box(
-                ## project_name
-                textInput(inputId = "projectName", 
+                
+                textInput(inputId = "projName", 
                           label = "New Project Name :"),
-                ## project_password
-                passwordInput(inputId = "projectPW", 
+                
+                passwordInput(inputId = "projPW", 
                               label = "Project Password :"),
-                ## administrator
-                textInput(inputId = "projectAdministrator",
-                          label = "Administrator :")
+                
+                textInput(inputId = "projAdministrator",
+                          label = "Administrator :"),
+                
+                textInput('projDescription', 
+                          'Description:', placeholder = 'you can descrip the project'),
+                
+                dateInput('projDate', 'Date:',format = "yyyy/mm/dd",startview = 'month', language = 'en'),
+                
+                
               ),
                        
               box(
-                fileInput(inputId = "projectUploadfile",
+                fileInput(inputId = "projUploadfile",
                           label = "Upload files:",
                           multiple = TRUE,
                           accept = c('text/csv','text/comma-separated-values','.csv','.tsv')
                 ),
-                h5('List of uploaded files:'),
-                verbatimTextOutput('fileList')
+                
+                textInput('projLocation', 'Location:', placeholder = 'where the project stored'),
+                
+                textInput('projLab', 'Lab/Research:', placeholder = 'lab/research where the project carried out'),
+                
+                selectInput("projStatus", 
+                            "Status:",
+                            c("Private" = "pri",
+                              "Publish" = "pub",
+                              "Archived" = "arc"), 
+                            selected = 'pri'),
+                
+                actionButton('add_proj', 'Add')
+                #h5('List of uploaded files:'),
+                #verbatimTextOutput('fileList')
               )
-                       
+            ),
+            
+            h3("Projects"),
+            h5("This is a read-only table."),
+            h5("You can edit project information on 'My Current Projects' page."),
+            fluidRow(  
+              box(
+                width = 12,
+                DTOutput(outputId='x0')   ## projects table
+              )
             )
             
             ## log in
@@ -209,8 +238,8 @@ body <- dashboardBody(
               box(
                 # input datasets information
                 textInput('dataName', 'Sample name:', placeholder = 'sample name'),
-                textInput('dataDscription', 'Description:', placeholder = 'you can descrip the date'),
-                dateInput('dataDate', 'Date:',format = "yyyy-mm-dd",startview = 'month', language = 'en'),
+                textInput('dataDescription', 'Description:', placeholder = 'you can descrip the date'),
+                dateInput('dataDate', 'Date:',format = "yyyy/mm/dd",startview = 'month', language = 'en'),
                 textInput('dataLocation', 'Location:', placeholder = 'where the date stored')
               ),
               
@@ -288,6 +317,36 @@ server <- function(input, output) {
   
   options(DT.options = list(pageLength = 10)) ## The initial display is 5 rows
   
+  # Create new project
+  ### Error in rep: attempt to replicate an object of type 'closure'??????????????????????
+  
+  observeEvent(input$add_proj,{
+    
+    p <- rbind(data.frame(ProjectID = '666',#读取行数加一 
+                          ProjectName = input$projName, 
+                          Description = input$projDescription, 
+                          Date = as.character(input$projDate),
+                          Location = input$projLocation, 
+                          Datasets = '666',#???
+                          LabResearchers = input$projLab, 
+                          ExternalLinks = '666',#???
+                          Status = input$projStatus),proj)
+    
+    proj(p)
+  })
+  
+  # delete row
+  #observeEvent(input$delete_data, {
+  #  p = proj()
+  #  print(nrow(p))
+  #  if (!is.null(input$x1_rows_selected)) {
+  #    t <- t[-as.numeric(input$x1_rows_selected),]
+  #  }
+  #  proj(p)
+  #})
+  
+  
+  
   #My Current Projects 
   
   # edit a cell
@@ -296,7 +355,10 @@ server <- function(input, output) {
     
   })
   
+  
   proj <- reactiveVal(projVal)
+  
+  # output proj table
   output$x1 <- renderDT(proj(),
                         server = FALSE,     ## client-side processing 
                         #selection = 'none',
@@ -314,14 +376,16 @@ server <- function(input, output) {
                           buttons = c(#'selectAll', 'selectNone',
                                       'csv', 'excel', 'pdf', 'print'),   #'selectRows', 'selectColumns', 'selectCells','copy',
                           searchHighlight = TRUE,
-                          search = list(regex = TRUE)
-                          #columnDefs = list(list(targets = c(1), searchable = FALSE)) #Disable Searching for Individual Columns禁用搜索第一列
+                          search = list(regex = TRUE),
+                          columnDefs = list(list(targets = c(3), searchable = FALSE)) #Disable Searching for Individual Columns
                           
                           ## ??? no searchPanes
                           #columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3))
+                          
+                          # aLengthMenu = c(1,5,10,20,50) #???
+                          
                           )
   )
-              
   
   # print the selected projects
   output$y1 <- renderPrint({
@@ -329,8 +393,17 @@ server <- function(input, output) {
     input$x1_rows_selected
     })
   
+  
+  
+  
 
-
+  # creat new project
+  output$x0 <- renderDT(proj(),
+                        selection = 'none')
+  
+  
+  
+  
   
   
   # Raw Datasets 
@@ -342,21 +415,11 @@ server <- function(input, output) {
   #  }
   
   # add new row
+  datas <- reactiveVal(dataVal)
+  
   observeEvent(input$add_data,{
-    #newrow <- data.frame(Sample_Name = input$name, 
-    #                     Status = input$status, 
-    #                     Date = as.character(input$date),
-    #                     Description = input$description, 
-    #                     Location = input$location, 
-    #                     Datatype = input$datatype,
-    #                     Lab = input$lab, 
-    #                     Projectlinked = input$projectid,
-    #                     stringsAsFactors = F)
-    
-    
-    #Error in data.frame: arguments imply differing number of rows: 1, 0
-    
-    t <- rbind(data.frame(Sample_Name = input$dataName, 
+
+    t <- rbind(data.frame(Sample_name = input$dataName, 
                               Description = input$dataDescription, 
                               Date = as.character(input$dataDate),
                               Location = input$dataLocation, 
@@ -365,19 +428,19 @@ server <- function(input, output) {
                               Status = input$dataStatus, 
                               Projectlinked = input$projectid
                               
-                              ),datas)
+                              ),datas())
     
-    datas <<- t
+    datas(t)
     })
   
   # delete row
   observeEvent(input$delete_data, {
-    t = datas
+    t = datas()
     print(nrow(t))
     if (!is.null(input$x2_rows_selected)) {
       t <- t[-as.numeric(input$x2_rows_selected),]
     }
-    datas <<- t
+    datas(t)
   })
   
   
@@ -389,14 +452,12 @@ server <- function(input, output) {
   
   
   # output dataset table
-  datas <- reactiveVal(dataVal)
-  
   output$x2 <- renderDT(
     datas(),
     server = FALSE,     ## client-side processing
     
     #selection = 'single',  #selection = 'none',
-    selection = list(target = 'row+column'),   ## Multiple selection: rows and columns
+    selection = list(target = 'row'),   ## Multiple selection: rows
     
     #editable = 'cell', 
     editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
