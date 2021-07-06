@@ -59,12 +59,17 @@ print_rows_cols = function(id) {
 
 
 #read test files
-testfile_dataset <- read.csv('csv_test_dataset.csv') #sep = ','
-testfile_project <- read.csv('csv_test_project.csv')
+#testfile_dataset <- read.csv('csv_test_dataset.csv') #sep = ','
+#testfile_project <- read.csv('csv_test_project.csv')
 
+
+#datas<-readRDS("df_data.rds") ### error
 datas <- testfile_dataset
+
 proj <- testfile_project  #!!!EDIT
+
 dataVal <- datas
+
 projVal <- proj
 
 # data.frame with credentials info ??
@@ -170,8 +175,11 @@ body <- dashboardBody(
                 textInput(inputId = "projName", 
                           label = "New Project Name :"),
                 
-                passwordInput(inputId = "projPW", 
-                              label = "Project Password :"),
+                textInput(inputId = "projID", 
+                          label = "New Project ID :"),
+                
+                #passwordInput(inputId = "projPW", 
+                #              label = "Project Password :"),
                 
                 textInput(inputId = "projAdministrator",
                           label = "Administrator :"),
@@ -233,6 +241,7 @@ body <- dashboardBody(
             hr(),
             DTOutput(outputId='x1'),   ## projects table
             verbatimTextOutput(outputId='y1'), ## list the selected rows and columns / list of current projects
+            h3("Related Datasets"),
             DTOutput(outputId='related_datasets')
     ),
     
@@ -269,28 +278,29 @@ body <- dashboardBody(
                 actionButton('add_data', 'Add')
               )
             ),
-            
-            
             h1(),
+            actionButton('delete_data', 'Delete'),
+            actionButton('save_data','Save'),
+            
 
             fluidRow(
+              
               box(width = 12,
                 DTOutput(outputId='x2')  ## the place to output datasets table
               )
             ),
             
             
-            actionButton('delete_data', 'Delete'),
-            h1()
+            
             
             #verbatimTextOutput(outputId='y2'),  ## the place to output text
-            
-            ## other input type
-            #passwordInput('passwd', 'Your password is: ', placeholder = 'Your password please', width = '100%')
-            #sliderInput('num', 'Choose a number: ', min = 0, max = 100, value = 30),
-            #radioButtons('gender', 'Gender', c('Male'='m', 'Female'='f','Transgender'='trans'),inline = T),
-            #conditionalPanel("input.gender == 'f'",
-            #radioButtons('gender1', 'Gender', c('Male'='m', 'Female'='f','Transgender'='trans'),inline = T)),
+            h3("Related Projects"),
+            fluidRow(
+              
+              box(width = 12,
+                  DTOutput(outputId='related_proj')  ## the place to output datasets table
+              )
+            )
     ),
     
     tabItem(tabName = "aboutus",
@@ -322,23 +332,23 @@ ui <- dashboardPage(
 
 server <- function(input, output) {
   
-  options(DT.options = list(pageLength = 10)) ## The initial display is 5 rows
+  options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   
   # Create new project
-  ### Error in rep: attempt to replicate an object of type 'closure'??????????????????????
+  ### Error in rep: attempt to replicate an object of type 'closure' ??????????????????????
   
   observeEvent(input$add_proj,{
     
-    p <- rbind(data.frame(ProjectID = '666',#读取行数加一 
+    p <- rbind(data.frame(ProjectID = input$projID,  #paste0("P",nrow(proj)+1),
                           ProjectName = input$projName, 
                           Description = input$projDescription, 
                           Date = as.character(input$projDate),
                           Location = input$projLocation, 
                           LabResearchers = input$projLab, 
-                          Sample.ID = '666',#???
-                          Status = input$projStatus),proj)
+                          Sample.ID = input$projSample,
+                          Status = input$projStatus),projVal)
     
-    proj(p)
+    projVal(p)
   })
   
   # delete row
@@ -356,13 +366,11 @@ server <- function(input, output) {
   #My Current Projects 
   
   # edit a cell ##############################################
-  
+  ###最好是让用户选择一行，点击“编辑”按钮，然后在另一个框中编辑并保存更改。###
   observeEvent(input$x1_cell_edit, {
     projVal <<- editData(proj(), input$x1_cell_edit, 'x1') ## double <
     
   })
-  
-  
   
   
   # Associating two tables ########################################
@@ -371,16 +379,16 @@ server <- function(input, output) {
   # 预期功能：选中一个proj后，显示该项目中包含的datasets
   
   
-  ## if no row selected, display all datasets 如果未选中任何一行，则显示所有的datasets（x2）
+  ## if no row(in x1) selected, display all datasets 如果未选中任何一行，则显示所有的datasets（x2）
   ## if select one row, display the datasets included in that proj 如果选择了某含，则显示该proj的datasets
   ## return：pids is the project ID
   
   pids<-reactive({
     if(length(input$x1_rows_selected)==0){
-      pids<-proj[input$x1_rows_all[1],]
+      pids<-projVal[input$x1_rows_all[1],]
     }
     else{
-      pids<-proj[input$x1_rows_selected[1],]
+      pids<-projVal[input$x1_rows_selected[1],]
       #pids<-proj[1,]
     }
     return(pids)
@@ -390,25 +398,27 @@ server <- function(input, output) {
   ## return：dsub is the Associated datas
   rd <- reactive({
     pid<-pids()  ## selected proj row
-    dsub<-subset(datas,datas$Project.ID %in% pid$ProjectID) %>% spread(measurement,value)  ## Associated by project.id
+    dsub<-subset(dataVal,dataVal$Project.ID == unique(pid$ProjectID))   ## Associated by project.id
     return(dsub)
   })
   
   
   ### Error: object of type 'closure' is not subsettable ??????????
-  output$related_datasets <- renderDT({
+  
+  
+  output$related_datasets <- DT::renderDT({
     dsub <- rd()
     #if(dim(dsub)[1]==0){
     #  return(NULL)
     #}
     dt <- DT::datatable(dsub,
-                        selection="single",
-                        filter="bottom",
-                        options = list(#bSortClasses = TRUE,
-                                       #aLengthMenu = c(1,5,10,20,50), ##???
-                                       pageLength = 50
-                    )
-          )
+                        selection="single")
+                        #filter="bottom",
+                        #options = list(#bSortClasses = TRUE,
+                        #               #aLengthMenu = c(1,5,10,20,50), ##???
+                        #               pageLength = 50
+                    
+          
     
     #dt <- dt %>% formatStyle('pval',
     #                         target = 'row',
@@ -426,9 +436,9 @@ server <- function(input, output) {
   
   # output proj table #########################
   
-  proj <- reactiveVal(projVal)
+  projVal <- reactiveVal(proj)
   
-  output$x1 <- renderDT(proj(),
+  output$x1 <- renderDT(projVal(),
                         server = FALSE,     ## client-side processing 
                         #selection = 'none',
                         selection = list(target = 'row'),   ## Multiple selection: rows
@@ -467,7 +477,7 @@ server <- function(input, output) {
   
 
   # creat new project
-  output$x0 <- renderDT(proj(),
+  output$x0 <- renderDT(projVal(),
                         selection = 'none')
   
   
@@ -483,8 +493,10 @@ server <- function(input, output) {
   #    return()
   #  }
   
+  
+  
   # add new row
-  datas <- reactiveVal(dataVal)
+  dataVal <- reactiveVal(datas)
   
   observeEvent(input$add_data,{
 
@@ -495,32 +507,32 @@ server <- function(input, output) {
                           Datatype = input$datatype,
                           Lab = input$dataLab, 
                           Status = input$dataStatus, 
-                          Project.ID = input$projectid),datas())    
+                          Project.ID = input$projectid),dataVal())    
     
-    datas(t)
+    dataVal(t)
     })
   
   # delete row
   observeEvent(input$delete_data, {
-    t = datas()
+    t = dataVal()
     print(nrow(t))
     if (!is.null(input$x2_rows_selected)) {
       t <- t[-as.numeric(input$x2_rows_selected),]
     }
-    datas(t)
+    dataVal(t)
   })
   
   
   # edit a cell
   observeEvent(input$x2_cell_edit, {
-    dataVal <<- editData(datas(), input$x2_cell_edit, 'x2') ## double <
+    datas <<- editData(dataVal(), input$x2_cell_edit, 'x2') ## double <
     
   })
   
   
   # output dataset table
   output$x2 <- renderDT(
-    datas(),
+    dataVal(),
     server = FALSE,     ## client-side processing
     
     #selection = 'single',  #selection = 'none',
@@ -554,6 +566,17 @@ server <- function(input, output) {
     )         
     
   )
+  
+  
+  ### Error in <Anonymous>: 'data' must be 2-dimensional (e.g. data frame or matrix) ???
+  #observeEvent(input$save_data,{
+  #  saveRDS(dataVal,"df_data.rds")
+  #  df_data<-readRDS("df_data.rds")
+    
+    ####saveRDS(df,"df.rds")
+    ####df<-readRDS ("df.rds")
+  #})
+  
               
 }
 
