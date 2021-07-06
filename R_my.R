@@ -1,4 +1,4 @@
-# UTF8
+#
 # This is my laboratory information management system (LIMS)
 # Shiny web application
 # 
@@ -6,8 +6,10 @@
 # problems:
 #  table only save the last edit 
 
-#  CAN delete and add new row
+#  CAN delete and add new dataset row
 #  BUT after refresh, it return to the original table
+
+#  Error in add project row
 
 #  interaction of datasets and projects
 
@@ -258,12 +260,13 @@ body <- dashboardBody(
                               "Publish" = "pub",
                               "Archived" = "arc"), 
                             selected = 'pri'),
-                textInput('projectid', 'Project_linked:', placeholder = 'project id')
+                textInput('projectid', 'Project_linked:', placeholder = 'project id'),
                 #fileInput('file', 'Choose file:'),
+                actionButton('add_data', 'Add')
               )
             ),
             
-            actionButton('add_data', 'Add'),
+            
             h1(),
 
             fluidRow(
