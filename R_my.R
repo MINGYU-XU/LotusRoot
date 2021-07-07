@@ -15,7 +15,7 @@
 #  interaction of datasets and projects
 #  related datasets CANNOT shown
 
-#  how to set log in page    ???ui<-secure_app(ui)
+#  User permission Settings ??? Editable permissions???
 
 #---------------------------------------------------------------------
 
@@ -64,8 +64,8 @@ if (interactive()) {
   
   # define some credentials
   credentials <- data.frame(
-    user = c("test", "123", "zzz", "shiny"),
-    password = c("test", "123", "zzz", "shinypw"),
+    user = c("test", "123", "z"),
+    password = c("test", "123", "z"),
     stringsAsFactors = FALSE
   )}
 
@@ -101,14 +101,14 @@ sidebar <- dashboardSidebar(
     menuItem("Home", tabName = "home", 
              icon = icon(name="home")),
     menuItem("My Project", icon = icon(name="dna"), 
-             tabName = "myproject",
-        menuSubItem("Create New Project", 
-                 tabName = "create_new_project", 
-                 icon = icon(name = "plus-circle")),
-        menuSubItem("My Current Projects", 
-                 tabName = "current_project", 
-                 icon = icon(name = "list")),
-        startExpanded = TRUE
+             tabName = "myproject"
+        #menuSubItem("Create New Project", 
+        #         tabName = "create_new_project", 
+        #         icon = icon(name = "plus-circle")),
+        #menuSubItem("My Current Projects", 
+        #         tabName = "current_project", 
+        #         icon = icon(name = "list")),
+        #startExpanded = TRUE
     ),
     
     menuItem("Raw Datasets", tabName = "datasets", 
@@ -161,7 +161,7 @@ body <- dashboardBody(
     ),
  
     
-    tabItem(tabName = "create_new_project",
+    tabItem(tabName = "myproject",
             h3("Create New Project"),
             fluidRow(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
@@ -210,46 +210,49 @@ body <- dashboardBody(
                 actionButton('add_proj', 'Add',style = "color: white; background-color: teal")
                 #h5('List of uploaded files:'),
                 #verbatimTextOutput('fileList')
-              )
-              )
+              ))),
+              
+            
+            h3("My Projects"),
+            fluidRow(
+              box(width = 12,
+              DTOutput(outputId='x1'),   ## projects table
+              
+              #actionButton('save_proj','Save',style = "color: white; background-color: green"),
+              verbatimTextOutput(outputId='y1'), ## list the selected rows and columns / list of current projects
+              
+              actionButton('edit_proj', 'Edit',style = "color: white; background-color: teal"),
+              actionButton('delete_proj', 'Delete',style = "color: white; background-color: red"),
+              actionButton('save_proj','Save',style = "color: white; background-color: green"),
+              h5(),
+              )),
+              h3("Related Datasets"),
+              DTOutput(outputId='related_datasets')
+              
             ),
             
-            h3("Projects"),
-            h5("This is a read-only table."),
-            h5("You can edit project information on 'My Current Projects' page."),
-            fluidRow(  
-              box(
-                width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
-                DTOutput(outputId='x0')   ## projects table
-              )
-            )
+            #h3("Projects"),
+            #h5("This is a read-only table."),
+            #h5("You can edit project information on 'My Current Projects' page."),
+            #fluidRow(  
+            #  box(
+            #    width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
+            #    DTOutput(outputId='x0')   ## projects table
+            #  )
+            #)
             
             ## log in
             #actionButton("action_create",'action',
             #             icon = icon(name = "sign-in-alt"),
             #             width = "100px"
             #)
-    ),
     
-    
-    tabItem(tabName = "current_project",
-            h3("My Current Projects"),
-            hr(),
-            actionButton('delete_proj', 'Delete',style = "color: white; background-color: red"),
-            actionButton('save_proj','Save',style = "color: white; background-color: green"),
-            h5(),
-            DTOutput(outputId='x1'),   ## projects table
-            #actionButton('save_proj','Save',style = "color: white; background-color: green"),
-            verbatimTextOutput(outputId='y1'), ## list the selected rows and columns / list of current projects
             
-            
-            h3("Related Datasets"),
-            DTOutput(outputId='related_datasets')
-    ),
+
     
     
     tabItem(tabName = "datasets",
-            h3("Datasets"),
+            h3("Add New Datasets"),
             
             fluidRow(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
@@ -282,22 +285,24 @@ body <- dashboardBody(
               )
               )
             ),
-            h1(),
-            actionButton('delete_data', 'Delete',style = "color: white; background-color: red"),
-            actionButton('save_data','Save',style = "color: white; background-color: green"),
             
-
+            
+            h3("My Datasets"),
             fluidRow(
               
               box(width = 12,
-                DTOutput(outputId='x2')  ## the place to output datasets table
-              )
-            ),
+                DTOutput(outputId='x2'),  ## the place to output datasets table
+              
             
-            
+            actionButton('edit_data', 'Edit',style = "color: white; background-color: teal"),
+            actionButton('delete_data', 'Delete',style = "color: white; background-color: red"),
+            actionButton('save_data','Save',style = "color: white; background-color: green")
             
             
             #verbatimTextOutput(outputId='y2'),  ## the place to output text
+              )
+            ),
+            
             h3("Related Projects"),
             fluidRow(
               
@@ -352,9 +357,7 @@ server <- function(input, output) {
   })
   
   
-  
-  
-  options(DT.options = list(pageLength = 7)) ## The initial display is 10 rows
+  options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   
   # Create new project
   ### Error in rep: attempt to replicate an object of type 'closure' ??????????????????????
@@ -389,7 +392,7 @@ server <- function(input, output) {
   
   # edit a cell ##############################################
   ###最好是让用户选择一行，点击“编辑”按钮，然后在另一个框中编辑并保存更改。###
-  observeEvent(input$x1_cell_edit, {
+  observeEvent(input$edit_proj, {
     proj <<- editData(projVal(), input$x1_cell_edit, 'x1') ## double <
     
   })
@@ -449,7 +452,6 @@ server <- function(input, output) {
   # output proj table #########################
   
   projVal <- reactiveVal(proj)
-  
   output$x1 <- renderDT(projVal(),
                         server = FALSE,     ## client-side processing 
                         selection = list(target = 'row'),   ## Multiple selection: rows
@@ -475,9 +477,8 @@ server <- function(input, output) {
   
   
   
-  
-
   # create new project
+  projVal <- reactiveVal(proj)
   output$x0 <- renderDT(projVal(),
                         selection = 'none')
   
@@ -526,11 +527,32 @@ server <- function(input, output) {
   
   
   
-  # edit a cell
-  observeEvent(input$x2_cell_edit, {
-    datas <<- editData(dataVal(), input$x2_cell_edit, 'x2') ## double <
+  # edit a cell ????????????????????
+  observeEvent(input$edit_data, {
+    ### Error in split.default: first argument must be a vector ????????????????????????????     
+    dataVal()
+    options=list(
+      editable = list(target = "row", disable = list(columns = c(0)))
+    )                     
     
+    datas <<- editData(dataVal(), input$x2_row_edit, 'x2') ## double <
   })
+  
+  
+  observeEvent(input$edit_proj, {
+    ### Error in split.default: first argument must be a vector ????????????????????????????     
+    projVal()
+    options=list(
+      editable = list(target = "row", disable = list(columns = c(0)))
+    )                     
+    
+    proj <<- editData(projVal(), input$x1_row_edit, 'x1') ## double <
+  })
+  
+  
+  
+  
+  
   
   
   # output dataset table
