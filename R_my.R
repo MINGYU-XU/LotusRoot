@@ -44,14 +44,15 @@ print_rows_cols = function(id) {
 ## Read files---------------------------------------------------------------
 
 #read test files
-#testfile_dataset <- read.csv('csv_test_dataset.csv') #sep = ','
-#testfile_project <- read.csv('csv_test_project.csv')
+testfile_dataset <- read.csv('csv_test_dataset.csv') #sep = ','
+testfile_project <- read.csv('csv_test_project.csv')
 
 
 #datas<-readRDS("df_data.rds") ### error
-datas <- df_data #####Error in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
+datas <- read.csv('df_data.csv')
+   #####Error in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
 
-proj <- df_proj#!!!EDIT
+proj <- read.csv('df_proj.csv')#!!!EDIT
 
 dataVal <- datas
 
@@ -202,9 +203,9 @@ body <- dashboardBody(
                 
                 selectInput("projStatus", 
                             "Status:",
-                            c("Private" = "pri",
-                              "Publish" = "pub",
-                              "Archived" = "arc"), 
+                            c("Private" = "private",
+                              "Publish" = "publish",
+                              "Archived" = "archived"), 
                             selected = 'pri'),
                 
                 actionButton('add_proj', 'Add',style = "color: white; background-color: teal")
@@ -214,6 +215,8 @@ body <- dashboardBody(
               
             
             h3("My Projects"),
+            h5("Note: You must click the 'Save' button below to confirm the new project added or edited, 
+               otherwise the new project will not be saved!"),
             fluidRow(
               box(width = 12,
               DTOutput(outputId='x1'),   ## projects table
@@ -267,17 +270,17 @@ body <- dashboardBody(
               box(
                 selectInput("datatype", 
                             "Data type:",
-                            c("Cell" = "cel",
-                              "Tissue" = "tis",
-                              "Species" = "spe"), 
+                            c("Cell" = "cell",
+                              "Tissue" = "tissue",
+                              "Species" = "species"), 
                             selected = 'cel'),
                 
                 textInput('dataLab', 'Lab/Research:', placeholder = 'lab/research obtained the data'),
                 selectInput("dataStatus", 
                             "Status:",
-                            c("Private" = "pri",
-                              "Publish" = "pub",
-                              "Archived" = "arc"), 
+                            c("Private" = "private",
+                              "Publish" = "publish",
+                              "Archived" = "archived"), 
                             selected = 'pri'),
                 textInput('projectid', 'Project_linked:', placeholder = 'project id'),
                 #fileInput('file', 'Choose file:'),
@@ -288,6 +291,8 @@ body <- dashboardBody(
             
             
             h3("My Datasets"),
+            h5("Note: You must click the 'Save' button below to confirm the new dataset added or edited, 
+               otherwise the new dataset will not be saved!"),
             fluidRow(
               
               box(width = 12,
@@ -332,7 +337,7 @@ ui <- dashboardPage(
 )
 
 
-ui <- secure_app(ui, choose_language = TRUE)
+#ui <- secure_app(ui, choose_language = TRUE)
 
 
 #--------------------------------------------------------- ui ------------------
@@ -403,18 +408,21 @@ server <- function(input, output) {
   # Expected function: selecte a proj then the Datasets included in it are displayed  
   # 预期功能：选中一个proj后，显示该项目中包含的datasets
   
-  ## if no row(in x1) selected, display all datasets 如果未选中任何一行，则显示所有的datasets（x2）
+  ## if no row(in x1) selected, No table
   ## if select one row, display the datasets included in that proj 如果选择了某含，则显示该proj的datasets
   ## return：'pids' is the project ID
   
   pids<-reactive({
     if(length(input$x1_rows_selected)==0){
-      pids<-projVal(input$x1_rows_all[1],)
+      #pids<-projVal(input$x1_rows_all[1],)
+      
+      return(NULL)  ## No output
     }
     else{
-      pids<-projVal(input$x1_rows_selected[1],)
-      #pids<-proj[1,]
+      pids <- projVal()[input$x1_rows_selected,"ProjectID"]
+      
     }
+    print(pids)
     return(pids)
   })
   
@@ -422,16 +430,20 @@ server <- function(input, output) {
   output$related_datasets <- DT::renderDT({
     pid<-pids()
     
-    if(dim(pid)[1]==0){
+    if(length(pid)==0){
       return(NULL)
     }
     
-    dt <- DT::datatable(pid,
+    
+    ds<-dataVal() %>% filter(Project.ID  %in% pid) 
+    ## Filter the table
+    
+    dt <- DT::datatable(ds,
                         selection="single",
                         filter="bottom",
                         options = list(SortClasses = TRUE,
                                        LengthMenu = c(1,5,10,20,50), 
-                                       pageLength = 50
+                                       pageLength = 10
                                        )
                         )
                     
@@ -527,7 +539,9 @@ server <- function(input, output) {
   
   
   
-  # edit a cell ????????????????????
+  # edit a row ????????????????????
+  # select a row, press edit and 
+  # a popup window comes up with the data for that row that can be edited and saved.
   observeEvent(input$edit_data, {
     ### Error in split.default: first argument must be a vector ????????????????????????????     
     dataVal()
@@ -598,20 +612,18 @@ server <- function(input, output) {
   ## Error in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
   
   observeEvent(input$save_data,{
-    write.csv(dataVal,'df_data.csv',row.names = FALSE)
+    write.csv(dataVal(),'df_data.csv',row.names = FALSE)
     
     #df_data<-read.csv('df_data.csv')
     
     })
   
   observeEvent(input$save_proj,{  
-    write.csv(projVal,'df_proj.csv',row.names = FALSE)     ### ERROR in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
+    write.csv(projVal(),'df_proj.csv',row.names = FALSE)     ### ERROR in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
     
     #df_proj<-read.csv('df_proj.csv')
     
   })
-  
-  
   
   ### Error in <Anonymous>: 'data' must be 2-dimensional (e.g. data frame or matrix) ???
   #observeEvent(input$save_data,{
