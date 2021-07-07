@@ -25,28 +25,12 @@ library(tidyverse)
 library(shinymanager)
 library(DT)
 library(readr)
+library(dplyr)
+library(tidyr)
 
 
 ## Functions --------------------------------------------------------------------
-
-# 1 dt_output
-# output table (id:outputId)
-dt_output = function(title, id) {
-  h1(paste0('Table:', title)) 
-  hr()
-  DTOutput(id)
-}
-
-# 2 render_dt
-# select rows and columns
-# edit table by cell/row/column/all
-render_dt = function(data, editable = 'cell', server = TRUE, ...) {
-  renderDT(data, selection = list(target = 'row+column'), server = server, editable = editable, ...)
-  # selection = list(target = 'row+column')
-  # selection = 'none'
-}
-
-# 3 print_rows_cols
+# print_rows_cols
 # print row+column selected
 print_rows_cols = function(id) {
   cat('Rows selected:\n')
@@ -55,9 +39,9 @@ print_rows_cols = function(id) {
   print(input[[paste0(id, '_columns_selected')]])
 }
 
-#----------------------------------------------------------functions-------
 
 
+## Read files---------------------------------------------------------------
 
 #read test files
 #testfile_dataset <- read.csv('csv_test_dataset.csv') #sep = ','
@@ -73,13 +57,18 @@ dataVal <- datas
 
 projVal <- proj
 
-# data.frame with credentials info ??
-credentials <- data.frame(
-  user = c("test", "xmy", "zzz", "shiny"),
-  password = c("test", "123", "zzz", "shinypw"),
-  # comment = c("alsace", "auvergne", "bretagne"), %>% 
-  stringsAsFactors = FALSE
-)
+
+
+## secure credentials info 
+if (interactive()) {
+  
+  # define some credentials
+  credentials <- data.frame(
+    user = c("test", "123", "zzz", "shiny"),
+    password = c("test", "123", "zzz", "shinypw"),
+    stringsAsFactors = FALSE
+  )}
+
 
 
 
@@ -150,21 +139,25 @@ body <- dashboardBody(
   tabItems(
     tabItem(tabName = "home",
             h3("Home"),
+            h5("Hello!"),
+            
+            
             ## user_name
-            textInput(inputId = "userName", 
-                      label = "User Name :"),
+            #textInput(inputId = "userName", 
+            #          label = "User Name :"),
+            
             ## password
-            passwordInput(inputId = "passwd", 
-                          label = "Password :"),
+            #passwordInput(inputId = "passwd", 
+            #              label = "Password :"),
+            
             ## email
             #textInput(inputId = "email",
             #          label = "Email :"),
             br(),
             ## log in
-            actionButton("login",
-                         " Log in / Register",
-                         icon = icon(name = "sign-in-alt"),
-                         width = "200px")
+            #actionButton("login", " Log in / Register", icon = icon(name = "sign-in-alt"), width = "200px"),
+            
+            verbatimTextOutput("auth_output")
     ),
  
     
@@ -333,18 +326,33 @@ ui <- dashboardPage(
         body
 )
 
-#ui <- secure_app(ui)
+
+ui <- secure_app(ui, choose_language = TRUE)
+
+
 #--------------------------------------------------------- ui ------------------
 
 
-#Logged = FALSE;
-#my_username <- "test"
-#my_password <- "test"
 
 
 #server ------------------------------------------------------------------------
 
 server <- function(input, output) {
+  
+  # HOME page
+  # call the server part
+  # check_credentials returns a function to authenticate users
+  res_auth <- secure_server(
+    check_credentials = check_credentials(credentials)
+  )
+  
+  output$auth_output <- renderPrint({
+    
+    reactiveValuesToList(res_auth)
+  })
+  
+  
+  
   
   options(DT.options = list(pageLength = 7)) ## The initial display is 10 rows
   
@@ -392,52 +400,42 @@ server <- function(input, output) {
   # Expected function: selecte a proj then the Datasets included in it are displayed  
   # 预期功能：选中一个proj后，显示该项目中包含的datasets
   
-  
   ## if no row(in x1) selected, display all datasets 如果未选中任何一行，则显示所有的datasets（x2）
   ## if select one row, display the datasets included in that proj 如果选择了某含，则显示该proj的datasets
-  ## return：pids is the project ID
+  ## return：'pids' is the project ID
   
   pids<-reactive({
     if(length(input$x1_rows_selected)==0){
-      pids<-projVal[input$x1_rows_all[1],]
+      pids<-projVal(input$x1_rows_all[1],)
     }
     else{
-      pids<-projVal[input$x1_rows_selected[1],]
+      pids<-projVal(input$x1_rows_selected[1],)
       #pids<-proj[1,]
     }
     return(pids)
   })
   
-  ## Project.ID列 $ProjectID 给dsub
-  ## return：dsub is the Associated datas
-  rd <- reactive({
-    pid<-pids()  ## selected proj row
-    dsub<-subset(dataVal,dataVal$Project.ID == unique(pid$ProjectID))   ## Associated by project.id
-    return(dsub)
-  })
-  
-  
-  ### Error: object of type 'closure' is not subsettable ??????????
-  
   
   output$related_datasets <- DT::renderDT({
-    dsub <- rd()
-    #if(dim(dsub)[1]==0){
-    #  return(NULL)
-    #}
-    dt <- DT::datatable(dsub,
-                        selection="single")
-                        #filter="bottom",
-                        #options = list(#bSortClasses = TRUE,
-                        #               #aLengthMenu = c(1,5,10,20,50), ##???
-                        #               pageLength = 50
+    pid<-pids()
+    
+    if(dim(pid)[1]==0){
+      return(NULL)
+    }
+    
+    dt <- DT::datatable(pid,
+                        selection="single",
+                        filter="bottom",
+                        options = list(SortClasses = TRUE,
+                                       LengthMenu = c(1,5,10,20,50), 
+                                       pageLength = 50
+                                       )
+                        )
                     
           
     
-    #dt <- dt %>% formatStyle('pval',
-    #                         target = 'row',
-    #                         backgroundColor = styleInterval(c(0.05), c(cols[1], cols[2]))
-    #      )
+    dt <- dt %>% formatStyle('pval',target = 'row')
+
     dt
   })
   
@@ -485,18 +483,7 @@ server <- function(input, output) {
   
   
   
-  
-  
-  
   # Raw Datasets 
-  
-  
-  #output$tableout <- renderDT({
-  #  if(input$submit == 0){
-  #    return()
-  #  }
-  
-  
   
   # add new row
   dataVal <- reactiveVal(datas)
@@ -514,6 +501,8 @@ server <- function(input, output) {
     
     dataVal(t)
     })
+  
+  
   
   # delete row
   observeEvent(input$delete_data, {
