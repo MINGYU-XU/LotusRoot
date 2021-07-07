@@ -12,9 +12,6 @@
 #  try to save as .rds but ERROR
 
 
-#  interaction of datasets and projects
-#  related datasets CANNOT shown
-
 #  User permission Settings ??? Editable permissions???
 
 #---------------------------------------------------------------------
@@ -49,17 +46,8 @@ sidebar <- dashboardSidebar(
   sidebarMenu(
     menuItem("Home", tabName = "home", 
              icon = icon(name="home")),
-    menuItem("My Project", icon = icon(name="dna"), 
-             tabName = "myproject"
-             #menuSubItem("Create New Project", 
-             #         tabName = "create_new_project", 
-             #         icon = icon(name = "plus-circle")),
-             #menuSubItem("My Current Projects", 
-             #         tabName = "current_project", 
-             #         icon = icon(name = "list")),
-             #startExpanded = TRUE
-    ),
-    
+    menuItem("My Project",tabName = "myproject",
+             icon = icon(name="dna")),
     menuItem("Raw Datasets", tabName = "datasets", 
              icon = icon(name="database")),
     menuItem("About Us", tabName = "aboutus", 
@@ -87,30 +75,39 @@ body <- dashboardBody(
   # ui- Home- Log in page  
   tabItems(
     tabItem(tabName = "home",
-            h3("Home"),
-            h5("Hello!"),
+            h1("HOME"),
+            h3("Welcome to My LIMS!"),
             
             
-            ## user_name
-            #textInput(inputId = "userName", 
-            #          label = "User Name :"),
-            
-            ## password
-            #passwordInput(inputId = "passwd", 
-            #              label = "Password :"),
-            
-            ## email
-            #textInput(inputId = "email",
-            #          label = "Email :"),
-            br(),
             ## log in
-            #actionButton("login", " Log in / Register", icon = icon(name = "sign-in-alt"), width = "200px"),
+            box(width = 5,
+            h4("Log In"),
+            textInput(inputId = "loginName", 
+                      label = "User Name :"),
+            passwordInput(inputId = "loginpw", 
+                          label = "Password :"),
+            br(),
+            actionButton("login", " Log in", icon = icon(name = "sign-in-alt"), width = "200px")
+            ),
+            
+            ## register
+            box(width = 7,
+            h4("New user? Register here!"),
+            useShinyjs(),  # Include shinyjs
+            actionButton("register", "Register", icon = icon(name = "sign-in-alt"), width = "200px"),
+            # cilck the 'register' button then the following blanks appear, otherwise hidden
+            uiOutput("ui_register")
+            ),
+            
+            
             
             verbatimTextOutput("auth_output")
+            
     ),
     
     
     tabItem(tabName = "myproject",
+            h1("PROJECT"),
             h3("Create New Project"),
             fluidRow(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
@@ -203,6 +200,7 @@ body <- dashboardBody(
     
     
     tabItem(tabName = "datasets",
+            h1("DATASET"),
             h3("Add New Datasets"),
             
             fluidRow(
@@ -266,13 +264,13 @@ body <- dashboardBody(
     ),
     
     tabItem(tabName = "aboutus",
-            h3("About Us"),
+            h1("About Us"),
             h5("LIMS is a modularised web-based laboratory information management system built to centrally track projects and data with standardised metadata, while still maintaining appropriate access and permissions to users and groups."), 
             h5("This system will make our analyses more findable, accessible, interoperable and reproducible based on the FAIR data principles.")
     ),
     
     tabItem(tabName = "FAQ",
-            h3("FAQ"),
+            h1("FAQ"),
             h5()
     )
   ))

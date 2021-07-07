@@ -6,6 +6,7 @@
 
 library(shiny)
 library(shinydashboard)
+library(shinyjs)
 library(tidyverse)
 library(shinymanager)
 library(DT)
@@ -61,16 +62,39 @@ if (interactive()) {
 server <- function(input, output) {
   
   # HOME page
-  # call the server part
   # check_credentials returns a function to authenticate users
   res_auth <- secure_server(
     check_credentials = check_credentials(credentials)
   )
   
   output$auth_output <- renderPrint({
-    
     reactiveValuesToList(res_auth)
   })
+  
+  
+  output$ui_register <- renderUI(fluidPage(
+    br(),
+    textInput(inputId = "registerName", 
+              label = "User Name :"),
+    passwordInput(inputId = "registerpw", 
+                  label = "Password :"),
+    textInput(inputId = "email",
+              label = "Email :",
+              placeholder = "your email"),
+    selectInput(inputId = "group", "Which Group/Lab/research center you belong to?", 
+                choices = c('X Center','Ed LAB','BioSci','CHEM') ## can add more
+                ),
+    selectInput(inputId = "permission", "Your permission :", 
+                choices = c('General_Staff','Data_Administrator','Project_Supervisor ','System_Maintenance') ## can add more
+    ),
+  )
+  )                                       
+  
+  shinyjs::hide("ui_register")
+  observeEvent(input$register, {
+    shinyjs::show("ui_register", anim = TRUE, animType = "fade")
+  })
+  
   
   
   options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
