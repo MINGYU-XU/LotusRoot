@@ -171,6 +171,7 @@ body <- dashboardBody(
     tabItem(tabName = "create_new_project",
             h3("Create New Project"),
             fluidRow(
+              box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
               box(
                 
                 textInput(inputId = "projName", 
@@ -213,9 +214,10 @@ body <- dashboardBody(
                               "Archived" = "arc"), 
                             selected = 'pri'),
                 
-                actionButton('add_proj', 'Add')
+                actionButton('add_proj', 'Add',style = "color: white; background-color: teal")
                 #h5('List of uploaded files:'),
                 #verbatimTextOutput('fileList')
+              )
               )
             ),
             
@@ -224,7 +226,7 @@ body <- dashboardBody(
             h5("You can edit project information on 'My Current Projects' page."),
             fluidRow(  
               box(
-                width = 12,
+                width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
                 DTOutput(outputId='x0')   ## projects table
               )
             )
@@ -240,11 +242,11 @@ body <- dashboardBody(
     tabItem(tabName = "current_project",
             h3("My Current Projects"),
             hr(),
-            actionButton('delete_proj', 'Delete'),
-            actionButton('save_proj','Save'),
+            actionButton('delete_proj', 'Delete',style = "color: white; background-color: red"),
+            actionButton('save_proj','Save',style = "color: white; background-color: green"),
             h5(),
             DTOutput(outputId='x1'),   ## projects table
-            #actionButton('save_proj','Save'),
+            #actionButton('save_proj','Save',style = "color: white; background-color: green"),
             verbatimTextOutput(outputId='y1'), ## list the selected rows and columns / list of current projects
             
             
@@ -257,6 +259,7 @@ body <- dashboardBody(
             h3("Datasets"),
             
             fluidRow(
+              box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
               box(
                 # input datasets information
                 textInput('dataID', 'Sample ID:', placeholder = 'sample ID'),
@@ -282,12 +285,13 @@ body <- dashboardBody(
                             selected = 'pri'),
                 textInput('projectid', 'Project_linked:', placeholder = 'project id'),
                 #fileInput('file', 'Choose file:'),
-                actionButton('add_data', 'Add')
+                actionButton('add_data', 'Add',style = "color: white; background-color: teal")
+              )
               )
             ),
             h1(),
-            actionButton('delete_data', 'Delete'),
-            actionButton('save_data','Save'),
+            actionButton('delete_data', 'Delete',style = "color: white; background-color: red"),
+            actionButton('save_data','Save',style = "color: white; background-color: green"),
             
 
             fluidRow(
