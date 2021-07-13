@@ -71,12 +71,14 @@ body <- dashboardBody(
   
   # zoom the web
   tags$style("
-              body {
-             -moz-transform: scale(0.8, 0.8); /* Moz-browsers */
-             zoom: 0.9; /* Other non-webkit browsers */
-             zoom: 90%; /* Webkit browsers */
-             }
-             "),
+    body {
+    -moz-transform: scale(0.8, 0.8); /* Moz-browsers */
+    zoom: 0.9; /* Other non-webkit browsers */
+    zoom: 90%; /* Webkit browsers */
+
+    }
+    
+    "),
   
   
   
@@ -154,8 +156,13 @@ body <- dashboardBody(
                     #          label = "Administrator:"),
                     
                     
-                    textInput('projResearcher', 'Researcher:', placeholder = 'Researcher'),
-                    
+                    #textInput('projResearcher', 'Researcher:', placeholder = 'Researcher'),
+                    selectInput("projResearcher", 
+                                "Researcher:",
+                                c("JCW" = "JCW",
+                                  "SL" = "SL",
+                                  "Other" = "Other"), 
+                                selected = 'JCW'),
                     textInput('projBioinformatician', 'Bioinformatician:', placeholder = 'Bioinformatician'),
                     
                     textInput('projGroup', 'Group:', placeholder = 'Group'),
@@ -250,35 +257,35 @@ body <- dashboardBody(
                     
                     
                     selectInput("organism", "Organism:",
-                                c("Human" = "human",
-                                  "Mouse" = "mouse",
-                                  "Other" = "other"), 
-                                selected = 'mouse'),
+                                c("Human" = "Human",
+                                  "Mouse" = "Mouse",
+                                  "Other" = "Other"), 
+                                selected = 'Human'),
                     
                     selectInput("cell", "Tissue/Cell:",
-                                c("Brain" = "brain",
-                                  "Neuron" = "neuron",
-                                  "Liver" = "liver",
-                                  "Kidney" = "kidney",
-                                  "Lung" = "lung",
-                                  "Heart" = "heart",
-                                  "Other" = "other"), 
-                                selected = 'mouse'),
+                                c("Brain" = "Brain",
+                                  "Neuron" = "Neuron",
+                                  "Liver" = "Liver",
+                                  "Kidney" = "Kidney",
+                                  "Lung" = "Lung",
+                                  "Heart" = "Heart",
+                                  "Other" = "Other"), 
+                                selected = 'Brain'),
                     
                     
-                    selectInput("genetype", "Genetype:",
-                                c("WT(wildtype)" = "wt",
-                                  "KO(knock-out)" = "ko",
-                                  "TG(transgenic)" = "tg",
-                                  "Other" = "other"), 
-                                selected = 'wt'),
+                    selectInput("genotype", "Genotype:",
+                                c("WT(wildtype)" = "WT(wildtype)",
+                                  "KO(knock-out)" = "KO(knock-out)",
+                                  "TG(transgenic)" = "TG(transgenic)",
+                                  "Other" = "Other"), 
+                                selected = 'WT(wildtype)'),
                     
                     selectInput("format", "Format:",
-                                c("fastq" = "fq",
-                                  "fastq.gz" = "fq.gz",
-                                  "BAM" = "bam",
-                                  "Other" = "other"), 
-                                selected = 'fq.gz'),
+                                c("fastq" = "fastq",
+                                  "fastq.gz" = "fastq.gz",
+                                  "BAM" = "BAM",
+                                  "Other" = "Other"), 
+                                selected = 'fastq.gz'),
                     
                     
                     textInput('treatment', 'Treatment:'),

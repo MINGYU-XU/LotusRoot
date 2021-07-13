@@ -4,9 +4,6 @@
 #
 
 
-
-
-
 ## Functions --------------------------------------------------------------------
 # print_rows_cols
 # print row+column selected
@@ -22,15 +19,16 @@ print_rows_cols = function(id) {
 ## Read files---------------------------------------------------------------
 
 #read test files
-testfile_dataset <- read.csv('csv_test_dataset.csv') #sep = ','
-testfile_project <- read.csv('csv_test_project.csv')
+testfile_dataset <- read.csv('csv_test2_data.csv') #sep = ','
+testfile_project <- read.csv('csv_test2_proj.csv')
 
-
+#datas <- testfile_dataset
+#proj <- testfile_project
 #datas<-readRDS("df_data.rds") ### error
-datas <- read.csv('df_data.csv')
+#datas <- read.csv('df_data.csv')
 #####Error in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
 
-proj <- read.csv('df_proj.csv')#!!!EDIT
+#proj <- read.csv('df_proj.csv')#!!!EDIT
 
 dataVal <- datas
 
@@ -92,18 +90,29 @@ server <- function(input, output) {
   options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   
   # Create new project
-  ### Error in rep: attempt to replicate an object of type 'closure' ??????????????????????
+  
   
   observeEvent(input$add_proj,{
     
-    p <- rbind(data.frame(ProjectID = input$projID,  #paste0("P",nrow(proj)+1),
-                          ProjectName = input$projName, 
+    
+    ##Error in rbind: numbers of columns of arguments do not match ??????????????????
+    
+    p <- rbind(data.frame(Project.ID = input$projID,  #paste0("P",nrow(proj)+1),
+                          Project.Name = input$projName, 
+                          Parent = input$projParent,
                           Description = input$projDescription, 
-                          Date = as.character(input$projDate),
-                          Location = input$projLocation, 
-                          LabResearchers = input$projLab, 
-                          Sample.ID = input$projSample,
-                          Status = input$projStatus),projVal())
+                          Start.Date = as.character(input$projDate),
+                          End.Date = as.character(input$projDate2),
+                          Path = input$projPath, 
+                          Sample.Sheet = input$projSample,
+                          Researcher = input$projResearcher, 
+                          Bioinformatician = input$projBioinformatician,
+                          Group = input$projGroup,
+                          Report = input$projReport,
+                          Status = input$projStatus,
+                          Data.Repository = input$projdataRepository,
+                          Code.Repository = input$codeRepository,
+                          Permissions = input$projPermissions),projVal())
     
     projVal(p)
   })
@@ -130,8 +139,10 @@ server <- function(input, output) {
   })
   
   
-  # Associating two tables ########################################
+### Associating two tables ########################################
+  # 通过project id关联
   
+  # proj -> data
   # Expected function: selecte a proj then the Datasets included in it are displayed  
   # 预期功能：选中一个proj后，显示该项目中包含的datasets
   
@@ -146,7 +157,7 @@ server <- function(input, output) {
       return(NULL)  ## No output
     }
     else{
-      pids <- projVal()[input$x1_rows_selected,"ProjectID"]
+      pids <- projVal()[input$x1_rows_selected,"Project.ID"]
       
     }
     print(pids)
@@ -184,11 +195,60 @@ server <- function(input, output) {
   
   
   
+  # data -> proj
+  # Expected function: selecte a data then the projs are displayed  
+  # 预期功能：选中一个data后，显示包含该data的所有proj
+  
+  ## if no row(in x1) selected, No table
+  ## if select one row, display the projs include the data 如果选择了某含，则显示该proj的datasets
+  ## return：'pids' is the project ID
+  
+  pids<-reactive({
+    if(length(input$x2_rows_selected)==0){
+      #pids<-projVal(input$x1_rows_all[1],)
+      
+      return(NULL)  ## No output
+    }
+    else{
+      pids <- projVal()[input$x2_rows_selected,"Project.ID"]
+      
+    }
+    print(pids)
+    return(pids)
+  })
+  
+  
+  output$related_datasets <- DT::renderDT({
+    pid<-pids()
+    
+    if(length(pid)==0){
+      return(NULL)
+    }
+    
+    
+    ds<-dataVal() %>% filter(Project.ID  %in% pid) 
+    ## Filter the table
+    
+    dt <- DT::datatable(ds,
+                        selection="single",
+                        filter="bottom",
+                        options = list(SortClasses = TRUE,
+                                       LengthMenu = c(1,5,10,20,50), 
+                                       pageLength = 10
+                        )
+    )
+    
+    
+    
+    dt <- dt %>% formatStyle('pval',target = 'row')
+    
+    dt
+  })
   
   
   
   
-  # output proj table #########################
+### output proj table #########################
   
   projVal <- reactiveVal(proj)
   output$x1 <- renderDT(projVal(),
@@ -201,6 +261,7 @@ server <- function(input, output) {
                           dom = 'Blfrtip', 
                           style = 'os', 
                           items = 'row',
+                          scrollX = TRUE,
                           buttons = c('csv', 'excel', 'pdf', 'print'),
                           searchHighlight = TRUE,
                           search = list(regex = TRUE)
@@ -230,14 +291,19 @@ server <- function(input, output) {
   
   observeEvent(input$add_data,{
     
-    t <- rbind(data.frame(Sample.ID = input$dataID, 
+    t <- rbind(data.frame(Data.ID = input$dataID, 
+                          Project.ID = input$dataprojID,
+                          Sample.Name = input$sampleName,
                           Description = input$dataDescription, 
                           Date = as.character(input$dataDate),
-                          Location = input$dataLocation, 
-                          Datatype = input$datatype,
-                          Lab = input$dataLab, 
-                          Status = input$dataStatus, 
-                          Project.ID = input$projectid),dataVal())    
+                          Path = input$dataPath, 
+                          Data.Repository = input$dataRepository,
+                          Method = input$method,
+                          Organism = input$organism,
+                          Tissue.Cell = input$cell, 
+                          Genotype = input$genotype,
+                          Format = input$format,
+                          Treatment = input$treatment),dataVal())    
     
     dataVal(t)
   })
@@ -315,7 +381,7 @@ server <- function(input, output) {
       
       dom = 'Blfrtip',  ##dom = 'PBlfrtip',
       style = 'os', items = 'row',
-      
+      scrollX = TRUE,
       #buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
       buttons = c(#'selectAll', 'selectNone',
         'csv', 'excel', 'pdf', 'print'),   #'selectRows', 'selectColumns', 'selectCells',
