@@ -4,15 +4,7 @@
 #
 
 
-library(shiny)
-library(shinydashboard)
-library(shinyjs)
-library(tidyverse)
-library(shinymanager)
-library(DT)
-library(readr)
-library(dplyr)
-library(tidyr)
+
 
 
 ## Functions --------------------------------------------------------------------

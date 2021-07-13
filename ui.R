@@ -16,7 +16,15 @@
 
 #---------------------------------------------------------------------
 
-
+library(shiny)
+library(shinydashboard)
+library(shinyjs)
+library(tidyverse)
+library(shinymanager)
+library(DT)
+library(readr)
+library(dplyr)
+library(tidyr)
 
 
 # ui
@@ -114,44 +122,62 @@ body <- dashboardBody(
                   box(
                     
                     textInput(inputId = "projName", 
-                              label = "New Project Name :"),
+                              label = "Project Name:",placeholder = 'Project Name'),
                     
                     textInput(inputId = "projID", 
-                              label = "New Project ID :"),
+                              label = "Project ID:"),
                     
-                    #passwordInput(inputId = "projPW", 
-                    #              label = "Project Password :"),
-                    
-                    textInput(inputId = "projAdministrator",
-                              label = "Administrator :"),
+                    passwordInput(inputId = "projParent", 
+                                  label = "Parent Project:"),
                     
                     textInput('projDescription', 
-                              'Description:', placeholder = 'you can descrip the project'),
+                              'Description:', placeholder = 'You can descrip your project'),
                     
-                    dateInput('projDate', 'Date:',format = "yyyy/mm/dd",startview = 'month', language = 'en'),
+                    dateInput('projDate', 'Start Date:',format = "dd/mm/yyyy",startview = 'month', language = 'en'),
+                    
+                    dateInput('projDate2', 'End Date:',format = "dd/mm/yyyy",startview = 'month', language = 'en'),
+                    
+                    textInput('projPath', 'Path:', placeholder = 'Where the project stored in the server'),
+                    
+                    textInput('projSample', 'Sample ID:', placeholder = 'Sample ID'),
                     
                     
                   ),
                   
                   box(
-                    #fileInput(inputId = "projUploadfile",
-                    #          label = "Upload files:",
-                    #          multiple = TRUE,
-                    #          accept = c('text/csv','text/comma-separated-values','.csv','.tsv')
-                    #),
+                    fileInput(inputId = "projReport",
+                              label = "Report:",
+                              multiple = TRUE
+                              #accept = c('text/csv','text/comma-separated-values','.csv','.tsv')
+                    ),
+                    #textInput(inputId = "projAdministrator",
+                    #          label = "Administrator:"),
                     
-                    textInput('projLocation', 'Location:', placeholder = 'where the project stored'),
                     
-                    textInput('projLab', 'Lab/Research:', placeholder = 'lab/research where the project carried out'),
+                    textInput('projResearcher', 'Researcher:', placeholder = 'Researcher'),
                     
-                    textInput('projSample', 'Sample ID:', placeholder = 'sample ID'),
+                    textInput('projBioinformatician', 'Bioinformatician:', placeholder = 'Bioinformatician'),
+                    
+                    textInput('projGroup', 'Group:', placeholder = 'Group'),
+                    
+                    
+                    textInput('projdataRepository', 'Data Repository:', placeholder = 'Data Repository GEO'),
+                    
+                    textInput('codeRepository', 'Code Repository:', placeholder = 'Code Repository github URL'),
                     
                     selectInput("projStatus", 
                                 "Status:",
-                                c("Private" = "private",
-                                  "Publish" = "publish",
-                                  "Archived" = "archived"), 
-                                selected = 'pri'),
+                                c("Complete" = "Complete",
+                                  "Published" = "Published",
+                                  "Ongoing" = "Ongoing"), 
+                                selected = 'Ongoing'),
+                    
+                    selectInput("projPermissions", 
+                                "Permissions:",
+                                c("Group" = "Group",
+                                  "Individual" = "Individual",
+                                  "Open" = "Open"), 
+                                selected = 'Group'),
                     
                     actionButton('add_proj', 'Add',style = "color: white; background-color: teal")
                     #h5('List of uploaded files:'),
@@ -207,29 +233,56 @@ body <- dashboardBody(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
                   box(
                     # input datasets information
-                    textInput('dataID', 'Sample ID:', placeholder = 'sample ID'),
-                    textInput('dataDescription', 'Description:', placeholder = 'you can descrip the date'),
-                    dateInput('dataDate', 'Date:',format = "yyyy/mm/dd",startview = 'month', language = 'en'),
-                    textInput('dataLocation', 'Location:', placeholder = 'where the date stored')
+                    textInput('dataID', 'Data ID:', placeholder = 'Data ID'),
+                    textInput('dataprojID', 'Project ID:', placeholder = 'Project IDs'),
+                    textInput('sampleName', 'Sample Name:', placeholder = 'Sample Name'),
+                    textInput('dataDescription', 
+                              'Description:', placeholder = 'You can descrip your data'),
+                    dateInput('dataDate', 'Date:',format = "dd/mm/yyyy",startview = 'month', language = 'en'),
+                    textInput('dataPath', 'Path:', placeholder = 'where the date stored'),
+                    textInput('dataRepository', 'Data Repository:', placeholder = 'Data Repository GEO'),
                   ),
                   
                   box(
-                    selectInput("datatype", 
-                                "Data type:",
-                                c("Cell" = "cell",
-                                  "Tissue" = "tissue",
-                                  "Species" = "species"), 
-                                selected = 'cel'),
+                    selectInput("method", "Method:",
+                                c("ChIP-seq" = "chip","BS-seq" = "bsd"), 
+                                selected = 'chip'),
                     
-                    textInput('dataLab', 'Lab/Research:', placeholder = 'lab/research obtained the data'),
-                    selectInput("dataStatus", 
-                                "Status:",
-                                c("Private" = "private",
-                                  "Publish" = "publish",
-                                  "Archived" = "archived"), 
-                                selected = 'pri'),
-                    textInput('projectid', 'Project_linked:', placeholder = 'project id'),
-                    #fileInput('file', 'Choose file:'),
+                    
+                    selectInput("organism", "Organism:",
+                                c("Human" = "human",
+                                  "Mouse" = "mouse",
+                                  "Other" = "other"), 
+                                selected = 'mouse'),
+                    
+                    selectInput("cell", "Tissue/Cell:",
+                                c("Brain" = "brain",
+                                  "Neuron" = "neuron",
+                                  "Liver" = "liver",
+                                  "Kidney" = "kidney",
+                                  "Lung" = "lung",
+                                  "Heart" = "heart",
+                                  "Other" = "other"), 
+                                selected = 'mouse'),
+                    
+                    
+                    selectInput("genetype", "Genetype:",
+                                c("WT(wildtype)" = "wt",
+                                  "KO(knock-out)" = "ko",
+                                  "TG(transgenic)" = "tg",
+                                  "Other" = "other"), 
+                                selected = 'wt'),
+                    
+                    selectInput("format", "Format:",
+                                c("fastq" = "fq",
+                                  "fastq.gz" = "fq.gz",
+                                  "BAM" = "bam",
+                                  "Other" = "other"), 
+                                selected = 'fq.gz'),
+                    
+                    
+                    textInput('treatment', 'Treatment:'),
+                    
                     actionButton('add_data', 'Add',style = "color: white; background-color: teal")
                   )
               )
