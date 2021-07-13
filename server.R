@@ -16,6 +16,10 @@ print_rows_cols = function(id) {
 
 
 
+
+
+
+
 ## Read files---------------------------------------------------------------
 
 #read test files
@@ -36,7 +40,9 @@ projVal <- proj
 
 
 
-## secure credentials info 
+
+
+##£ secure credentials info 
 if (interactive()) {
   
   # define some credentials
@@ -49,10 +55,14 @@ if (interactive()) {
 
 
 
+
+
+
 server <- function(input, output) {
   
-  # HOME page
+  # HOME page ----------------------------------------------------------------
   # check_credentials returns a function to authenticate users
+  
   res_auth <- secure_server(
     check_credentials = check_credentials(credentials)
   )
@@ -89,13 +99,16 @@ server <- function(input, output) {
   
   options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   
-  # Create new project
   
+  
+  
+  
+  
+### Create new proj/Datarow ###################################
+  
+  projVal <- reactiveVal(proj)
   
   observeEvent(input$add_proj,{
-    
-    
-    ##Error in rbind: numbers of columns of arguments do not match ??????????????????
     
     p <- rbind(data.frame(Project.ID = input$projID,  #paste0("P",nrow(proj)+1),
                           Project.Name = input$projName, 
@@ -117,21 +130,33 @@ server <- function(input, output) {
     projVal(p)
   })
   
-  # delete row
-  #observeEvent(input$delete_data, {
-  #  p = proj()
-  #  print(nrow(p))
-  #  if (!is.null(input$x1_rows_selected)) {
-  #    t <- t[-as.numeric(input$x1_rows_selected),]
-  #  }
-  #  proj(p)
-  #})
+
+  
+  dataVal <- reactiveVal(datas)
+  
+  observeEvent(input$add_data,{
+    
+    t <- rbind(data.frame(Data.ID = input$dataID, 
+                          Project.ID = input$dataprojID,
+                          Sample.Name = input$sampleName,
+                          Description = input$dataDescription, 
+                          Date = as.character(input$dataDate),
+                          Path = input$dataPath, 
+                          Data.Repository = input$dataRepository,
+                          Method = input$method,
+                          Organism = input$organism,
+                          Tissue.Cell = input$cell, 
+                          Genotype = input$genotype,
+                          Format = input$format,
+                          Treatment = input$treatment),dataVal())    
+    
+    dataVal(t)
+  })
   
   
   
-  #My Current Projects 
   
-  # edit a cell ##############################################
+### edit a cell ##############################################
   ###最好是让用户选择一行，点击“编辑”按钮，然后在另一个框中编辑并保存更改。###
   observeEvent(input$edit_proj, {
     proj <<- editData(projVal(), input$x1_cell_edit, 'x1') ## double <
@@ -142,9 +167,8 @@ server <- function(input, output) {
 ### Associating two tables ########################################
   # 通过project id关联
   
-  # proj -> data
+  # proj -> data # 预期功能：选中一个proj后，显示该项目中包含的datasets
   # Expected function: selecte a proj then the Datasets included in it are displayed  
-  # 预期功能：选中一个proj后，显示该项目中包含的datasets
   
   ## if no row(in x1) selected, No table
   ## if select one row, display the datasets included in that proj 如果选择了某含，则显示该proj的datasets
@@ -168,18 +192,25 @@ server <- function(input, output) {
   output$related_datasets <- DT::renderDT({
     pid<-pids()
     
-    if(length(pid)==0){
+    if(length(pid)==0 ){
       return(NULL)
+    }else if(!is.null(pid[input$x1_rows_selected,"Parent"])){
+      
     }
     
+    #if(is.null(pid[input$x1_rows_selected,"Parent"])){
+    #  return(NULL)
+    #}
     
-    ds<-dataVal() %>% filter(Project.ID  %in% pid) 
+    
+    ds <- dataVal() %>% filter(Project.ID  %in% pid) 
     ## Filter the table
     
     dt <- DT::datatable(ds,
                         selection="single",
                         filter="bottom",
                         options = list(SortClasses = TRUE,
+                                       scrollX = TRUE,
                                        LengthMenu = c(1,5,10,20,50), 
                                        pageLength = 10
                         )
@@ -195,44 +226,43 @@ server <- function(input, output) {
   
   
   
-  # data -> proj
-  # Expected function: selecte a data then the projs are displayed  
-  # 预期功能：选中一个data后，显示包含该data的所有proj
+### data -> proj  预期功能：选中一个data后，显示包含该data的所有proj
   
   ## if no row(in x1) selected, No table
   ## if select one row, display the projs include the data 如果选择了某含，则显示该proj的datasets
   ## return：'pids' is the project ID
   
-  pids<-reactive({
+  pids2<-reactive({
     if(length(input$x2_rows_selected)==0){
       #pids<-projVal(input$x1_rows_all[1],)
       
       return(NULL)  ## No output
     }
     else{
-      pids <- projVal()[input$x2_rows_selected,"Project.ID"]
+      pids2 <- dataVal()[input$x2_rows_selected,"Project.ID"]
       
     }
-    print(pids)
-    return(pids)
+    print(pids2)
+    return(pids2)
   })
   
   
-  output$related_datasets <- DT::renderDT({
-    pid<-pids()
+  output$related_proj <- DT::renderDT({
+    pid2<-pids2()
     
-    if(length(pid)==0){
+    if(length(pid2)==0){
       return(NULL)
     }
     
     
-    ds<-dataVal() %>% filter(Project.ID  %in% pid) 
+    ds2<-projVal() %>% filter(Project.ID  %in% pid2) 
     ## Filter the table
     
-    dt <- DT::datatable(ds,
+    dt2 <- DT::datatable(ds2,
                         selection="single",
                         filter="bottom",
                         options = list(SortClasses = TRUE,
+                                       scrollX = TRUE,
                                        LengthMenu = c(1,5,10,20,50), 
                                        pageLength = 10
                         )
@@ -240,15 +270,17 @@ server <- function(input, output) {
     
     
     
-    dt <- dt %>% formatStyle('pval',target = 'row')
+    dt2 <- dt2 %>% formatStyle('pval',target = 'row')
     
-    dt
+    dt2
   })
   
   
   
   
-### output proj table #########################
+### output tables ################
+  
+  # proj table
   
   projVal <- reactiveVal(proj)
   output$x1 <- renderDT(projVal(),
@@ -274,88 +306,6 @@ server <- function(input, output) {
     cat('Projects selected:\n')
     input$x1_rows_selected
   })
-  
-  
-  
-  # create new project
-  projVal <- reactiveVal(proj)
-  output$x0 <- renderDT(projVal(),
-                        selection = 'none')
-  
-  
-  
-  # Raw Datasets 
-  
-  # add new row
-  dataVal <- reactiveVal(datas)
-  
-  observeEvent(input$add_data,{
-    
-    t <- rbind(data.frame(Data.ID = input$dataID, 
-                          Project.ID = input$dataprojID,
-                          Sample.Name = input$sampleName,
-                          Description = input$dataDescription, 
-                          Date = as.character(input$dataDate),
-                          Path = input$dataPath, 
-                          Data.Repository = input$dataRepository,
-                          Method = input$method,
-                          Organism = input$organism,
-                          Tissue.Cell = input$cell, 
-                          Genotype = input$genotype,
-                          Format = input$format,
-                          Treatment = input$treatment),dataVal())    
-    
-    dataVal(t)
-  })
-  
-  
-  
-  # delete row
-  observeEvent(input$delete_data, {
-    t = dataVal()
-    print(nrow(t))
-    if (!is.null(input$x2_rows_selected)) {
-      t <- t[-as.numeric(input$x2_rows_selected),]
-    }
-    dataVal(t)
-  })
-  
-  observeEvent(input$delete_proj, {
-    r = projVal()
-    print(nrow(r))
-    if (!is.null(input$x1_rows_selected)) {
-      r <- r[-as.numeric(input$x1_rows_selected),]
-    }
-    projVal(r)
-  })
-  
-  
-  
-  
-  # edit a row ????????????????????
-  # select a row, press edit and 
-  # a popup window comes up with the data for that row that can be edited and saved.
-  observeEvent(input$edit_data, {
-    ### Error in split.default: first argument must be a vector ????????????????????????????     
-    dataVal()
-    options=list(
-      editable = list(target = "row", disable = list(columns = c(0)))
-    )                     
-    
-    datas <<- editData(dataVal(), input$x2_row_edit, 'x2') ## double <
-  })
-  
-  
-  observeEvent(input$edit_proj, {
-    ### Error in split.default: first argument must be a vector ????????????????????????????     
-    projVal()
-    options=list(
-      editable = list(target = "row", disable = list(columns = c(0)))
-    )                     
-    
-    proj <<- editData(projVal(), input$x1_row_edit, 'x1') ## double <
-  })
-  
   
   
   
@@ -397,11 +347,76 @@ server <- function(input, output) {
       #columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3))
     )         
     
-  )
+  )  
+  
+
+  
+  
+    # create new project
+  #projVal <- reactiveVal(proj)
+  
+  ## ????
+  #output$x0 <- renderDT(projVal(),
+  #                      selection = 'none')
   
   
   
-  ## SAVE the table into a file, and then load the file
+  
+
+  
+  
+### delete data/proj row #####################################
+  
+  observeEvent(input$delete_data, {
+    t = dataVal()
+    print(nrow(t))
+    if (!is.null(input$x2_rows_selected)) {
+      t <- t[-as.numeric(input$x2_rows_selected),]
+    }
+    dataVal(t)
+  })
+  
+  observeEvent(input$delete_proj, {
+    r = projVal()
+    print(nrow(r))
+    if (!is.null(input$x1_rows_selected)) {
+      r <- r[-as.numeric(input$x1_rows_selected),]
+    }
+    projVal(r)
+  })
+  
+  
+  
+  
+## edit a row ????????????????????
+  # select a row, press edit and 
+  # a popup window comes up with the data for that row that can be edited and saved.
+  observeEvent(input$edit_data, {
+    ### Error in split.default: first argument must be a vector ????????????????????????????     
+    dataVal()
+    options=list(
+      editable = list(target = "row", disable = list(columns = c(0)))
+    )                     
+    
+    datas <<- editData(dataVal(), input$x2_row_edit, 'x2') ## double <
+  })
+  
+  
+  observeEvent(input$edit_proj, {
+    ### Error in split.default: first argument must be a vector ????????????????????????????     
+    projVal()
+    options=list(
+      editable = list(target = "row", disable = list(columns = c(0)))
+    )                     
+    
+    proj <<- editData(projVal(), input$x1_row_edit, 'x1') ## double <
+  })
+  
+  
+  
+  
+
+### SAVE the table into a file, and then load the file ???????????????
   ## Error in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
   
   observeEvent(input$save_data,{

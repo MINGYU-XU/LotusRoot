@@ -82,6 +82,10 @@ body <- dashboardBody(
   
   
   
+  
+  
+  
+  
   # ui- Home- Log in page  
   tabItems(
     tabItem(tabName = "home",
@@ -116,6 +120,15 @@ body <- dashboardBody(
     ),
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
     tabItem(tabName = "myproject",
             h1("PROJECT"),
             h3("Create New Project"),
@@ -147,11 +160,12 @@ body <- dashboardBody(
                   ),
                   
                   box(
-                    fileInput(inputId = "projReport",
-                              label = "Report:",
-                              multiple = TRUE
-                              #accept = c('text/csv','text/comma-separated-values','.csv','.tsv')
-                    ),
+                    textInput('projReport', 'Report:'),
+                    #fileInput(inputId = "projReport",
+                    #          label = "Report:",
+                    #          multiple = TRUE
+                    #          accept = c('text/csv','text/comma-separated-values','.csv','.tsv')
+                    #),
                     #textInput(inputId = "projAdministrator",
                     #          label = "Administrator:"),
                     
@@ -165,7 +179,13 @@ body <- dashboardBody(
                                 selected = 'JCW'),
                     textInput('projBioinformatician', 'Bioinformatician:', placeholder = 'Bioinformatician'),
                     
-                    textInput('projGroup', 'Group:', placeholder = 'Group'),
+                    selectInput('projGroup', 'Group:',
+                                c("Bird" = "Bird",
+                                  "Hill" = "Hill",
+                                  "Wind" = "Wind",
+                                  "Other" = "Other"), 
+                                selected = 'Bird'
+                                ),
                     
                     
                     textInput('projdataRepository', 'Data Repository:', placeholder = 'Data Repository GEO'),
@@ -193,8 +213,7 @@ body <- dashboardBody(
             
             
             h3("My Projects"),
-            h5("Note: You must click the 'Save' button below to confirm the new project added or edited, 
-               otherwise the new project will not be saved!"),
+            h5(),
             fluidRow(
               box(width = 12,
                   DTOutput(outputId='x1'),   ## projects table
@@ -232,6 +251,15 @@ body <- dashboardBody(
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
     tabItem(tabName = "datasets",
             h1("DATASET"),
             h3("Add New Datasets"),
@@ -252,8 +280,9 @@ body <- dashboardBody(
                   
                   box(
                     selectInput("method", "Method:",
-                                c("ChIP-seq" = "chip","BS-seq" = "bsd"), 
-                                selected = 'chip'),
+                                c("ChIP-seq" = "ChIP-seq",
+                                  "BS-seq" = "BS-seq"), 
+                                selected = 'ChIP-seq'),
                     
                     
                     selectInput("organism", "Organism:",
@@ -297,8 +326,7 @@ body <- dashboardBody(
             
             
             h3("My Datasets"),
-            h5("Note: You must click the 'Save' button below to confirm the new dataset added or edited, 
-               otherwise the new dataset will not be saved!"),
+            h5(),
             fluidRow(
               
               box(width = 12,
@@ -322,6 +350,19 @@ body <- dashboardBody(
               )
             )
     ),
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     tabItem(tabName = "aboutus",
             h1("About Us"),
