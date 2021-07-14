@@ -47,7 +47,7 @@ user <- read.csv('register.csv')
 
 
 
-##£ secure credentials info 
+## secure credentials info ## 
 if (interactive()) {
   
   # define some credentials
@@ -125,9 +125,11 @@ server <- function(input, output) {
   })
   
   
+
   
-  ####?????????????????????????????????????????
-  shinyjs::hide("body")
+    
+  ## After logging in, you can visit other pages ## ?????????????????????????????
+#  shinyjs::hide("body")
 #  observeEvent(input$login, {
 #    #shinyjs::show("body", anim = TRUE, animType = "fade")
 #    if(input$loginName %in% user){
@@ -146,7 +148,7 @@ server <- function(input, output) {
   
   options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   
-### Create new proj/Datarow ###################################
+### Create new proj/Datarow ###
   
   projVal <- reactiveVal(proj)
   
@@ -198,15 +200,9 @@ server <- function(input, output) {
   
   
   
-### edit a cell ##############################################
-  ###最好是让用户选择一行，点击“编辑”按钮，然后在另一个框中编辑并保存更改。###
-  observeEvent(input$edit_proj, {
-    proj <<- editData(projVal(), input$x1_cell_edit, 'x1') ## double <
-    
-  })
+
   
-  
-### Associating two tables ########################################
+### Associating two tables ###
   # 通过project id关联
   
   # proj -> data # 预期功能：选中一个proj后，显示该项目中包含的datasets
@@ -330,7 +326,10 @@ server <- function(input, output) {
   
   
   
-### output tables ################
+  
+  
+  
+### output tables ###
   
   # proj table
   
@@ -338,7 +337,7 @@ server <- function(input, output) {
   output$x1 <- renderDT(projVal(),
                         server = FALSE,     ## client-side processing 
                         selection = list(target = 'row'),   ## Multiple selection: rows
-                        editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
+                        #editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
                         filter = list(position = 'top', clear = FALSE),
                         extensions = c('Buttons'),
                         options = list(
@@ -373,7 +372,7 @@ server <- function(input, output) {
     selection = list(target = 'row'),   ## Multiple selection: rows
     
     #editable = 'cell', 
-    editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
+    #editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
     
     # search options
     filter = list(position = 'top', clear = FALSE),
@@ -403,21 +402,14 @@ server <- function(input, output) {
   
 
   
-  
-    # create new project
-  #projVal <- reactiveVal(proj)
+
 
   
   
-  
-  
-
-  
-  
-### delete data/proj row #####################################
+### delete data/proj row ###
   
   ## These values allow the actions made in the modal to be delayed until the modal is closed
-  values = reactiveValues(to_print = "",   ## This is the text that will be displayed
+  values = reactiveValues(#to_print = "",   ## This is the text that will be displayed
                           modal_closed=F)  ## This prevents the values$to_print output from 
   
   ## Open the modal when button clicked
@@ -467,7 +459,7 @@ server <- function(input, output) {
   
   
 
-  values_p = reactiveValues(to_print = "",   ## This is the text that will be displayed
+  values_p = reactiveValues(#to_print = "",   ## This is the text that will be displayed
                             modal_closed=F)
   
   observeEvent(input$delete_proj, {
@@ -513,7 +505,21 @@ server <- function(input, output) {
   
   
   
-## edit a row ????????????????????
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+### edit row ### ????????????????
+  # data row
   # select a row, press edit and 
   # a popup window comes up with the data for that row that can be edited and saved.
   observeEvent(input$edit_data, {
@@ -527,44 +533,109 @@ server <- function(input, output) {
   })
   
   
+  
+  
+  
+#  observeEvent(input$edit_proj, {
+#    ### Error in split.default: first argument must be a vector ????????????????????????????     
+#    projVal()
+#    options=list(
+#      editable = list(target = "row", disable = list(columns = c(0)))
+#    )                     
+#    
+#    proj <<- editData(projVal(), input$x1_row_edit, 'x1') ## double <
+#  })
+  
+  
+  
+  
+  
+  
+  # edit proj row
+  #function：让用户选择一行，点击“编辑”按钮，然后在另一个框中编辑并保存更改。
+  # select one proj --> click 'edit' --> pop-up window --> edit and save
+  
+  # actionButton: edit_proj
+  #observeEvent(input$edit_proj, {
+  #  proj <<- editData(projVal(), input$x1_row_edit, 'x1') ## double <
+  #})
+  
+  
+  edit_value_p = reactiveValues(modal_closed=F)
+  
   observeEvent(input$edit_proj, {
-    ### Error in split.default: first argument must be a vector ????????????????????????????     
-    projVal()
-    options=list(
-      editable = list(target = "row", disable = list(columns = c(0)))
-    )                     
-    
-    proj <<- editData(projVal(), input$x1_row_edit, 'x1') ## double <
+    values_p$modal_closed <- F
+    showModal(modalDialog(
+      title = "Edit Project", 
+      
+      DT::renderDataTable({
+        ep <- proj[input$x1_rows_selected,]
+        DT::datatable(ep, escape = FALSE,
+                      editable = list(target = "cell", disable = list(columns = c(0,1,5))), 
+                      # cannot edit project id, saart date
+                      
+                      options = list(SortClasses = TRUE,
+                                     scrollX = TRUE,
+                                     LengthMenu = c(1,5,10,20,50), 
+                                     pageLength = 10)
+                      )
+      }) ,
+      
+      easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+      footer = actionButton("save_p",label = "Save")
+      )
+    )
   })
   
+  observeEvent(input$save_p,{
+    edit_value_p$modal_closed <- T
+    removeModal()
+  })  
+  
+  
+  observe({
+    if(edit_value_p$modal_closed){
+      proj <<- editData(projVal(), input$x1_row_edit, 'x1')
+    }
+  })
+  
+  ## ??? pop-up window cannot save
+  ## Warning: Error in split.default: first argument must be a vector 
   
   
   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
 
-### SAVE the table into a file, and then load the file 
+### Save tables ###
+  # SAVE the table into a file, and then load the file 
+  # save as rds???
+  
   
   observeEvent(input$add_data,{
     write.csv(dataVal(),'df_data.csv',row.names = FALSE)
-    
     #df_data<-read.csv('df_data.csv')
     
   })
   
   observeEvent(input$add_proj,{  
     write.csv(projVal(),'df_proj.csv',row.names = FALSE)     ### ERROR in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
-    
     #df_proj<-read.csv('df_proj.csv')
     
   })
   
-  ### Error in <Anonymous>: 'data' must be 2-dimensional (e.g. data frame or matrix) ???
-  #observeEvent(input$save_data,{
-  #  saveRDS(dataVal,"df_data.rds")
-  #  df_data<-readRDS("df_data.rds")
+ 
   
-  ####saveRDS(df,"df.rds")
-  ####df<-readRDS ("df.rds")
-  #})
-#}))
+  
+   
+  
 }
 
