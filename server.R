@@ -128,13 +128,13 @@ server <- function(input, output) {
   
   ####?????????????????????????????????????????
   shinyjs::hide("body")
-  observeEvent(input$login, {
-    #shinyjs::show("body", anim = TRUE, animType = "fade")
-    if(input$loginName %in% user){
-      if(input$loginpw == user["Password"])
-    }
+#  observeEvent(input$login, {
+#    #shinyjs::show("body", anim = TRUE, animType = "fade")
+#    if(input$loginName %in% user){
+#      if(input$loginpw == user["Password"])
+#    }
     
-  })
+#  })
   
   
   
@@ -406,10 +406,7 @@ server <- function(input, output) {
   
     # create new project
   #projVal <- reactiveVal(proj)
-  
-  ## ????
-  #output$x0 <- renderDT(projVal(),
-  #                      selection = 'none')
+
   
   
   
@@ -544,8 +541,7 @@ server <- function(input, output) {
   
   
 
-### SAVE the table into a file, and then load the file ???????????????
-  ## Error in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
+### SAVE the table into a file, and then load the file 
   
   observeEvent(input$add_data,{
     write.csv(dataVal(),'df_data.csv',row.names = FALSE)
