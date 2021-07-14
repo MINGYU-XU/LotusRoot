@@ -170,8 +170,10 @@ server <- function(input, output) {
   # proj -> data # 预期功能：选中一个proj后，显示该项目中包含的datasets
   # Expected function: selecte a proj then the Datasets included in it are displayed  
   
+  ## ???????????????????????????????????????????????????????????????????
   ## if no row(in x1) selected, No table
-  ## if select one row, display the datasets included in that proj 如果选择了某含，则显示该proj的datasets
+  ## if select one parent proj, display its sub proj 
+  ## if select one sub proj, display the datasets included in that proj 如果选择了某含，则显示该proj的datasets
   ## return：'pids' is the project ID
   
   pids<-reactive({
@@ -188,39 +190,47 @@ server <- function(input, output) {
     return(pids)
   })
   
-  
+  #???????????????? different selection, different output
   output$related_datasets <- DT::renderDT({
     pid<-pids()
     
     if(length(pid)==0 ){
       return(NULL)
-    }else if(!is.null(pid[input$x1_rows_selected,"Parent"])){
       
+    } else if(!is.null(pid[input$x1_rows_selected,"Parent"]) & (pid[input$x1_rows_selected,"Parent"] %in% proj[,"Parent"]))
+      {
+      subproj <- projVal() %>% filter(Parent %in% pid) 
+      ## Filter the table
+      
+      dt <- DT::datatable(subproj,
+                          selection="single",
+                          filter="bottom",
+                          options = list(SortClasses = TRUE,
+                                         scrollX = TRUE,
+                                         LengthMenu = c(1,5,10,20,50), 
+                                         pageLength = 10)
+      )
+      
+      dt
+      
+    }else{
+      ds <- dataVal() %>% filter(Project.ID  %in% pid) 
+      ## Filter the table
+      
+      dt <- DT::datatable(ds,
+                          selection="single",
+                          filter="bottom",
+                          options = list(SortClasses = TRUE,
+                                         scrollX = TRUE,
+                                         LengthMenu = c(1,5,10,20,50), 
+                                         pageLength = 10)
+      )
+      
+      dt <- dt %>% formatStyle('pval',target = 'row')
+      
+      dt
     }
     
-    #if(is.null(pid[input$x1_rows_selected,"Parent"])){
-    #  return(NULL)
-    #}
-    
-    
-    ds <- dataVal() %>% filter(Project.ID  %in% pid) 
-    ## Filter the table
-    
-    dt <- DT::datatable(ds,
-                        selection="single",
-                        filter="bottom",
-                        options = list(SortClasses = TRUE,
-                                       scrollX = TRUE,
-                                       LengthMenu = c(1,5,10,20,50), 
-                                       pageLength = 10
-                        )
-    )
-    
-    
-    
-    dt <- dt %>% formatStyle('pval',target = 'row')
-    
-    dt
   })
   
   
@@ -367,23 +377,99 @@ server <- function(input, output) {
   
 ### delete data/proj row #####################################
   
+  ## These values allow the actions made in the modal to be delayed until the modal is closed
+  values = reactiveValues(to_print = "",   ## This is the text that will be displayed
+                          modal_closed=F)  ## This prevents the values$to_print output from 
+  
+  ## Open the modal when button clicked
   observeEvent(input$delete_data, {
-    t = dataVal()
-    print(nrow(t))
-    if (!is.null(input$x2_rows_selected)) {
-      t <- t[-as.numeric(input$x2_rows_selected),]
-    }
-    dataVal(t)
+    values$modal_closed <- F
+    showModal(modalDialog("Are you sure you want to delete this data?
+                          If you confirm the deletion, click the Delete button below.
+                          If you don't want to delete it, you can click outside the dialog box to cancel.", 
+                          title = "Delete Dataset", 
+                          easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+                          footer = actionButton("delete_d",label = "Delete"))
+    )
   })
+
+  ## This event is triggered by the actionButton inside the modalDialog
+  #  It closes the modal, and by setting values$modal_closed <- T
+  #  it triggers values$to_print to update.
+  observeEvent(input$delete_d,{
+    values$modal_closed <- T
+    removeModal()
+  })  
+  
+  ## values$to_print is only updated once the modal is closed.
+  observe({
+    if(values$modal_closed){
+      #values$to_print <- paste(input$checkboxes)
+      observeEvent(input$delete_d, {
+        t = dataVal()
+        print(nrow(t))
+        if (!is.null(input$x2_rows_selected)) {
+          t <- t[-as.numeric(input$x2_rows_selected),]
+        }
+        dataVal(t)
+      })
+      
+    }
+  })
+
+#  observeEvent(input$Delete, {
+#    t = dataVal()
+#    print(nrow(t))
+#    if (!is.null(input$x2_rows_selected)) {
+#      t <- t[-as.numeric(input$x2_rows_selected),]
+#    }
+#    dataVal(t)
+#  })
+  
+  
+
+  values_p = reactiveValues(to_print = "",   ## This is the text that will be displayed
+                            modal_closed=F)
   
   observeEvent(input$delete_proj, {
-    r = projVal()
-    print(nrow(r))
-    if (!is.null(input$x1_rows_selected)) {
-      r <- r[-as.numeric(input$x1_rows_selected),]
-    }
-    projVal(r)
+    values_p$modal_closed <- F
+    showModal(modalDialog("Are you sure you want to delete this project?
+                          If you confirm the deletion, click the Delete button below.
+                          If you don't want to delete it, you can click outside the dialog box to cancel.", 
+                          title = "Delete Project", 
+                          easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+                          footer = actionButton("delete_p",label = "Delete"))
+    )
   })
+  
+  observeEvent(input$delete_p,{
+    values_p$modal_closed <- T
+    removeModal()
+  })  
+  
+  ## values$to_print is only updated once the modal is closed.
+  observe({
+    if(values_p$modal_closed){
+      #values$to_print <- paste(input$checkboxes)
+      observeEvent(input$delete_p, {
+        r = projVal()
+        print(nrow(r))
+        if (!is.null(input$x1_rows_selected)) {
+          r <- r[-as.numeric(input$x1_rows_selected),]
+        }
+        projVal(r)
+      })
+    }
+    })
+      
+#  observeEvent(input$delete_proj, {
+#    r = projVal()
+#    print(nrow(r))
+#    if (!is.null(input$x1_rows_selected)) {
+#      r <- r[-as.numeric(input$x1_rows_selected),]
+#    }
+#    projVal(r)
+#  })
   
   
   
