@@ -126,12 +126,23 @@ server <- function(input, output) {
   
   
   
+  ####?????????????????????????????????????????
+  shinyjs::hide("body")
+  observeEvent(input$login, {
+    #shinyjs::show("body", anim = TRUE, animType = "fade")
+    if(input$loginName %in% user){
+      if(input$loginpw == user["Password"])
+    }
+    
+  })
   
   
   
   
   
   
+ ###-------------------------------------------------------------------------- 
+#output$body <- renderUI(fluidPage({
   
   options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   
@@ -536,14 +547,14 @@ server <- function(input, output) {
 ### SAVE the table into a file, and then load the file ???????????????
   ## Error in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
   
-  observeEvent(input$save_data,{
+  observeEvent(input$add_data,{
     write.csv(dataVal(),'df_data.csv',row.names = FALSE)
     
     #df_data<-read.csv('df_data.csv')
     
   })
   
-  observeEvent(input$save_proj,{  
+  observeEvent(input$add_proj,{  
     write.csv(projVal(),'df_proj.csv',row.names = FALSE)     ### ERROR in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
     
     #df_proj<-read.csv('df_proj.csv')
@@ -558,5 +569,6 @@ server <- function(input, output) {
   ####saveRDS(df,"df.rds")
   ####df<-readRDS ("df.rds")
   #})
-  
+#}))
 }
+

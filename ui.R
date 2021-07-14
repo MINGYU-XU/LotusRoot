@@ -101,8 +101,19 @@ body <- dashboardBody(
             passwordInput(inputId = "loginpw", 
                           label = "Password :"),
             br(),
-            actionButton("login", " Log in", icon = icon(name = "sign-in-alt"), width = "200px")
+            
+            
+            
+            useShinyjs(),  # Include shinyjs
+            
+            actionButton("login", " Log in", icon = icon(name = "sign-in-alt"), width = "200px"),
+            # cilck the 'login' button then enter the app, otherwise no entry
+            
+            
+            uiOutput("body") #????
             ),
+            
+            
             
             ## register
             box(width = 7,
@@ -223,7 +234,7 @@ body <- dashboardBody(
                   
                   actionButton('edit_proj', 'Edit',style = "color: white; background-color: teal"),
                   actionButton('delete_proj', 'Delete',style = "color: white; background-color: red"),
-                  actionButton('save_proj','Save',style = "color: white; background-color: green"),
+                  #actionButton('save_proj','Save',style = "color: white; background-color: green"),
                   h5(),
               )),
             h3("Related Datasets"),
@@ -335,7 +346,7 @@ body <- dashboardBody(
                   
                   actionButton('edit_data', 'Edit',style = "color: white; background-color: teal"),
                   actionButton('delete_data', 'Delete',style = "color: white; background-color: red"),
-                  actionButton('save_data','Save',style = "color: white; background-color: green")
+                  #actionButton('save_data','Save',style = "color: white; background-color: green")
                   
                   
                   #verbatimTextOutput(outputId='y2'),  ## the place to output text
