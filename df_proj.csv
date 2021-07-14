@@ -1,0 +1,7 @@
+"Project.ID","Project.Name","Parent","Description","Start.Date","End.Date","Path","Sample.Sheet","Researcher","Bioinformatician","Group","Report","Status","Data.Repository","Code.Repository","Permissions"
+"4","5444444","5","444444444444444444","2021-07-14","2021-07-31","4","4444","JCW","666","Wind","44","Ongoing","444","4444","Individual"
+"6","666","5","66666","2021-07-14","2021-07-14","66","66","JCW","666","Wind","6666","Ongoing","66","66","Individual"
+"5","asdf",NA,"asdf","2021-07-14","2021-08-07","555","555","SL","mmmmm","Bird","555","Ongoing","555","55mmm","Open"
+"1","MeCP2","3","Some text","13/04/2018","13/10/2019","/homes/swebb/data/Bird/JCW/MeCP2_April18","www.bifx-core.bio.ed.ac.uk/swebb/Bird/","JCW","Shaun","Bird","www.bifx-core.bio.ed.ac.uk/swebb/Bird/","Published","GEO: GSE1000","www.github.com/swebb/MeCP2","Group"
+"2","Me3","3","Some text","13/05/2019","13/10/2020","/homes/swebb/data/Bird/SL/mCG_BS-seq_May19","www.bifx-core.bio.ed.ac.uk/swebb/Bird/","SL","Shaun","Bird","www.bifx-core.bio.ed.ac.uk/swebb/Bird/","Complete","GEO: GSE1000","www.github.com/swebb/Me3","Individual"
+"3","MeCP2_Me3",NA,"qqqqqqqqq","13/07/2020","13/09/2020","/homes/swebb/data/Bird/SL/mCG_BS-seq_May19","www.bifx-core.bio.ed.ac.uk/swebb/Bird/ ","M","Shaun","Bird","","Ongoing","GEO: GSE1000","www.github.com/swebb/MeCP2_Me3","Group"
