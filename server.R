@@ -25,18 +25,23 @@ print_rows_cols = function(id) {
 #read test files
 testfile_dataset <- read.csv('csv_test2_data.csv') #sep = ','
 testfile_project <- read.csv('csv_test2_proj.csv')
-
 #datas <- testfile_dataset
 #proj <- testfile_project
+
 #datas<-readRDS("df_data.rds") ### error
-#datas <- read.csv('df_data.csv')
+datas <- read.csv('df_data.csv')
+
 #####Error in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
 
-#proj <- read.csv('df_proj.csv')#!!!EDIT
+proj <- read.csv('df_proj.csv')#!!!EDIT
 
-dataVal <- datas
+#dataVal <- datas
+#projVal <- proj
 
-projVal <- proj
+
+
+# register (user information table)
+user <- read.csv('register.csv')
 
 
 
@@ -82,11 +87,12 @@ server <- function(input, output) {
               label = "Email :",
               placeholder = "your email"),
     selectInput(inputId = "group", "Which Group/Lab/research center you belong to?", 
-                choices = c('X Center','Ed LAB','BioSci','CHEM') ## can add more
+                choices = c('Bird','Hill','Wind','Ed LAB','BioSci','CHEM') ## can add more
                 ),
-    selectInput(inputId = "permission", "Your permission :", 
+    selectInput(inputId = "permissions", "Your permission :", 
                 choices = c('General_Staff','Data_Administrator','Project_Supervisor ','System_Maintenance') ## can add more
     ),
+    actionButton("register_ok","OK")
   )
   )                                       
   
@@ -96,13 +102,38 @@ server <- function(input, output) {
   })
   
   
+  # new user register
+  userVal <- reactiveVal(user)
+  
+  observeEvent(input$register_ok,{
+    print("ok")
+    output$successfully_registered <- renderPrint({
+      cat("Hi",input$registerName,"!","You have registered successfully! Please log in.")
+    })
+    u <- rbind(data.frame(Name = input$registerName,
+                          Password = input$registerpw,
+                          Email = input$email,
+                          Group.Lab.Center = input$group,
+                          Permissions = input$permissions),userVal())    
+    
+    userVal(u)
+  })
+  
+  # save user information to the table
+  observeEvent(input$register_ok,{
+    write.csv(userVal(),'register.csv',row.names = FALSE)
+  })
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
-  
-  
-  
-  
-  
   
 ### Create new proj/Datarow ###################################
   

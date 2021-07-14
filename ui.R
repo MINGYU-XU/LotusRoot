@@ -113,7 +113,7 @@ body <- dashboardBody(
             uiOutput("ui_register")
             ),
             
-            
+            verbatimTextOutput("successfully_registered"),
             
             verbatimTextOutput("auth_output")
             
