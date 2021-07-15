@@ -150,6 +150,7 @@ server <- function(input, output) {
   
 ### Create new proj/Datarow ###
   
+  # add proj
   projVal <- reactiveVal(proj)
   
   observeEvent(input$add_proj,{
@@ -175,7 +176,7 @@ server <- function(input, output) {
   })
   
 
-  
+  # add data
   dataVal <- reactiveVal(datas)
   
   observeEvent(input$add_data,{
@@ -205,7 +206,8 @@ server <- function(input, output) {
 ### Associating two tables ###
   # 通过project id关联
   
-  # proj -> data # 预期功能：选中一个proj后，显示该项目中包含的datasets
+  # proj -> data 
+  # 预期功能：选中一个proj后，显示该项目中包含的datasets
   # Expected function: selecte a proj then the Datasets included in it are displayed  
   
   ## ???????????????????????????????????????????????????????????????????
@@ -274,7 +276,7 @@ server <- function(input, output) {
   
   
   
-### data -> proj  预期功能：选中一个data后，显示包含该data的所有proj
+  # data -> proj  预期功能：选中一个data后，显示包含该data的所有proj
   
   ## if no row(in x1) selected, No table
   ## if select one row, display the projs include the data 如果选择了某含，则显示该proj的datasets
@@ -331,7 +333,7 @@ server <- function(input, output) {
   
 ### output tables ###
   
-  # proj table
+  # output proj table
   
   projVal <- reactiveVal(proj)
   output$x1 <- renderDT(projVal(),
@@ -352,13 +354,11 @@ server <- function(input, output) {
                         )
   )
   
-  # print the selected projects
+  ### print the selected projects
   output$y1 <- renderPrint({
     cat('Projects selected:\n')
     input$x1_rows_selected
   })
-  
-  
   
   
   
@@ -406,8 +406,9 @@ server <- function(input, output) {
 
   
   
-### delete data/proj row ###
+### delete data/proj row 
   
+  # delete data
   ## These values allow the actions made in the modal to be delayed until the modal is closed
   values = reactiveValues(#to_print = "",   ## This is the text that will be displayed
                           modal_closed=F)  ## This prevents the values$to_print output from 
@@ -437,12 +438,13 @@ server <- function(input, output) {
     if(values$modal_closed){
       #values$to_print <- paste(input$checkboxes)
       observeEvent(input$delete_d, {
-        t = dataVal()
-        print(nrow(t))
+        d = dataVal()
+        print(nrow(d))
         if (!is.null(input$x2_rows_selected)) {
-          t <- t[-as.numeric(input$x2_rows_selected),]
+          d <- d[-as.numeric(input$x2_rows_selected),]
         }
-        dataVal(t)
+        dataVal(d)
+        write.csv(dataVal(),'df_data.csv',row.names = FALSE)
       })
       
     }
@@ -458,7 +460,10 @@ server <- function(input, output) {
 #  })
   
   
-
+  
+  
+  # delete proj
+  
   values_p = reactiveValues(#to_print = "",   ## This is the text that will be displayed
                             modal_closed=F)
   
@@ -489,6 +494,7 @@ server <- function(input, output) {
           r <- r[-as.numeric(input$x1_rows_selected),]
         }
         projVal(r)
+        write.csv(projVal(),'df_proj.csv',row.names = FALSE)
       })
     }
     })
@@ -518,23 +524,64 @@ server <- function(input, output) {
   
   
   
-### edit row ### ????????????????
+### edit row  ????????????????
+  
   # data row
   # select a row, press edit and 
   # a popup window comes up with the data for that row that can be edited and saved.
-  observeEvent(input$edit_data, {
+  
+  #observeEvent(input$edit_data, {
     ### Error in split.default: first argument must be a vector ????????????????????????????     
-    dataVal()
-    options=list(
-      editable = list(target = "row", disable = list(columns = c(0)))
-    )                     
+  #  dataVal()
+  #  options=list(
+  #    editable = list(target = "row", disable = list(columns = c(0)))
+  #  )                     
     
-    datas <<- editData(dataVal(), input$x2_row_edit, 'x2') ## double <
+  #  datas <<- editData(dataVal(), input$x2_row_edit, 'x2') ## double <
+  #})
+  
+  
+  edit_value_d = reactiveValues(modal_closed=F)
+  
+  observeEvent(input$edit_data, {
+    edit_value_d$modal_closed <- F
+    showModal(modalDialog(
+      title = "Edit Dataset", 
+      
+      DT::renderDataTable({
+        ed <- data[input$x2_rows_selected,]
+        DT::datatable(ed, escape = FALSE,
+                      editable = list(target = "cell", disable = list(columns = c(0,1,5))), 
+                      # cannot edit project id, saart date
+                      
+                      options = list(SortClasses = TRUE,
+                                     scrollX = TRUE,
+                                     LengthMenu = c(1,5,10,20,50), 
+                                     pageLength = 10)
+        )
+      }) ,
+      
+      easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+      footer = actionButton("save_d",label = "Save")
+    )
+    )
   })
   
+  observeEvent(input$save_d,{
+    edit_value_d$modal_closed <- T
+    removeModal()
+  })  
   
   
+  observe({
+    if(edit_value_d$modal_closed){
+      data <<- editData(dataVal(), input$x2_row_edit, 'x2')
+    }
+  })  
+
   
+  
+    
   
 #  observeEvent(input$edit_proj, {
 #    ### Error in split.default: first argument must be a vector ????????????????????????????     
@@ -552,19 +599,16 @@ server <- function(input, output) {
   
   
   # edit proj row
+  
   #function：让用户选择一行，点击“编辑”按钮，然后在另一个框中编辑并保存更改。
   # select one proj --> click 'edit' --> pop-up window --> edit and save
   
   # actionButton: edit_proj
-  #observeEvent(input$edit_proj, {
-  #  proj <<- editData(projVal(), input$x1_row_edit, 'x1') ## double <
-  #})
-  
   
   edit_value_p = reactiveValues(modal_closed=F)
   
   observeEvent(input$edit_proj, {
-    values_p$modal_closed <- F
+    edit_value_p$modal_closed <- F
     showModal(modalDialog(
       title = "Edit Project", 
       
@@ -619,13 +663,16 @@ server <- function(input, output) {
   # SAVE the table into a file, and then load the file 
   # save as rds???
   
-  
+  # save data
   observeEvent(input$add_data,{
     write.csv(dataVal(),'df_data.csv',row.names = FALSE)
     #df_data<-read.csv('df_data.csv')
-    
   })
   
+  
+  
+  
+  # save proj
   observeEvent(input$add_proj,{  
     write.csv(projVal(),'df_proj.csv',row.names = FALSE)     ### ERROR in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
     #df_proj<-read.csv('df_proj.csv')
