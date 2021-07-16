@@ -88,7 +88,17 @@ body <- dashboardBody(
   
   # ui- Home- Log in page  
   tabItems(
+    ## 没用 selected = "home",
+    #useShinyjs(), # initiate javascript
+    
     tabItem(tabName = "home",
+            
+            # hide the welcome message at the first place
+            shinyjs::hidden(tags$div(
+              id = 'login.welcome_div',
+              class = 'login-text', 
+              textOutput('login.welcome_text', container = tags$h2))),
+              
             h1("HOME"),
             h3("Welcome to My LIMS!"),
             
@@ -110,7 +120,7 @@ body <- dashboardBody(
             # cilck the 'login' button then enter the app, otherwise no entry
             
             
-            uiOutput("body") #????
+            
             ),
             
             
@@ -141,6 +151,7 @@ body <- dashboardBody(
     
     
     tabItem(tabName = "myproject",
+            
             h1("PROJECT"),
             h3("Create New Project"),
             fluidRow(
@@ -389,6 +400,9 @@ body <- dashboardBody(
 
 
 ui <- dashboardPage(
+  
+  
+  
   header,
   sidebar,
   body

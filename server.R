@@ -138,7 +138,41 @@ server <- function(input, output) {
     
 #  })
   
+  # show login dialog box when initiated
+  showModal(modalDialog(
+    title = 'Login to continue',
+    footer = actionButton('login','Login'),
+    textInput('login.username','Username'),
+    passwordInput('login.password','Password'),
+    tags$div(class = 'warn-text',textOutput('login.login_msg'))
+  ))
   
+  observeEvent(input$login, {
+    username <- input$login.username
+    password <- input$login.password
+    
+    # validate login credentials ?????????????????
+    if(username %in% user[,1]) {
+      if(password == user[[username]]) {
+        # succesfully log in
+        removeModal() # remove login dialog
+        output$login.welcome_text <- renderText(glue('welcome, {username}'))
+        shinyjs::show('login.welcome_div') # show welcome message
+      } else {
+        # password incorrect, show the warning message
+        # warning message disappear in 1 sec
+        output$login.login_msg <- renderText('Incorrect Password')
+        shinyjs::show('login.login_msg')
+        shinyjs::delay(1000, hide('login.login_msg'))
+      }
+    } else {
+      # username not found, show the warning message
+      # warning message disappear in 1 sec
+      output$login.login_msg <- renderText('Username Not Found')
+      shinyjs::show('login.login_msg')
+      shinyjs::delay(1000, hide('login.login_msg'))
+    }
+  })
   
   
   
@@ -543,13 +577,15 @@ server <- function(input, output) {
   
   edit_value_d = reactiveValues(modal_closed=F)
   
+  
   observeEvent(input$edit_data, {
     edit_value_d$modal_closed <- F
     showModal(modalDialog(
       title = "Edit Dataset", 
-      
+    
       DT::renderDataTable({
         ed <- data[input$x2_rows_selected,]
+        
         DT::datatable(ed, escape = FALSE,
                       editable = list(target = "cell", disable = list(columns = c(0,1,5))), 
                       # cannot edit project id, saart date
@@ -559,7 +595,8 @@ server <- function(input, output) {
                                      LengthMenu = c(1,5,10,20,50), 
                                      pageLength = 10)
         )
-      }) ,
+      }),
+      
       
       easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
       footer = actionButton("save_d",label = "Save")
@@ -611,10 +648,10 @@ server <- function(input, output) {
     edit_value_p$modal_closed <- F
     showModal(modalDialog(
       title = "Edit Project", 
-      
-      DT::renderDataTable({
+      renderDataTable({
         ep <- proj[input$x1_rows_selected,]
-        DT::datatable(ep, escape = FALSE,
+        #print(ep)
+        datatable(ep, escape = FALSE,
                       editable = list(target = "cell", disable = list(columns = c(0,1,5))), 
                       # cannot edit project id, saart date
                       
@@ -622,25 +659,29 @@ server <- function(input, output) {
                                      scrollX = TRUE,
                                      LengthMenu = c(1,5,10,20,50), 
                                      pageLength = 10)
-                      )
+        )
+        
+        
       }) ,
-      
       easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
       footer = actionButton("save_p",label = "Save")
+      
+      
       )
     )
   })
-  
+
   observeEvent(input$save_p,{
     edit_value_p$modal_closed <- T
     removeModal()
-  })  
+  })
   
-  
+  #projVal <- reactiveVal(proj)
   observe({
     if(edit_value_p$modal_closed){
       proj <<- editData(projVal(), input$x1_row_edit, 'x1')
     }
+    projVal()
   })
   
   ## ??? pop-up window cannot save
@@ -649,7 +690,12 @@ server <- function(input, output) {
   
   
   
-  
+#  observeEvent(input$save_p, {
+#    projVal()
+#    options=list(editable = list(target = "row", disable = list(columns = c(0))))                     
+        
+#    proj <<- editData(projVal(), input$x1_row_edit, 'x1') ## double <
+#  })
   
   
   
@@ -659,7 +705,7 @@ server <- function(input, output) {
   
    
 
-### Save tables ###
+### Save tables
   # SAVE the table into a file, and then load the file 
   # save as rds???
   
@@ -668,15 +714,10 @@ server <- function(input, output) {
     write.csv(dataVal(),'df_data.csv',row.names = FALSE)
     #df_data<-read.csv('df_data.csv')
   })
-  
-  
-  
-  
   # save proj
   observeEvent(input$add_proj,{  
     write.csv(projVal(),'df_proj.csv',row.names = FALSE)     ### ERROR in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
     #df_proj<-read.csv('df_proj.csv')
-    
   })
   
  
