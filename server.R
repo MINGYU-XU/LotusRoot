@@ -66,8 +66,9 @@ if (interactive()) {
 server <- function(input, output) {
   
   # HOME page ----------------------------------------------------------------
-  # check_credentials returns a function to authenticate users
   
+  
+  # check_credentials returns a function to authenticate users
   res_auth <- secure_server(
     check_credentials = check_credentials(credentials)
   )
@@ -77,6 +78,8 @@ server <- function(input, output) {
   })
   
   
+  
+  # register page
   output$ui_register <- renderUI(fluidPage(
     br(),
     textInput(inputId = "registerName", 
@@ -89,9 +92,9 @@ server <- function(input, output) {
     selectInput(inputId = "group", "Which Group/Lab/research center you belong to?", 
                 choices = c('Bird','Hill','Wind','Ed LAB','BioSci','CHEM') ## can add more
                 ),
-    selectInput(inputId = "permissions", "Your permission :", 
-                choices = c('General_Staff','Data_Administrator','Project_Supervisor ','System_Maintenance') ## can add more
-    ),
+    #selectInput(inputId = "permissions", "Your permission :", 
+    #            choices = c('General_Staff','Data_Administrator','Project_Supervisor ','System_Maintenance') ## can add more
+    #),
     actionButton("register_ok","OK")
   )
   )                                       
@@ -119,7 +122,7 @@ server <- function(input, output) {
     userVal(u)
   })
   
-  # save user information to the table
+  # save user information to 'register.csv'
   observeEvent(input$register_ok,{
     write.csv(userVal(),'register.csv',row.names = FALSE)
   })
@@ -139,41 +142,47 @@ server <- function(input, output) {
 #  })
   
   # show login dialog box when initiated
-  showModal(modalDialog(
+  # define the ui of the login dialog box
+  # will used later in server part
+  login_dialog <- modalDialog(
     title = 'Login to continue',
-    footer = actionButton('login','Login'),
-    textInput('login.username','Username'),
-    passwordInput('login.password','Password'),
-    tags$div(class = 'warn-text',textOutput('login.login_msg'))
-  ))
-  
-  observeEvent(input$login, {
-    username <- input$login.username
-    password <- input$login.password
+    footer = actionButton('tab_login.login','Login'),
+    textInput('tab_login.username','Username'),
+    passwordInput('tab_login.password','Password'),
+    tags$div(class = 'warn-text',textOutput('tab_login.login_msg'))
+  )  
+  showModal(login_dialog)
     
-    # validate login credentials ?????????????????
-    if(username %in% user[,1]) {
-      if(password == user[[username]]) {
-        # succesfully log in
-        removeModal() # remove login dialog
-        output$login.welcome_text <- renderText(glue('welcome, {username}'))
-        shinyjs::show('login.welcome_div') # show welcome message
+    observeEvent(input$tab_login.login, {
+      username <- input$tab_login.username
+      password <- input$tab_login.password
+      row.names(user) <- user$Name
+      
+      # validate login credentials
+      if(username %in% user[,'Name']) {
+        if(password == user[username,'Password']) {
+          # succesfully log in
+          removeModal() # remove login dialog
+          output$tab_login.welcome_text <- renderText(glue('welcome, {username}'))
+          shinyjs::show('tab_login.welcome_div') # show welcome message
+        } else {
+          # password incorrect, show the warning message
+          # warning message disappear in 1 sec
+          output$tab_login.login_msg <- renderText('Incorrect Password')
+          shinyjs::show('tab_login.login_msg')
+          shinyjs::delay(1000, hide('tab_login.login_msg'))
+        }
       } else {
-        # password incorrect, show the warning message
+        # username not found, show the warning message
         # warning message disappear in 1 sec
-        output$login.login_msg <- renderText('Incorrect Password')
-        shinyjs::show('login.login_msg')
-        shinyjs::delay(1000, hide('login.login_msg'))
+        output$tab_login.login_msg <- renderText('Username Not Found. Please register.')
+        shinyjs::show('tab_login.login_msg')
+        shinyjs::delay(1000, hide('tab_login.login_msg'))
       }
-    } else {
-      # username not found, show the warning message
-      # warning message disappear in 1 sec
-      output$login.login_msg <- renderText('Username Not Found')
-      shinyjs::show('login.login_msg')
-      shinyjs::delay(1000, hide('login.login_msg'))
-    }
-  })
+    })
   
+  
+ 
   
   
   
@@ -722,8 +731,6 @@ server <- function(input, output) {
   
  
   
-  
-   
   
 }
 
