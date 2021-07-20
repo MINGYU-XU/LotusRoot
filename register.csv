@@ -1,9 +1,20 @@
-Name,Password,Email,Group.Lab.Center,Permissions
-ff,ff,ff@qq.com,Wind,Project_Supervisor 
-bb,bb,bb@gmail.com,Bird,Project_Supervisor 
-hh,hh,hh@ed.ac.uk,Wind,Data_Administrator
-ww,ww,ww@ed.ac.uk,Bird,General_Staff
-xmy,xmy,123@ed.ac.uk,Hill,System_Maintenance
-zz,zz,zz@ed.ac.uk,Bird,Data_Administrator
-ee,ee,ee@ed.ac.uk,Wind,Project_Supervisor
-kk,kk,kk@ed.ac.uk,Hill,General_Staff
+"Name","Password","Email","Group.Lab.Center","Permissions"
+"uii","uii","uii","BioSci","General_Staff"
+"hjk","hjk","hjk","BioSci","General_Staff"
+"ty","ty","ty@ed.ac.uk","Wind","General_Staff"
+"yu","yu","yu@ed.ac.uk","Wind","General_Staff"
+"dfg","dfg","dfg@ed.ac.uk","Wind","General_Staff"
+"rty","rty","rty@ed.ac.uk","CHEM","General_Staff"
+"zxc","zxc","zxc@ed.ac.uk","CHEM","General_Staff"
+"asd","asd","asd@ed.ac.uk","CHEM","General_Staff"
+"qwe","qwe","qwe@ed.ac.uk","BioSci","General_Staff"
+"uu","uu","uu@ed.ac.uk","Ed LAB","General_Staff"
+"xx","xx","xx@ed.ac.uk","Wind","General_Staff"
+"ff","ff","ff@qq.com","Wind","Project_Supervisor "
+"bb","bb","bb@gmail.com","Bird","Project_Supervisor "
+"hh","hh","hh@ed.ac.uk","Wind","Data_Administrator"
+"ww","ww","ww@ed.ac.uk","Bird","General_Staff"
+"xmy","xmy","123@ed.ac.uk","Hill","System_Maintenance"
+"zz","zz","zz@ed.ac.uk","Bird","Data_Administrator"
+"ee","ee","ee@ed.ac.uk","Wind","Project_Supervisor"
+"kk","kk","kk@ed.ac.uk","Hill","General_Staff"

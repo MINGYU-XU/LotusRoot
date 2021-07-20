@@ -83,8 +83,8 @@ server <- function(input, output) {
 ### show login/register dialog box when initiated
   
   # After logging in, you can visit other pages
+  
   # define the ui of the login dialog box
-  # will used later in server part
   login_dialog <- modalDialog(
     title = 'Welcome to My LIMS!',
     footer = actionButton('useless','  '),
@@ -97,6 +97,7 @@ server <- function(input, output) {
         tags$div(class = 'warn-text',textOutput('tab_login.login_msg'))),
     box(width = 7,
         h4('Register'),
+        useShinyFeedback(), # include shinyFeedback
         textInput('registerName','Username'),
         passwordInput('registerpw','Password'),
         textInput("email", "Email :",placeholder = "your email"),
@@ -122,7 +123,7 @@ server <- function(input, output) {
       if(password == user[username,'Password']) {
         # succesfully log in
         removeModal() # remove login dialog
-        output$tab_login.welcome_text <- renderText(glue('welcome, {username}'))
+        output$tab_login.welcome_text <- renderText(glue('Welcome, {username}!'))
         shinyjs::show('tab_login.welcome_div') # show welcome message
       } else {
         # password incorrect, show the warning message
@@ -140,49 +141,29 @@ server <- function(input, output) {
     }
   })
   
-  
-  
-    
-  # register pop-up window
-  
-#  register_dialog <- modalDialog(
-#    title = 'Register',
-#    footer = actionButton("register_ok","OK"),
-#    textInput('registerName','Username'),
-#    passwordInput('registerpw','Password'),
-#    textInput("email", "Email :",placeholder = "your email"),
-#    selectInput(inputId = "group", "Which Group/Lab/research center you belong to?", 
-#                choices = c('Bird','Hill','Wind','Ed LAB','BioSci','CHEM') ## can add more
-#    ),
-#    tags$div(class = 'warn-text',textOutput('register.register_msg'))
-#  )  
-#  output$ui_register <- showModal(register_dialog)
-  
-  
-########  
-#  output$ui_register <- renderUI(fluidPage(
-#    textInput(inputId = "registerName", label = "User Name :"),
-#    passwordInput(inputId = "registerpw", label = "Password :"),
-#    textInput(inputId = "email",  label = "Email :",  placeholder = "your email"),
-#    selectInput(inputId = "group", "Which Group/Lab/research center you belong to?", 
-#                choices = c('Bird','Hill','Wind','Ed LAB','BioSci','CHEM') ## can add more
-#                ),
-#    #selectInput(inputId = "permissions", "Your permission :", 
-#    #            choices = c('General_Staff','Data_Administrator','Project_Supervisor ','System_Maintenance') ),
-#    actionButton("register_ok","OK")
-#  )
-#  )                                       
-  
-#  shinyjs::hide("ui_register")
-#  observeEvent(input$new_user_register, {
-#    shinyjs::show("ui_register", anim = TRUE, animType = "fade")
-#  })
-  
-##############
-  
-  
+
   # new user register
-  userVal <- reactiveVal(user)
+  
+  # check unique user name
+  observeEvent(input$registerName, {
+    
+    #row.names(user) <- user$Name
+    if(input$registerName %in% user[,'Name']) {
+      ## feedback
+      showFeedbackWarning(
+        inputId = "registerName",
+        text = "The user name is already taken."
+      )
+      shinyjs::hide("register_ok")
+      
+    } else {
+      hideFeedback("registerName")
+      shinyjs::show("register_ok")
+    }
+      
+    
+  })
+  
   
   observeEvent(input$register_ok,{
     
@@ -197,7 +178,7 @@ server <- function(input, output) {
                           Group.Lab.Center = input$group,
                           #Permissions = input$permissions
                           Permissions = 'General_Staff'
-                          ),userVal())    
+    ),userVal())    
     
     userVal(u)
   })
@@ -205,7 +186,12 @@ server <- function(input, output) {
   # save user information to 'register.csv'
   observeEvent(input$register_ok,{
     write.csv(userVal(),'register.csv',row.names = FALSE)
+    
   })
+  
+  
+  
+
   
   
 

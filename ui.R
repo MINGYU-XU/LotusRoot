@@ -25,6 +25,7 @@ library(DT)
 library(readr)
 library(dplyr)
 library(tidyr)
+library(shinyFeedback)
 
 
 # ui
@@ -94,30 +95,12 @@ body <- dashboardBody(
               class = 'login-text', 
               textOutput('tab_login.welcome_text', container = tags$h2))
             ),
-            ## log in
-            #box(width = 5,
-            #h4("Log In"),
-            #textInput(inputId = "loginName", label = "User Name :"),
-            #passwordInput(inputId = "loginpw",label = "Password :"),
-            #useShinyjs(),  # Include shinyjs
-            #actionButton("login", " Log in", icon = icon(name = "sign-in-alt"), width = "200px"),
-            # cilck the 'login' button then enter the app, otherwise no entry
-            #),
+            h1(),
+            h4("If you have any problems about using this App, please turn to the FAQ page."),
+            h4("If the FAQ page does not solve your problem, please contact lims@xx.com. We are very happy to help you!"),
+
             
-            
-            
-            ## register
-            box(width = 7,
-            h4("New user? Register here!"),
-            useShinyjs(),  # Include shinyjs
-            actionButton("register", "Register", icon = icon(name = "sign-in-alt"), width = "200px"),
-            # cilck the 'register' button then the following blanks appear, otherwise hidden
-            uiOutput("ui_register")
-            ),
-            
-            
-            
-            verbatimTextOutput("auth_output")
+            #verbatimTextOutput("auth_output")
             
     ),
     
