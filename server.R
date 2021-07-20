@@ -78,46 +78,126 @@ server <- function(input, output) {
   })
   
   
+
   
-  # register page
-  output$ui_register <- renderUI(fluidPage(
-    br(),
-    textInput(inputId = "registerName", 
-              label = "User Name :"),
-    passwordInput(inputId = "registerpw", 
-                  label = "Password :"),
-    textInput(inputId = "email",
-              label = "Email :",
-              placeholder = "your email"),
-    selectInput(inputId = "group", "Which Group/Lab/research center you belong to?", 
-                choices = c('Bird','Hill','Wind','Ed LAB','BioSci','CHEM') ## can add more
-                ),
-    #selectInput(inputId = "permissions", "Your permission :", 
-    #            choices = c('General_Staff','Data_Administrator','Project_Supervisor ','System_Maintenance') ## can add more
-    #),
-    actionButton("register_ok","OK")
-  )
-  )                                       
+### show login/register dialog box when initiated
   
-  shinyjs::hide("ui_register")
-  observeEvent(input$register, {
-    shinyjs::show("ui_register", anim = TRUE, animType = "fade")
+  # After logging in, you can visit other pages
+  # define the ui of the login dialog box
+  # will used later in server part
+  login_dialog <- modalDialog(
+    title = 'Welcome to My LIMS!',
+    footer = actionButton('useless','  '),
+    size = 'l',
+    box(width = 5,
+        h4('Login'),
+        textInput('tab_login.username','Username'),
+        passwordInput('tab_login.password','Password'),
+        actionButton('tab_login.login','Login'),
+        tags$div(class = 'warn-text',textOutput('tab_login.login_msg'))),
+    box(width = 7,
+        h4('Register'),
+        textInput('registerName','Username'),
+        passwordInput('registerpw','Password'),
+        textInput("email", "Email :",placeholder = "your email"),
+        selectInput(inputId = "group", "Which Group/Lab/research center you belong to?", 
+                    choices = c('Bird','Hill','Wind','Ed LAB','BioSci','CHEM') 
+        ),
+        actionButton('register_ok','New User Register'),
+        verbatimTextOutput("successfully_registered")
+        )
+  )  
+  showModal(login_dialog)
+  
+  
+  # validate the login username and password
+  userVal <- reactiveVal(user) #######??  如何实时登录？？
+  observeEvent(input$tab_login.login, {
+    
+    username <- input$tab_login.username
+    password <- input$tab_login.password
+    row.names(user) <- user$Name
+    
+    if(username %in% user[,'Name']) {
+      if(password == user[username,'Password']) {
+        # succesfully log in
+        removeModal() # remove login dialog
+        output$tab_login.welcome_text <- renderText(glue('welcome, {username}'))
+        shinyjs::show('tab_login.welcome_div') # show welcome message
+      } else {
+        # password incorrect, show the warning message
+        # warning message disappear in 1 sec
+        output$tab_login.login_msg <- renderText('Incorrect Password')
+        shinyjs::show('tab_login.login_msg')
+        shinyjs::delay(2000, hide('tab_login.login_msg')) ##Delay disappear
+      }
+    } else {
+      # username not found, show the warning message
+      # warning message disappear in 1 sec
+      output$tab_login.login_msg <- renderText('Username Not Found. Please register.')
+      shinyjs::show('tab_login.login_msg')
+      shinyjs::delay(2000, hide('tab_login.login_msg'))  ##Delay disappear
+    }
   })
+  
+  
+  
+    
+  # register pop-up window
+  
+#  register_dialog <- modalDialog(
+#    title = 'Register',
+#    footer = actionButton("register_ok","OK"),
+#    textInput('registerName','Username'),
+#    passwordInput('registerpw','Password'),
+#    textInput("email", "Email :",placeholder = "your email"),
+#    selectInput(inputId = "group", "Which Group/Lab/research center you belong to?", 
+#                choices = c('Bird','Hill','Wind','Ed LAB','BioSci','CHEM') ## can add more
+#    ),
+#    tags$div(class = 'warn-text',textOutput('register.register_msg'))
+#  )  
+#  output$ui_register <- showModal(register_dialog)
+  
+  
+########  
+#  output$ui_register <- renderUI(fluidPage(
+#    textInput(inputId = "registerName", label = "User Name :"),
+#    passwordInput(inputId = "registerpw", label = "Password :"),
+#    textInput(inputId = "email",  label = "Email :",  placeholder = "your email"),
+#    selectInput(inputId = "group", "Which Group/Lab/research center you belong to?", 
+#                choices = c('Bird','Hill','Wind','Ed LAB','BioSci','CHEM') ## can add more
+#                ),
+#    #selectInput(inputId = "permissions", "Your permission :", 
+#    #            choices = c('General_Staff','Data_Administrator','Project_Supervisor ','System_Maintenance') ),
+#    actionButton("register_ok","OK")
+#  )
+#  )                                       
+  
+#  shinyjs::hide("ui_register")
+#  observeEvent(input$new_user_register, {
+#    shinyjs::show("ui_register", anim = TRUE, animType = "fade")
+#  })
+  
+##############
   
   
   # new user register
   userVal <- reactiveVal(user)
   
   observeEvent(input$register_ok,{
+    
     print("ok")
+    # Tips for successful registration
     output$successfully_registered <- renderPrint({
-      cat("Hi",input$registerName,"!","You have registered successfully! Please log in.")
+      cat("Hi",input$registerName,"!","Successfully registered!")
     })
     u <- rbind(data.frame(Name = input$registerName,
                           Password = input$registerpw,
                           Email = input$email,
                           Group.Lab.Center = input$group,
-                          Permissions = input$permissions),userVal())    
+                          #Permissions = input$permissions
+                          Permissions = 'General_Staff'
+                          ),userVal())    
     
     userVal(u)
   })
@@ -131,55 +211,9 @@ server <- function(input, output) {
 
   
     
-  ## After logging in, you can visit other pages ## ?????????????????????????????
-#  shinyjs::hide("body")
-#  observeEvent(input$login, {
-#    #shinyjs::show("body", anim = TRUE, animType = "fade")
-#    if(input$loginName %in% user){
-#      if(input$loginpw == user["Password"])
-#    }
-    
-#  })
   
-  # show login dialog box when initiated
-  # define the ui of the login dialog box
-  # will used later in server part
-  login_dialog <- modalDialog(
-    title = 'Login to continue',
-    footer = actionButton('tab_login.login','Login'),
-    textInput('tab_login.username','Username'),
-    passwordInput('tab_login.password','Password'),
-    tags$div(class = 'warn-text',textOutput('tab_login.login_msg'))
-  )  
-  showModal(login_dialog)
-    
-    observeEvent(input$tab_login.login, {
-      username <- input$tab_login.username
-      password <- input$tab_login.password
-      row.names(user) <- user$Name
-      
-      # validate login credentials
-      if(username %in% user[,'Name']) {
-        if(password == user[username,'Password']) {
-          # succesfully log in
-          removeModal() # remove login dialog
-          output$tab_login.welcome_text <- renderText(glue('welcome, {username}'))
-          shinyjs::show('tab_login.welcome_div') # show welcome message
-        } else {
-          # password incorrect, show the warning message
-          # warning message disappear in 1 sec
-          output$tab_login.login_msg <- renderText('Incorrect Password')
-          shinyjs::show('tab_login.login_msg')
-          shinyjs::delay(1000, hide('tab_login.login_msg'))
-        }
-      } else {
-        # username not found, show the warning message
-        # warning message disappear in 1 sec
-        output$tab_login.login_msg <- renderText('Username Not Found. Please register.')
-        shinyjs::show('tab_login.login_msg')
-        shinyjs::delay(1000, hide('tab_login.login_msg'))
-      }
-    })
+
+  
   
   
  

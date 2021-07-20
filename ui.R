@@ -84,14 +84,8 @@ body <- dashboardBody(
   
   # ui- Home- Log in page  
   tabItems(
-    ## 没用 selected = "home",
-    #useShinyjs(), # initiate javascript
     
-  
-  
     tabItem(tabName = "home",
-            
-              
             h1("HOME"),
             
             # hide the welcome message at the first place
@@ -100,19 +94,12 @@ body <- dashboardBody(
               class = 'login-text', 
               textOutput('tab_login.welcome_text', container = tags$h2))
             ),
-            
-            
-            
             ## log in
             #box(width = 5,
-            
             #h4("Log In"),
             #textInput(inputId = "loginName", label = "User Name :"),
             #passwordInput(inputId = "loginpw",label = "Password :"),
-            #br(),
-            
             #useShinyjs(),  # Include shinyjs
-            
             #actionButton("login", " Log in", icon = icon(name = "sign-in-alt"), width = "200px"),
             # cilck the 'login' button then enter the app, otherwise no entry
             #),
@@ -128,7 +115,7 @@ body <- dashboardBody(
             uiOutput("ui_register")
             ),
             
-            verbatimTextOutput("successfully_registered"),
+            
             
             verbatimTextOutput("auth_output")
             
