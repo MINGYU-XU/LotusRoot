@@ -16,10 +16,6 @@ print_rows_cols = function(id) {
 
 
 
-
-
-
-
 ## Read files---------------------------------------------------------------
 
 #read test files
@@ -33,21 +29,13 @@ datas <- read.csv('df_data.csv')
 
 #####Error in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
 
-proj <- read.csv('df_proj.csv')#!!!EDIT
-
-#dataVal <- datas
-#projVal <- proj
-
-
+proj <- read.csv('df_proj.csv')
 
 # register (user information table)
 user <- read.csv('register.csv')
 
 
-
-
-
-## secure credentials info ## 
+## secure credentials info ----------------------------------
 if (interactive()) {
   
   # define some credentials
@@ -59,26 +47,20 @@ if (interactive()) {
 
 
 
-
-
-
-
+#---------------------------------------------------------------------
 server <- function(input, output) {
   
-  # HOME page ----------------------------------------------------------------
+  # HOME page -------------
   
   
   # check_credentials returns a function to authenticate users
   res_auth <- secure_server(
     check_credentials = check_credentials(credentials)
   )
-  
   output$auth_output <- renderPrint({
     reactiveValuesToList(res_auth)
   })
   
-  
-
   
 ### show login/register dialog box when initiated
   
@@ -91,13 +73,13 @@ server <- function(input, output) {
     size = 'l',
     box(width = 5,
         h4('Login'),
-        textInput('tab_login.username','Username'),
-        passwordInput('tab_login.password','Password'),
+        textInput('tab_login.username','Username:zz'),
+        passwordInput('tab_login.password','Password:zz'),
         actionButton('tab_login.login','Login'),
         tags$div(class = 'warn-text',textOutput('tab_login.login_msg'))),
     box(width = 7,
         h4('Register'),
-        useShinyFeedback(), # include shinyFeedback
+        useShinyFeedback(), 
         textInput('registerName','Username'),
         passwordInput('registerpw','Password'),
         textInput("email", "Email :",placeholder = "your email"),
@@ -112,7 +94,7 @@ server <- function(input, output) {
   
   
   # validate the login username and password
-  userVal <- reactiveVal(user) #######??  如何实时登录？？
+  userVal <- reactiveVal(user) #######??real time login?
   observeEvent(input$tab_login.login, {
     
     username <- input$tab_login.username
@@ -123,7 +105,10 @@ server <- function(input, output) {
       if(password == user[username,'Password']) {
         # succesfully log in
         removeModal() # remove login dialog
-        output$tab_login.welcome_text <- renderText(glue('Welcome, {username}!'))
+        output$tab_login.welcome_text <- renderText(
+          paste0('Welcome,', ' ',username,'!')
+          )
+          
         shinyjs::show('tab_login.welcome_div') # show welcome message
       } else {
         # password incorrect, show the warning message
@@ -147,26 +132,19 @@ server <- function(input, output) {
   # check unique user name
   observeEvent(input$registerName, {
     
-    #row.names(user) <- user$Name
     if(input$registerName %in% user[,'Name']) {
-      ## feedback
-      showFeedbackWarning(
+      showFeedbackDanger(
         inputId = "registerName",
         text = "The user name is already taken."
       )
-      shinyjs::hide("register_ok")
-      
+      shinyjs::hide("register_ok") ##???
     } else {
       hideFeedback("registerName")
-      shinyjs::show("register_ok")
+      shinyjs::show("register_ok") ##??
     }
-      
-    
   })
   
-  
   observeEvent(input$register_ok,{
-    
     print("ok")
     # Tips for successful registration
     output$successfully_registered <- renderPrint({
@@ -186,38 +164,83 @@ server <- function(input, output) {
   # save user information to 'register.csv'
   observeEvent(input$register_ok,{
     write.csv(userVal(),'register.csv',row.names = FALSE)
-    
   })
   
   
   
-
   
-  
-
-  
+### User permissions --------------------------------------
+  observeEvent(input$tab_login.login,{
+    #print("login---get permissions")
+    row.names(user) <- user$Name
+    pm <- user[input$tab_login.username,'Permissions']
+    output$tab_login.permissions_text <- renderText(paste0('Your permissions: ',pm))
+    print(pm)    #'General_Staff','Data_Administrator','Project_Supervisor ','System_Maintenance'
+    if(pm == 'System_Maintenance'){
+      print("can do all things")
+    } else if(pm == 'General_Staff'){  ###???????
+      shinyjs::hide("add_proj")
+      shinyjs::hide("edit_proj")
+      shinyjs::hide("delete_proj")
+      shinyjs::hide("add_data")
+      shinyjs::hide("edit_data")
+      shinyjs::hide("delete_data")
     
+    } else if(pm == 'Project_Supervisor'){
+      shinyjs::hide("add_data")
+      shinyjs::hide("edit_data")
+      shinyjs::hide("delete_data")
+      
+    } else if(pm == 'Data_Administrator'){
+      shinyjs::hide("add_proj")
+      shinyjs::hide("edit_proj")
+      shinyjs::hide("delete_proj")
+    } 
+    
+  })
   
 
-  
-  
-  
- 
-  
-  
-  
- ###-------------------------------------------------------------------------- 
-#output$body <- renderUI(fluidPage({
+#---------------------------------------------------------------------
+
   
   options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   
-### Create new proj/Datarow ###
+### ADD new proj/Datarow -----------------------------------
   
+  # check unique projID
+  observeEvent(input$projID, {
+    proj <- projVal() ###
+    if(input$projID %in% proj[,'Project.ID']) {
+      ## feedback
+      showFeedbackDanger(
+        inputId = "projID",
+        text = "The project ID is already taken."
+      )
+      shinyjs::hide("add_proj")
+    } else {
+      hideFeedback("projID")
+      shinyjs::show("add_proj")
+    }
+  })
+  # check unique proj name
+  observeEvent(input$projName, {
+    proj <- projVal()
+    if(input$projName %in% proj[,'Project.Name']) {
+      ## feedback
+      showFeedbackDanger(
+        inputId = "projName",
+        text = "The project name is already taken."
+      )
+      hide("add_proj") #???
+    } else {
+      hideFeedback("projName")
+      shinyjs::show("add_proj") #???
+      
+    }
+  })
   # add proj
   projVal <- reactiveVal(proj)
-  
   observeEvent(input$add_proj,{
-    
     p <- rbind(data.frame(Project.ID = input$projID,  #paste0("P",nrow(proj)+1),
                           Project.Name = input$projName, 
                           Parent = input$projParent,
@@ -238,12 +261,42 @@ server <- function(input, output) {
     projVal(p)
   })
   
-
+  
+  
+  
+  # check unique data ID
+  observeEvent(input$dataID, {
+    datas <- dataVal() ###
+    if(input$dataID %in% datas[,'Data.ID']) {
+      ## feedback
+      showFeedbackDanger(
+        inputId = "dataID",
+        text = "The data ID is already taken."
+      )
+      shinyjs::hide("add_data") #???
+    } else {
+      hideFeedback("dataID")
+      shinyjs::show("add_data") #???
+    }
+  })
+  # check unique sampleName
+  observeEvent(input$sampleName, {
+    datas <- dataVal() ###
+    if(input$sampleName %in% datas[,'Sample.Name']) {
+      ## feedback
+      showFeedbackDanger(
+        inputId = "sampleName",
+        text = "The sample name is already taken."
+      )
+      shinyjs::hide("add_data") #???
+    } else {
+      hideFeedback("sampleName")
+      shinyjs::show("add_data") #???
+    }
+  })
   # add data
   dataVal <- reactiveVal(datas)
-  
   observeEvent(input$add_data,{
-    
     t <- rbind(data.frame(Data.ID = input$dataID, 
                           Project.ID = input$dataprojID,
                           Sample.Name = input$sampleName,
@@ -261,12 +314,263 @@ server <- function(input, output) {
     dataVal(t)
   })
   
+ 
+  ### DELETE data/proj row -----------------------------------------------------------------
   
+  # delete data row --------
   
+  ## These values allow the actions made in the modal to be delayed until the modal is closed
+  values = reactiveValues(#to_print = "",   
+    modal_closed=F)  
+  ## Open the modal when delete button clicked
+  observeEvent(input$delete_data, {
+    values$modal_closed <- F
+    showModal(modalDialog(h4('Are you sure you want to delete this data?'),
+                          h5('If you confirm the deletion, click the Delete button below.'),
+                          h5('If you do not want to delete it, you can click outside the dialog box to cancel.'), 
+                          title = "Delete Dataset", 
+                          easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+                          footer = actionButton("delete_d",label = "Delete"))
+    )
+  })
+  # This event is triggered by the actionButton inside the modalDialog
+  # It closes the modal, and by setting values$modal_closed <- T
+  observeEvent(input$delete_d,{
+    values$modal_closed <- T
+    removeModal()
+  })  
+  
+  # only updated once the modal is closed
+  observe({
+    if(values$modal_closed){
+      # values$to_print <- paste(input$checkboxes)
+      observeEvent(input$delete_d, {
+        d = dataVal()
+        #print(nrow(d))
+        if (!is.null(input$x2_rows_selected)) {
+          d <- d[-as.numeric(input$x2_rows_selected),]
+        }
+        dataVal(d)
+        write.csv(dataVal(),'df_data.csv',row.names = FALSE)
+        
+      })
+    }
+    
+  })
   
 
+  # delete proj row -------------
+  values_p = reactiveValues(modal_closed=F)
+  observeEvent(input$delete_proj, {
+    values_p$modal_closed <- F
+    showModal(modalDialog("Are you sure you want to delete this project?
+                          If you confirm the deletion, click the Delete button below.
+                          If you don't want to delete it, you can click outside the dialog box to cancel.", 
+                          title = "Delete Project", 
+                          easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+                          footer = actionButton("delete_p",label = "Delete"))
+    )
+  })
+  observeEvent(input$delete_p,{
+    values_p$modal_closed <- T
+    removeModal()
+  })  
+  observe({
+    if(values_p$modal_closed){
+      observeEvent(input$delete_p, {
+        r = projVal()
+        #print(nrow(r))
+        if (!is.null(input$x1_rows_selected)) {
+          r <- r[-as.numeric(input$x1_rows_selected),]
+        }
+        projVal(r)
+        write.csv(projVal(),'df_proj.csv',row.names = FALSE)
+        
+      })
+    }
+    
+  })
+
   
-### Associating two tables ###
+  
+  
+# EDIT row ---------------------------------------------------------------------
+  
+  # data row
+  # select a row, press edit and 
+  # a popup window comes up with the data for that row that can be edited and saved.
+  
+  #observeEvent(input$edit_data, {
+  ### Error in split.default: first argument must be a vector ????????????????????????????     
+  #  dataVal()
+  #  options=list(
+  #    editable = list(target = "row", disable = list(columns = c(0)))
+  #  )                     
+  
+  #  datas <<- editData(dataVal(), input$x2_row_edit, 'x2') ## double <
+  #})
+  
+  
+  edit_value_d = reactiveValues(modal_closed=F)
+  
+  
+  observeEvent(input$edit_data, {
+    edit_value_d$modal_closed <- F
+    showModal(modalDialog(
+      title = "Edit Dataset", 
+      
+      DT::renderDataTable({
+        ed <- data[input$x2_rows_selected,]
+        
+        DT::datatable(ed, escape = FALSE,
+                      editable = list(target = "cell", disable = list(columns = c(0,1,5))), 
+                      # cannot edit project id, saart date
+                      
+                      options = list(SortClasses = TRUE,
+                                     scrollX = TRUE,
+                                     LengthMenu = c(1,5,10,20,50), 
+                                     pageLength = 10)
+        )
+      }),
+      
+      
+      easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+      footer = actionButton("save_d",label = "Save")
+    )
+    )
+  })
+  
+  observeEvent(input$save_d,{
+    edit_value_d$modal_closed <- T
+    removeModal()
+  })  
+  
+  
+  observe({
+    if(edit_value_d$modal_closed){
+      data <<- editData(dataVal(), input$x2_row_edit, 'x2')
+    }
+  })  
+  
+  
+  
+  
+  
+  #  observeEvent(input$edit_proj, {
+  #    ### Error in split.default: first argument must be a vector ????????????????????????????     
+  #    projVal()
+  #    options=list(
+  #      editable = list(target = "row", disable = list(columns = c(0)))
+  #    )                     
+  #    
+  #    proj <<- editData(projVal(), input$x1_row_edit, 'x1') ## double <
+  #  })
+  
+  
+  
+  
+  
+  
+  # edit proj row
+  
+  #function：让用户选择一行，点击“编辑”按钮，然后在另一个框中编辑并保存更改。
+  # select one proj --> click 'edit' --> pop-up window --> edit and save
+  
+  # actionButton: edit_proj
+  
+  edit_value_p = reactiveValues(modal_closed=F)
+  
+  observeEvent(input$edit_proj, {
+    edit_value_p$modal_closed <- F
+    showModal(modalDialog(
+      title = "Edit Project", 
+      renderDataTable({
+        ep <- proj[input$x1_rows_selected,]
+        #print(ep)
+        datatable(ep, escape = FALSE,
+                  editable = list(target = "cell", disable = list(columns = c(0,1,5))), 
+                  # cannot edit project id, saart date
+                  
+                  options = list(SortClasses = TRUE,
+                                 scrollX = TRUE,
+                                 LengthMenu = c(1,5,10,20,50), 
+                                 pageLength = 10)
+        )
+        
+        
+      }) ,
+      easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+      footer = actionButton("save_p",label = "Save")
+      
+      
+    )
+    )
+  })
+  
+  observeEvent(input$save_p,{
+    edit_value_p$modal_closed <- T
+    removeModal()
+  })
+  
+  #projVal <- reactiveVal(proj)
+  observe({
+    if(edit_value_p$modal_closed){
+      proj <<- editData(projVal(), input$x1_row_edit, 'x1')
+    }
+    projVal()
+  })
+  
+  ## ??? pop-up window cannot save
+  ## Warning: Error in split.default: first argument must be a vector 
+  
+  
+  
+  
+  #  observeEvent(input$save_p, {
+  #    projVal()
+  #    options=list(editable = list(target = "row", disable = list(columns = c(0))))                     
+  
+  #    proj <<- editData(projVal(), input$x1_row_edit, 'x1') ## double <
+  #  })
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  ### Save tables --------------------------------------------------------------
+  # SAVE the table into a file, and then load the file 
+  # save as rds???
+  
+  # save data
+  observeEvent(input$add_data,{
+    write.csv(dataVal(),'df_data.csv',row.names = FALSE)
+    #df_data<-read.csv('df_data.csv')
+  })
+  # save proj
+  observeEvent(input$add_proj,{  
+    write.csv(projVal(),'df_proj.csv',row.names = FALSE)     ### ERROR in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
+    #df_proj<-read.csv('df_proj.csv')
+  })
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+   
+### Associating two tables ---------------------------------------
   # 通过project id关联
   
   # proj -> data 
@@ -469,287 +773,7 @@ server <- function(input, output) {
 
   
   
-### delete data/proj row 
-  
-  # delete data
-  ## These values allow the actions made in the modal to be delayed until the modal is closed
-  values = reactiveValues(#to_print = "",   ## This is the text that will be displayed
-                          modal_closed=F)  ## This prevents the values$to_print output from 
-  
-  ## Open the modal when button clicked
-  observeEvent(input$delete_data, {
-    values$modal_closed <- F
-    showModal(modalDialog("Are you sure you want to delete this data?
-                          If you confirm the deletion, click the Delete button below.
-                          If you don't want to delete it, you can click outside the dialog box to cancel.", 
-                          title = "Delete Dataset", 
-                          easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
-                          footer = actionButton("delete_d",label = "Delete"))
-    )
-  })
 
-  ## This event is triggered by the actionButton inside the modalDialog
-  #  It closes the modal, and by setting values$modal_closed <- T
-  #  it triggers values$to_print to update.
-  observeEvent(input$delete_d,{
-    values$modal_closed <- T
-    removeModal()
-  })  
-  
-  ## values$to_print is only updated once the modal is closed.
-  observe({
-    if(values$modal_closed){
-      #values$to_print <- paste(input$checkboxes)
-      observeEvent(input$delete_d, {
-        d = dataVal()
-        print(nrow(d))
-        if (!is.null(input$x2_rows_selected)) {
-          d <- d[-as.numeric(input$x2_rows_selected),]
-        }
-        dataVal(d)
-        write.csv(dataVal(),'df_data.csv',row.names = FALSE)
-      })
-      
-    }
-  })
-
-#  observeEvent(input$Delete, {
-#    t = dataVal()
-#    print(nrow(t))
-#    if (!is.null(input$x2_rows_selected)) {
-#      t <- t[-as.numeric(input$x2_rows_selected),]
-#    }
-#    dataVal(t)
-#  })
-  
-  
-  
-  
-  # delete proj
-  
-  values_p = reactiveValues(#to_print = "",   ## This is the text that will be displayed
-                            modal_closed=F)
-  
-  observeEvent(input$delete_proj, {
-    values_p$modal_closed <- F
-    showModal(modalDialog("Are you sure you want to delete this project?
-                          If you confirm the deletion, click the Delete button below.
-                          If you don't want to delete it, you can click outside the dialog box to cancel.", 
-                          title = "Delete Project", 
-                          easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
-                          footer = actionButton("delete_p",label = "Delete"))
-    )
-  })
-  
-  observeEvent(input$delete_p,{
-    values_p$modal_closed <- T
-    removeModal()
-  })  
-  
-  ## values$to_print is only updated once the modal is closed.
-  observe({
-    if(values_p$modal_closed){
-      #values$to_print <- paste(input$checkboxes)
-      observeEvent(input$delete_p, {
-        r = projVal()
-        print(nrow(r))
-        if (!is.null(input$x1_rows_selected)) {
-          r <- r[-as.numeric(input$x1_rows_selected),]
-        }
-        projVal(r)
-        write.csv(projVal(),'df_proj.csv',row.names = FALSE)
-      })
-    }
-    })
-      
-#  observeEvent(input$delete_proj, {
-#    r = projVal()
-#    print(nrow(r))
-#    if (!is.null(input$x1_rows_selected)) {
-#      r <- r[-as.numeric(input$x1_rows_selected),]
-#    }
-#    projVal(r)
-#  })
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-### edit row  ????????????????
-  
-  # data row
-  # select a row, press edit and 
-  # a popup window comes up with the data for that row that can be edited and saved.
-  
-  #observeEvent(input$edit_data, {
-    ### Error in split.default: first argument must be a vector ????????????????????????????     
-  #  dataVal()
-  #  options=list(
-  #    editable = list(target = "row", disable = list(columns = c(0)))
-  #  )                     
-    
-  #  datas <<- editData(dataVal(), input$x2_row_edit, 'x2') ## double <
-  #})
-  
-  
-  edit_value_d = reactiveValues(modal_closed=F)
-  
-  
-  observeEvent(input$edit_data, {
-    edit_value_d$modal_closed <- F
-    showModal(modalDialog(
-      title = "Edit Dataset", 
-    
-      DT::renderDataTable({
-        ed <- data[input$x2_rows_selected,]
-        
-        DT::datatable(ed, escape = FALSE,
-                      editable = list(target = "cell", disable = list(columns = c(0,1,5))), 
-                      # cannot edit project id, saart date
-                      
-                      options = list(SortClasses = TRUE,
-                                     scrollX = TRUE,
-                                     LengthMenu = c(1,5,10,20,50), 
-                                     pageLength = 10)
-        )
-      }),
-      
-      
-      easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
-      footer = actionButton("save_d",label = "Save")
-    )
-    )
-  })
-  
-  observeEvent(input$save_d,{
-    edit_value_d$modal_closed <- T
-    removeModal()
-  })  
-  
-  
-  observe({
-    if(edit_value_d$modal_closed){
-      data <<- editData(dataVal(), input$x2_row_edit, 'x2')
-    }
-  })  
-
-  
-  
-    
-  
-#  observeEvent(input$edit_proj, {
-#    ### Error in split.default: first argument must be a vector ????????????????????????????     
-#    projVal()
-#    options=list(
-#      editable = list(target = "row", disable = list(columns = c(0)))
-#    )                     
-#    
-#    proj <<- editData(projVal(), input$x1_row_edit, 'x1') ## double <
-#  })
-  
-  
-  
-  
-  
-  
-  # edit proj row
-  
-  #function：让用户选择一行，点击“编辑”按钮，然后在另一个框中编辑并保存更改。
-  # select one proj --> click 'edit' --> pop-up window --> edit and save
-  
-  # actionButton: edit_proj
-  
-  edit_value_p = reactiveValues(modal_closed=F)
-  
-  observeEvent(input$edit_proj, {
-    edit_value_p$modal_closed <- F
-    showModal(modalDialog(
-      title = "Edit Project", 
-      renderDataTable({
-        ep <- proj[input$x1_rows_selected,]
-        #print(ep)
-        datatable(ep, escape = FALSE,
-                      editable = list(target = "cell", disable = list(columns = c(0,1,5))), 
-                      # cannot edit project id, saart date
-                      
-                      options = list(SortClasses = TRUE,
-                                     scrollX = TRUE,
-                                     LengthMenu = c(1,5,10,20,50), 
-                                     pageLength = 10)
-        )
-        
-        
-      }) ,
-      easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
-      footer = actionButton("save_p",label = "Save")
-      
-      
-      )
-    )
-  })
-
-  observeEvent(input$save_p,{
-    edit_value_p$modal_closed <- T
-    removeModal()
-  })
-  
-  #projVal <- reactiveVal(proj)
-  observe({
-    if(edit_value_p$modal_closed){
-      proj <<- editData(projVal(), input$x1_row_edit, 'x1')
-    }
-    projVal()
-  })
-  
-  ## ??? pop-up window cannot save
-  ## Warning: Error in split.default: first argument must be a vector 
-  
-  
-  
-  
-#  observeEvent(input$save_p, {
-#    projVal()
-#    options=list(editable = list(target = "row", disable = list(columns = c(0))))                     
-        
-#    proj <<- editData(projVal(), input$x1_row_edit, 'x1') ## double <
-#  })
-  
-  
-  
-  
-  
-  
-  
-   
-
-### Save tables
-  # SAVE the table into a file, and then load the file 
-  # save as rds???
-  
-  # save data
-  observeEvent(input$add_data,{
-    write.csv(dataVal(),'df_data.csv',row.names = FALSE)
-    #df_data<-read.csv('df_data.csv')
-  })
-  # save proj
-  observeEvent(input$add_proj,{  
-    write.csv(projVal(),'df_proj.csv',row.names = FALSE)     ### ERROR in as.data.frame.default: cannot coerce class ‘c("reactiveVal", "reactive", "function")’ to a data.frame
-    #df_proj<-read.csv('df_proj.csv')
-  })
-  
- 
   
   
 }
