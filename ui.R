@@ -173,7 +173,9 @@ body <- dashboardBody(
                   )
               ),
             h3("Related Datasets"),
-            DTOutput(outputId='related_datasets')
+            DTOutput(outputId='related_datasets'),
+            h3("Parent project and sub-projects"),
+            DTOutput(outputId='parent_sub_proj')
             
     ),
 

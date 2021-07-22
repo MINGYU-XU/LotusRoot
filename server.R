@@ -54,12 +54,12 @@ server <- function(input, output) {
   
   
   # check_credentials returns a function to authenticate users
-  res_auth <- secure_server(
-    check_credentials = check_credentials(credentials)
-  )
-  output$auth_output <- renderPrint({
-    reactiveValuesToList(res_auth)
-  })
+  #res_auth <- secure_server(
+  #  check_credentials = check_credentials(credentials)
+  #)
+  #output$auth_output <- renderPrint({
+  #  reactiveValuesToList(res_auth)
+  #})
   
   
 ### show login/register dialog box when initiated
@@ -401,7 +401,7 @@ server <- function(input, output) {
   # a popup window comes up with the data for that row that can be edited and saved.
   
   #observeEvent(input$edit_data, {
-  ### Error in split.default: first argument must be a vector ????????????????????????????     
+  ### Error in split.default: first argument must be a vector ???????     
   #  dataVal()
   #  options=list(
   #    editable = list(target = "row", disable = list(columns = c(0)))
@@ -560,136 +560,52 @@ server <- function(input, output) {
   
   
   
+### Associating two tables ---------------------------------------------------------
+  # 通过project id关联,预期功能：选中一个proj后，显示该项目中包含的datasets
   
-  
-  
-  
-  
-  
-  
-  
-  
-   
-### Associating two tables ---------------------------------------
-  # 通过project id关联
-  
-  # proj -> data 
-  # 预期功能：选中一个proj后，显示该项目中包含的datasets
-  # Expected function: selecte a proj then the Datasets included in it are displayed  
-  
-  ## ???????????????????????????????????????????????????????????????????
+  # proj -> data/sub-projs -------------------------------
   ## if no row(in x1) selected, No table
   ## if select one parent proj, display its sub proj 
-  ## if select one sub proj, display the datasets included in that proj 如果选择了某含，则显示该proj的datasets
-  ## return：'pids' is the project ID
-  
+  ## if select one sub proj, display the datasets included in that proj
+  ## return：'pids' is the information of the whole line
   pids<-reactive({
-    if(length(input$x1_rows_selected)==0){
-      #pids<-projVal(input$x1_rows_all[1],)
-      
-      return(NULL)  ## No output
-    }
-    else{
-      pids <- projVal()[input$x1_rows_selected,"Project.ID"]
-      
-    }
-    print(pids)
+    if(length(input$x1_rows_selected)==0) {return(NULL)}   ## No output
+    else { pids <- projVal()[input$x1_rows_selected,"Project.ID"] }
     return(pids)
   })
   
-  #???????????????? different selection, different output
   output$related_datasets <- DT::renderDT({
     pid<-pids()
-    
-    if(length(pid)==0 ){
-      return(NULL)
-      
-    } else if(!is.null(pid[input$x1_rows_selected,"Parent"]) & (pid[input$x1_rows_selected,"Parent"] %in% proj[,"Parent"]))
-      {
-      subproj <- projVal() %>% filter(Parent %in% pid) 
-      ## Filter the table
-      
-      dt <- DT::datatable(subproj,
-                          selection="single",
-                          filter="bottom",
-                          options = list(SortClasses = TRUE,
-                                         scrollX = TRUE,
-                                         LengthMenu = c(1,5,10,20,50), 
-                                         pageLength = 10)
-      )
-      
-      dt
-      
-    }else{
-      ds <- dataVal() %>% filter(Project.ID  %in% pid) 
-      ## Filter the table
-      
-      dt <- DT::datatable(ds,
-                          selection="single",
-                          filter="bottom",
-                          options = list(SortClasses = TRUE,
-                                         scrollX = TRUE,
-                                         LengthMenu = c(1,5,10,20,50), 
-                                         pageLength = 10)
-      )
-      
-      dt <- dt %>% formatStyle('pval',target = 'row')
-      
-      dt
-    }
-    
+    ds <- dataVal() %>% filter(Project.ID  %in% pid)   ## Filter the table
+    rd <- DT::datatable( ds, selection="single", options = list(SortClasses = TRUE, scrollX = TRUE))
+    rd
+  })
+
+  output$parent_sub_proj <- DT::renderDT({
+    pid<-pids()
+    ds <- projVal() %>% filter(Parent  %in% pid)   ## Filter the table
+    ds <- rbind(projVal()[input$x1_rows_selected,],ds)
+    ds <- ds[!duplicated(ds),] ## Delete duplicate rows
+    ps <- DT::datatable( ds, selection="single", options = list(SortClasses = TRUE, scrollX = TRUE))
+    ps
   })
   
   
-  
-  
-  # data -> proj  预期功能：选中一个data后，显示包含该data的所有proj
-  
+  # data -> proj  ----------------------------
   ## if no row(in x1) selected, No table
-  ## if select one row, display the projs include the data 如果选择了某含，则显示该proj的datasets
+  ## if select one row, display the projs include the data
   ## return：'pids' is the project ID
-  
   pids2<-reactive({
-    if(length(input$x2_rows_selected)==0){
-      #pids<-projVal(input$x1_rows_all[1],)
-      
-      return(NULL)  ## No output
-    }
-    else{
-      pids2 <- dataVal()[input$x2_rows_selected,"Project.ID"]
-      
-    }
-    print(pids2)
+    if(length(input$x2_rows_selected)==0) {return(NULL)}   ## No output
+    else { pids2 <- dataVal()[input$x2_rows_selected,"Project.ID"] }
     return(pids2)
   })
   
-  
   output$related_proj <- DT::renderDT({
     pid2<-pids2()
-    
-    if(length(pid2)==0){
-      return(NULL)
-    }
-    
-    
-    ds2<-projVal() %>% filter(Project.ID  %in% pid2) 
-    ## Filter the table
-    
-    dt2 <- DT::datatable(ds2,
-                        selection="single",
-                        filter="bottom",
-                        options = list(SortClasses = TRUE,
-                                       scrollX = TRUE,
-                                       LengthMenu = c(1,5,10,20,50), 
-                                       pageLength = 10
-                        )
-    )
-    
-    
-    
-    dt2 <- dt2 %>% formatStyle('pval',target = 'row')
-    
-    dt2
+    ds2 <- projVal() %>% filter(Project.ID  %in% pid2)   ## Filter the table
+    rp2 <- DT::datatable( ds2, selection="single", options = list(SortClasses = TRUE, scrollX = TRUE))
+    rp2
   })
   
   
@@ -698,7 +614,7 @@ server <- function(input, output) {
   
   
   
-### output tables ###
+### output tables --------------------------------------------------------------
   
   # output proj table
   
@@ -770,9 +686,6 @@ server <- function(input, output) {
 
   
 
-
-  
-  
 
   
   
