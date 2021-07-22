@@ -9,48 +9,42 @@ library(glue)
 
 user.access <- read.csv('register.csv')
 
+tab_login <- list()
 
-ui <- navbarPage(
-  title = 'Login',
-  selected = 'Login',
-  useShinyjs(), # initiate javascript
-  tabPanel(
-    title = 'Login', # name of the tab
-    # hide the welcome message at the first place
-    shinyjs::hidden(tags$div(
-      id = 'tab_login.welcome_div',
-      class = 'login-text', 
-      textOutput('tab_login.welcome_text', container = tags$h2))
-    )
+tab_login$ui <- tabPanel(
+  title = 'Login', # name of the tab
+  # hide the welcome message at the first place
+  shinyjs::hidden(tags$div(
+    id = 'tab_login.welcome_div',
+    class = 'login-text', 
+    textOutput('tab_login.welcome_text', container = tags$h2))
   )
 )
 
-
-
-
-
-############server
-
+# define the ui of the login dialog box
+# will used later in server part
+login_dialog <- modalDialog(
+  title = 'Login to continue',
+  footer = actionButton('tab_login.login','Login'),
+  textInput('tab_login.username','Username'),
+  passwordInput('tab_login.password','Password'),
+  tags$div(class = 'warn-text',textOutput('tab_login.login_msg'))
+)
 
 # define the backend of login tab
-server <- function(input, output) {
+tab_login$server <- function(input, output) {
   
   # show login dialog box when initiated
-  showModal(modalDialog(
-    title = 'Login to continue',
-    footer = actionButton('tab_login.login','Login'),
-    textInput('tab_login.username','Username'),
-    passwordInput('tab_login.password','Password'),
-    tags$div(class = 'warn-text',textOutput('tab_login.login_msg'))
-  ))
+  showModal(login_dialog)
   
   observeEvent(input$tab_login.login, {
     username <- input$tab_login.username
     password <- input$tab_login.password
+    row.names(user.access) <- user.access$Name
     
-    # validate login credentials ?????????????????
-    if(username %in% names(user.access)) {
-      if(password == user.access[[username]]) {
+    # validate login credentials
+    if(username %in% user.access[,'Name']) {
+      if(password == user.access[username,'Password']) {
         # succesfully log in
         removeModal() # remove login dialog
         output$tab_login.welcome_text <- renderText(glue('welcome, {username}'))
@@ -75,5 +69,17 @@ server <- function(input, output) {
 
 
 
+
+
+#source('tab.R') # load tab_login ui/server
+
+ui <- navbarPage(
+  title = 'Login',
+  selected = 'Login',
+  useShinyjs(), # initiate javascript
+  tab_login$ui # append defined ui
+)
+
+server <- tab_login$server # assign defined server
 
 shinyApp(ui = ui, server = server)
