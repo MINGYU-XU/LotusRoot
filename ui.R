@@ -262,5 +262,8 @@ body <- dashboardBody(
 ui <- dashboardPage(
   header,
   sidebar,
-  body)
+  body,
+  
+  useShinyjs()
+)
 #ui <- secure_app(ui, choose_language = TRUE)

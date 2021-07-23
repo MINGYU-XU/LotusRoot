@@ -94,15 +94,17 @@ server <- function(input, output) {
   
   
   # validate the login username and password
-  userVal <- reactiveVal(user) #######??real time login?
+  userVal <- reactiveVal(user)
+  
   observeEvent(input$tab_login.login, {
     
     username <- input$tab_login.username
     password <- input$tab_login.password
-    row.names(user) <- user$Name
+    #row.names(user) <- user$Name
     
-    if(username %in% user[,'Name']) {
-      if(password == user[username,'Password']) {
+    if(username %in% userVal()[,'Name']) {
+      #if(password == user[username,'Password']) {
+      if(password == userVal() %>% filter(Name==username) %>% pull(Password)){
         # succesfully log in
         removeModal() # remove login dialog
         output$tab_login.welcome_text <- renderText(
@@ -137,15 +139,14 @@ server <- function(input, output) {
         inputId = "registerName",
         text = "The user name is already taken."
       )
-      shinyjs::hide("register_ok") ##???
+      shinyjs::hide("register_ok") 
     } else {
       hideFeedback("registerName")
-      shinyjs::show("register_ok") ##??
+      shinyjs::show("register_ok") 
     }
   })
   
   observeEvent(input$register_ok,{
-    print("ok")
     # Tips for successful registration
     output$successfully_registered <- renderPrint({
       cat("Hi",input$registerName,"!","Successfully registered!")
@@ -171,14 +172,14 @@ server <- function(input, output) {
   
 ### User permissions --------------------------------------
   observeEvent(input$tab_login.login,{
-    #print("login---get permissions")
-    row.names(user) <- user$Name
-    pm <- user[input$tab_login.username,'Permissions']
+    #row.names(user) <- user$Name
+    #pm <- userVal()[input$tab_login.username,'Permissions']
+    pm <- userVal() %>% filter(Name==input$tab_login.username) %>% pull(Permissions)
     output$tab_login.permissions_text <- renderText(paste0('Your permissions: ',pm))
     print(pm)    #'General_Staff','Data_Administrator','Project_Supervisor ','System_Maintenance'
     if(pm == 'System_Maintenance'){
       print("can do all things")
-    } else if(pm == 'General_Staff'){  ###???????
+    } else if(pm == 'General_Staff'){  
       shinyjs::hide("add_proj")
       shinyjs::hide("edit_proj")
       shinyjs::hide("delete_proj")
@@ -231,10 +232,10 @@ server <- function(input, output) {
         inputId = "projName",
         text = "The project name is already taken."
       )
-      hide("add_proj") #???
+      shinyjs::hide("add_proj") 
     } else {
       hideFeedback("projName")
-      shinyjs::show("add_proj") #???
+      shinyjs::show("add_proj") 
       
     }
   })
@@ -273,10 +274,10 @@ server <- function(input, output) {
         inputId = "dataID",
         text = "The data ID is already taken."
       )
-      shinyjs::hide("add_data") #???
+      shinyjs::hide("add_data") 
     } else {
       hideFeedback("dataID")
-      shinyjs::show("add_data") #???
+      shinyjs::show("add_data") 
     }
   })
   # check unique sampleName
@@ -288,10 +289,10 @@ server <- function(input, output) {
         inputId = "sampleName",
         text = "The sample name is already taken."
       )
-      shinyjs::hide("add_data") #???
+      shinyjs::hide("add_data") 
     } else {
       hideFeedback("sampleName")
-      shinyjs::show("add_data") #???
+      shinyjs::show("add_data") 
     }
   })
   # add data
