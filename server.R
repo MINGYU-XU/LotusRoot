@@ -179,6 +179,7 @@ server <- function(input, output) {
     print(pm)    #'General_Staff','Data_Administrator','Project_Supervisor ','System_Maintenance'
     if(pm == 'System_Maintenance'){
       print("can do all things")
+      shinyjs::show('admin_item')
     } else if(pm == 'General_Staff'){  
       shinyjs::hide("add_proj")
       shinyjs::hide("edit_proj")
@@ -186,16 +187,17 @@ server <- function(input, output) {
       shinyjs::hide("add_data")
       shinyjs::hide("edit_data")
       shinyjs::hide("delete_data")
-    
+      shinyjs::hide("admin")
     } else if(pm == 'Project_Supervisor'){
       shinyjs::hide("add_data")
       shinyjs::hide("edit_data")
       shinyjs::hide("delete_data")
-      
+      shinyjs::hide("admin")
     } else if(pm == 'Data_Administrator'){
       shinyjs::hide("add_proj")
       shinyjs::hide("edit_proj")
       shinyjs::hide("delete_proj")
+      shinyjs::hide("admin")
     } 
     
   })

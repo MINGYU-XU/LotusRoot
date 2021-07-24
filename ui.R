@@ -70,14 +70,41 @@ sidebar <- dashboardSidebar(
   sidebarMenu(
     menuItem("Home", tabName = "home", 
              icon = icon(name="home")),
-    menuItem("My Project",tabName = "myproject",
-             icon = icon(name="dna")),
-    menuItem("Raw Datasets", tabName = "datasets", 
-             icon = icon(name="database")),
+    menuItem("My Project",tabName = "myproject", icon = icon(name="dna"),
+             menuSubItem("Create New Project", 
+                      tabName = "create_new_project", 
+                      icon = icon(name = "plus-circle")),
+             menuSubItem("Projects", 
+                      tabName = "current_project", 
+                      icon = icon(name = "list")),
+             startExpanded = TRUE),
+    menuItem("Raw Datasets", tabName = "datasets",icon = icon(name="database"),
+             menuSubItem("Create New Dataset", 
+                         tabName = "create_new_dataset", 
+                         icon = icon(name = "plus-circle")),
+             menuSubItem("Datasets", 
+                         tabName = "current_dataset", 
+                         icon = icon(name = "list")),
+             startExpanded = TRUE),
     menuItem("About Us", tabName = "aboutus", 
              icon = icon(name="user-friends")),
     menuItem("FAQ", tabName = "FAQ", 
-             icon = icon(name="question-circle"))
+             icon = icon(name="question-circle")),
+    shinyjs::hidden(tags$div(id = 'admin_item',
+                             menuItem("Administrator", tabName = "admin",icon = icon(name="user-cog"),
+                                      menuSubItem("User Information", 
+                                                  tabName = "admin_user", 
+                                                  icon = icon(name = "id-card")),
+                                      menuSubItem("Researcher", 
+                                                  tabName = "admin_researcher", 
+                                                  icon = icon(name = "search")),
+                                      menuSubItem("Group", 
+                                                  tabName = "admin_group", 
+                                                  icon = icon(name = "building")),
+                                      startExpanded = TRUE)
+                                      
+                             )
+    )
   )
 )
 
@@ -115,12 +142,13 @@ body <- dashboardBody(
     
     
     
-    tabItem(tabName = "myproject",
+    tabItem(tabName = "create_new_project",
             h1("PROJECT"),
-            h3("Create New Project"),
+            
             fluidRow(
               #useShinyFeedback(),
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
+                  h3("Create New Project"),
                   box(
                     textInput("projName","Project Name:",placeholder = 'Project Name'),
                     textInput("projID","Project ID:"),
@@ -157,12 +185,15 @@ body <- dashboardBody(
                                  style = "color: white; background-color: teal")
                     )
                   )
-              ),
-            
-            h3("My Projects"),
-            h5(),
+              )),
+    
+    tabItem(tabName = "current_project",
+            h1("PROJECT"),
             fluidRow(
-              box(width = 12,
+              #useShinyFeedback(),
+              box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
+                  h3("My Projects"),
+                  h5(),
                   DTOutput(outputId='x1'),   ## projects table
                   #actionButton('save_proj','Save',style = "color: white; background-color: green"),
                   verbatimTextOutput(outputId='y1'), ## list the selected rows and columns / list of current projects
@@ -170,20 +201,29 @@ body <- dashboardBody(
                   actionButton('delete_proj', 'Delete',style = "color: white; background-color: red"),
                   #actionButton('save_proj','Save',style = "color: white; background-color: green"),
                   h5(),
-                  )
-              ),
-            h3("Related Datasets"),
-            DTOutput(outputId='related_datasets'),
-            h3("Parent project and sub-projects"),
-            DTOutput(outputId='parent_sub_proj')
-            
-    ),
-
-    tabItem(tabName = "datasets",
-            h1("DATASET"),
-            h3("Add New Datasets"),
+                  
+                  )),
             fluidRow(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
+                  h3("Related Datasets"),
+                  DTOutput(outputId='related_datasets')
+                  )),
+            fluidRow(
+              box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
+                  h3("Parent project and sub-projects"),
+                  DTOutput(outputId='parent_sub_proj')
+              ))
+            ),
+            
+            
+            
+
+    tabItem(tabName = "create_new_dataset",
+            h1("DATASET"),
+            
+            fluidRow(
+              box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
+                  h3("Add New Dataset"),
                   box(
                     # input datasets information
                     textInput('dataID', 'Data ID:', placeholder = 'Data ID'),
@@ -226,25 +266,28 @@ body <- dashboardBody(
                                  style = "color: white; background-color: teal")
                   )
               )
-            ),
-            
-            h3("My Datasets"),
-            h5(),
+            )),
+    
+    
+    tabItem(tabName = "current_dataset",
+            h1("DATASET"),
             fluidRow(
-              box(width = 12,
+              box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
+                  h3("My Datasets"),
+                  h5(),
                   DTOutput(outputId='x2'),  ## the place to output datasets table
                   actionButton('edit_data', 'Edit',style = "color: white; background-color: teal"),
                   actionButton('delete_data', 'Delete',style = "color: white; background-color: red"),
                   #actionButton('save_data','Save',style = "color: white; background-color: green")
                   #verbatimTextOutput(outputId='y2'),  ## the place to output text
-              )
-            ),
-            h3("Related Projects"),
+              )),
             fluidRow(
-              box(width = 12,
-                  DTOutput(outputId='related_proj')  ## the place to output datasets table
-              )
-            )
+              box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
+                  h3("Related Projects"),
+                  DTOutput(outputId='related_proj') 
+              ))
+
+            
     ),
     
     tabItem(tabName = "aboutus",
@@ -255,6 +298,34 @@ body <- dashboardBody(
     tabItem(tabName = "FAQ",
             h1("FAQ"),
             h5()
+    ),
+    
+    tabItem(tabName = "admin_user",
+            h1("System Management"),
+            h5(),
+            fluidRow(
+              box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
+                  h3("User Information"),
+                  DTOutput(outputId='admin_user_info') 
+              ))
+    ),
+    tabItem(tabName = "admin_researcher",
+            h1("System Management"),
+            h5(),
+            fluidRow(
+              box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
+                  h3("Researcher"),
+                  DTOutput(outputId='admin_researcher_info') 
+              ))
+    ),
+    tabItem(tabName = "admin_group",
+            h1("System Management "),
+            h5(),
+            fluidRow(
+              box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
+                  h3("Group"),
+                  DTOutput(outputId='admin_group_info') 
+              ))
     )
   ))
 
