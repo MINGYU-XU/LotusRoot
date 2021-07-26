@@ -1,4 +1,12 @@
-"Data.ID","Project.ID","Sample.Name","Description","Date","Method","Organism","Tissue.Cell","Genotype","Treatment","Path","Format","Data.Repository"
-1,1,"MeCP2_ChIP_1","my data","13/04/2018","ChIP-seq","Human","Brain","WT(wildtype)",NA,"/library/Bird/JCW/MeCP2/0001.fq.gz","fastq.gz","GEO:GSM120000"
-2,1,"MeCP2_ChIP_2","new ","13/04/2018","ChIP-seq","Human","Brain","WT(wildtype)",NA,"/library/Bird/JCW/MeCP2/0002.fq.gz","fastq.gz","GEO:GSM130000"
-3,2,"mCG_BS_WT","v1","13/05/2019","BS-seq","Mouse","Neuron","TG(transgenic)",NA,"/library/Bird/SL/MeCP2/A.fq","fastq",""
+"Data.ID","Related.ProjectID","Data.Name","Description","Date","Path","Data.Repository","Method","Organism","Tissue.Cell","Genotype","Format","Treatment"
+11,"5","11","11","2021-07-26","11","11","ChIP-seq","Mouse","Brain","WT(wildtype)","fastq.gz","11"
+10,"5","10","1111","2021-07-26","110","10","ChIP-seq","Human","Brain","WT(wildtype)","fastq.gz","1"
+9,"5","99","999","2021-07-26","9","9","BS-seq","Mouse","Kidney","WT(wildtype)","fastq.gz","9"
+8,"5","888","88","2021-07-26","8","8","ChIP-seq","Mouse","Liver","TG(transgenic)","fastq.gz","888"
+7,"4","777","777","2021-07-26","777","777","ChIP-seq","Human","Brain","WT(wildtype)","fastq.gz","777"
+6,"7","66","6","2021-07-26","6","6","ChIP-seq","Human","Brain","WT(wildtype)","fastq.gz","6"
+1,"1","MeCP2_ChIP_1","my data","13/04/2018","/library/Bird/JCW/MeCP2/0001.fq.gz","GEO:GSM120000","ChIP-seq","Human","Brain","WT(wildtype)","fastq.gz",NA
+2,"1","MeCP2_ChIP_2","new ","13/04/2018","/library/Bird/JCW/MeCP2/0002.fq.gz","GEO:GSM130000","ChIP-seq","Human","Brain","WT(wildtype)","fastq.gz",NA
+3,"2","mCG_BS_WT1","v1","13/05/2019","/library/Bird/SL/MeCP2/B.fq","","BS-seq","Mouse","Neuron","TG(transgenic)","fastq",NA
+4,"2","mCG_BS_WT2","v2","14/05/2019","/library/Bird/SL/Hum/A.fq","","BS-seq","Mouse","Neuron","TG(transgenic)","fastq",NA
+5,NA,"Hum","jcw","15/05/2019","/library/Bird/SL/MeCP2/A.fq","","ChIP-seq","Human","Neuron","TG(transgenic)","fastq",NA
