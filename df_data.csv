@@ -1,4 +1,5 @@
 "Data.ID","Related.ProjectID","Data.Name","Description","Date","Path","Data.Repository","Method","Organism","Tissue.Cell","Genotype","Format","Treatment"
+12,"4","121212","122222","2021-07-27","12222","12","BS-seq","Human","Brain","TG(transgenic)","fastq.gz","12"
 11,"5","11","11","2021-07-26","11","11","ChIP-seq","Mouse","Brain","WT(wildtype)","fastq.gz","11"
 10,"5","10","1111","2021-07-26","110","10","ChIP-seq","Human","Brain","WT(wildtype)","fastq.gz","1"
 9,"5","99","999","2021-07-26","9","9","BS-seq","Mouse","Kidney","WT(wildtype)","fastq.gz","9"

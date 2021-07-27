@@ -309,57 +309,80 @@ body <- dashboardBody(
             h1("System Management —— User"),
             h5(),
             fluidRow(
-              box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
+              box(width = 12,
+                  status = "primary",collapsible = FALSE,solidHeader = TRUE,
                   h3("User Information"),
-                  DTOutput(outputId='admin_user_info') 
+                  fluidRow(
+                    column(4, textInput('userName','Username')),
+                    column(4, passwordInput('userPW','Password')),
+                    column(4, textInput("userEmail", "Email :")),
+                    column(4, selectInput(inputId = "userGroup", "Belong to which group?", 
+                                          choices = c('Bird','Hill','Wind','Ed LAB','BioSci','CHEM')
+                                          )),
+                    column(4, selectInput(inputId = "userPermissions", "User Permissions:", 
+                                          choices = c('General_Staff','Data_Administrator','Project_Supervisor ','System_Maintenance')
+                                          )),
+                    column(5,offset = 0, actionButton('add_user','Add',style = "color: white; background-color: teal")),
+                    column(5,verbatimTextOutput("user_successfully_added"))
+                  ),
+                  br(),
+                  box(width = 12, 
+                      DTOutput(outputId='admin_user_info'),
+                      actionButton('delete_user','Delete',style = "color: white; background-color: red"))
               ))
     ),
     tabItem(tabName = "admin_p",
             h1("System Management —— Project Options"),
             h5(),
             fluidRow(
-              box(width = 6, height = 630,
+              
+              box(width = 6, height = 670,
                   status = "primary",collapsible = FALSE,solidHeader = TRUE,
-                  h3("Researcher"), 
+                  h3("Researcher"), ###
                   br(),
                   fluidRow(
                     column(8, textInput('researcherName','Researcher Name:')),
-                    column(3, actionButton('add_researcher','Add'))
+                    column(3, actionButton('add_researcher','Add',style = "color: white; background-color: teal"))
                   ),
-                  #textInput('researcherName','Researcher Name:'),
-                  #actionButton('add_researcher','Add'),
+                  verbatimTextOutput("researcher_successfully_added"),
                   br(),
                   box(width = 12,
-                      DTOutput(outputId='admin_researcher'))
+                      DTOutput(outputId='admin_researcher'),
+                      actionButton('delete_researcher','Delete',
+                                   style = "color: white; background-color: red")
+                      )
               ),
-              box(width = 6,height = 630,
+              box(width = 6,height = 670,
                 status = "primary",collapsible = FALSE,solidHeader = TRUE,
-                h3("Bioinformatician"), 
+                h3("Bioinformatician"), ###
                 br(),
                 fluidRow(
                   column(8, textInput('bioinformaticianName','Bioinformatician Name:')),
-                  column(3, actionButton('add_bioinformatician','Add'))
+                  column(3, actionButton('add_bioinformatician','Add',style = "color: white; background-color: teal"))
                 ),
+                verbatimTextOutput("bioinformatician_successfully_added"),
                 br(),
-                #textInput('bioinformaticianName','Bioinformatician Name:'),
-                #actionButton('add_bioinformatician','Add'),
                 box(width = 12,
-                    DTOutput(outputId='admin_bioinformatician') )
+                    DTOutput(outputId='admin_bioinformatician'),
+                    actionButton('delete_bioinformatician','Delete',
+                                 style = "color: white; background-color: red")
+                    )
               ),
-              box(width = 6,height = 630,
+              box(width = 6,height = 670,
                 status = "primary",collapsible = FALSE,solidHeader = TRUE,
-                h3("Group"),
+                h3("Group"),###
                 br(),
                 fluidRow(
                   column(8, textInput('groupName','Group Name:')),
-                  column(3, actionButton('add_group','Add'))
+                  column(3, actionButton('add_group','Add',style = "color: white; background-color: teal"))
                 ),
+                verbatimTextOutput("group_successfully_added"),
                 br(),
-                #textInput('groupName','Group Name:'),
-                #actionButton('add_group','Add'),
                 box(width = 12,
-                    DTOutput(outputId='admin_group') )
-                
+                    DTOutput(outputId='admin_group'),
+                    actionButton('delete_group','Delete',
+                                 style = "color: white; background-color: red")
+                    )
               )
             )
     ),
@@ -367,64 +390,94 @@ body <- dashboardBody(
             h1("System Management —— Dataset Options"),
             h5(),
             fluidRow(
-              box(width = 6,height = 630,
+              box(width = 6,height = 670,
                   status = "primary",collapsible = FALSE,solidHeader = TRUE,
                   h3("Method"),
                   br(),
                   fluidRow(
                     column(8, textInput('methodName','Method:')),
-                    column(3, actionButton('add_method','Add'))
+                    column(3, actionButton('add_method','Add',style = "color: white; background-color: teal"))
                   ),
+                  verbatimTextOutput("method_successfully_added"),
                   br(),
-                  DTOutput(outputId='admin_method') 
+                  box(width = 12,
+                      DTOutput(outputId='admin_method'),
+                      actionButton('delete_method','Delete',
+                                   style = "color: white; background-color: red")
+                  )
               ),
-              box(width = 6,height = 630,
+              box(width = 6,height = 670,
                 status = "primary",collapsible = FALSE,solidHeader = TRUE,
                 h3("Organism"),
                 br(),
                 fluidRow(
                   column(8, textInput('organismName','Organism Name:')),
-                  column(3, actionButton('add_organism','Add'))
+                  column(3, actionButton('add_organism','Add',style = "color: white; background-color: teal"))
                 ),
+                verbatimTextOutput("organism_successfully_added"),
                 br(),
-                DTOutput(outputId='admin_organism') 
+                box(width = 12,
+                    DTOutput(outputId='admin_organism'),
+                    actionButton('delete_organism','Delete',
+                                 style = "color: white; background-color: red")
+                )
               ),
-              box(width = 6,height = 630,
+              box(width = 6,height = 670,
                 status = "primary",collapsible = FALSE,solidHeader = TRUE,
                 h3("Tissue/Cell"),
                 br(),
                 fluidRow(
                   column(8, textInput('cellName','Tissue/Cell Name:')),
-                  column(3, actionButton('add_cell','Add'))
+                  column(3, actionButton('add_cell','Add',style = "color: white; background-color: teal"))
                 ),
+                verbatimTextOutput("cell_successfully_added"),
                 br(),
-                DTOutput(outputId='admin_cell') 
+                box(width = 12,
+                    DTOutput(outputId='admin_cell'),
+                    actionButton('delete_cell','Delete',
+                                 style = "color: white; background-color: red")
+                )
               ),
-              box(width = 6,height = 630,
+              box(width = 6,height = 670,
                 status = "primary",collapsible = FALSE,solidHeader = TRUE,
                 h3("Genotype"),
                 br(),
                 fluidRow(
                   column(8, textInput('genotypeName','Genotype Name:')),
-                  column(3, actionButton('add_genotype','Add'))
+                  column(3, actionButton('add_genotype','Add',style = "color: white; background-color: teal"))
                 ),
+                verbatimTextOutput("genotype_successfully_added"),
                 br(),
-                DTOutput(outputId='admin_genotype') 
+                box(width = 12,
+                    DTOutput(outputId='admin_genotype'),
+                    actionButton('delete_genotype','Delete',
+                                 style = "color: white; background-color: red")
+                )
               ),
-              box(width = 6,height = 630,
+              box(width = 6,height = 670,
                 status = "primary",collapsible = FALSE,solidHeader = TRUE,
                 h3("Format"),
                 br(),
                 fluidRow(
                   column(8, textInput('formatName','Format Name:')),
-                  column(3, actionButton('add_format','Add'))
+                  column(3, actionButton('add_format','Add',style = "color: white; background-color: teal"))
                 ),
+                verbatimTextOutput("format_successfully_added"),
                 br(),
-                DTOutput(outputId='admin_format') 
+                box(width = 12,
+                    DTOutput(outputId='admin_format'),
+                    actionButton('delete_format','Delete',
+                                 style = "color: white; background-color: red")
+                )
+                
               )
             )
     )
-  ))
+    
+    
+  )
+)
+  
 
 ##############
 ui <- dashboardPage(
