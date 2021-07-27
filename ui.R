@@ -165,7 +165,7 @@ body <- dashboardBody(
                                   "SL" = "SL",
                                   "Other" = "Other"), selected = 'JCW'),
                     textInput('projBioinformatician', 'Bioinformatician:', placeholder = 'Bioinformatician'),
-                    selectInput('projGroup', 'Group:',
+                    selectInput('projGroup', 'Group:', ######!!!
                                 c("Bird" = "Bird",
                                   "Hill" = "Hill",
                                   "Wind" = "Wind",
@@ -318,20 +318,48 @@ body <- dashboardBody(
             h1("System Management —— Project Options"),
             h5(),
             fluidRow(
-              box(#width = 12,
+              box(width = 6, height = 630,
                   status = "primary",collapsible = FALSE,solidHeader = TRUE,
-                  h3("Researcher"),
-                  DTOutput(outputId='admin_researcher') 
+                  h3("Researcher"), 
+                  br(),
+                  fluidRow(
+                    column(8, textInput('researcherName','Researcher Name:')),
+                    column(3, actionButton('add_researcher','Add'))
+                  ),
+                  #textInput('researcherName','Researcher Name:'),
+                  #actionButton('add_researcher','Add'),
+                  br(),
+                  box(width = 12,
+                      DTOutput(outputId='admin_researcher'))
               ),
-              box(#width = 12,
+              box(width = 6,height = 630,
                 status = "primary",collapsible = FALSE,solidHeader = TRUE,
-                h3("Bioinformatician"),
-                DTOutput(outputId='admin_bioinformatician') 
+                h3("Bioinformatician"), 
+                br(),
+                fluidRow(
+                  column(8, textInput('bioinformaticianName','Bioinformatician Name:')),
+                  column(3, actionButton('add_bioinformatician','Add'))
+                ),
+                br(),
+                #textInput('bioinformaticianName','Bioinformatician Name:'),
+                #actionButton('add_bioinformatician','Add'),
+                box(width = 12,
+                    DTOutput(outputId='admin_bioinformatician') )
               ),
-              box(#width = 12,
+              box(width = 6,height = 630,
                 status = "primary",collapsible = FALSE,solidHeader = TRUE,
                 h3("Group"),
-                DTOutput(outputId='admin_group') 
+                br(),
+                fluidRow(
+                  column(8, textInput('groupName','Group Name:')),
+                  column(3, actionButton('add_group','Add'))
+                ),
+                br(),
+                #textInput('groupName','Group Name:'),
+                #actionButton('add_group','Add'),
+                box(width = 12,
+                    DTOutput(outputId='admin_group') )
+                
               )
             )
     ),
@@ -339,29 +367,59 @@ body <- dashboardBody(
             h1("System Management —— Dataset Options"),
             h5(),
             fluidRow(
-              box(#width = 12,
+              box(width = 6,height = 630,
                   status = "primary",collapsible = FALSE,solidHeader = TRUE,
                   h3("Method"),
+                  br(),
+                  fluidRow(
+                    column(8, textInput('methodName','Method:')),
+                    column(3, actionButton('add_method','Add'))
+                  ),
+                  br(),
                   DTOutput(outputId='admin_method') 
               ),
-              box(#width = 12,
+              box(width = 6,height = 630,
                 status = "primary",collapsible = FALSE,solidHeader = TRUE,
                 h3("Organism"),
+                br(),
+                fluidRow(
+                  column(8, textInput('organismName','Organism Name:')),
+                  column(3, actionButton('add_organism','Add'))
+                ),
+                br(),
                 DTOutput(outputId='admin_organism') 
               ),
-              box(#width = 12,
+              box(width = 6,height = 630,
                 status = "primary",collapsible = FALSE,solidHeader = TRUE,
                 h3("Tissue/Cell"),
+                br(),
+                fluidRow(
+                  column(8, textInput('cellName','Tissue/Cell Name:')),
+                  column(3, actionButton('add_cell','Add'))
+                ),
+                br(),
                 DTOutput(outputId='admin_cell') 
               ),
-              box(#width = 12,
+              box(width = 6,height = 630,
                 status = "primary",collapsible = FALSE,solidHeader = TRUE,
                 h3("Genotype"),
+                br(),
+                fluidRow(
+                  column(8, textInput('genotypeName','Genotype Name:')),
+                  column(3, actionButton('add_genotype','Add'))
+                ),
+                br(),
                 DTOutput(outputId='admin_genotype') 
               ),
-              box(#width = 12,
+              box(width = 6,height = 630,
                 status = "primary",collapsible = FALSE,solidHeader = TRUE,
                 h3("Format"),
+                br(),
+                fluidRow(
+                  column(8, textInput('formatName','Format Name:')),
+                  column(3, actionButton('add_format','Add'))
+                ),
+                br(),
                 DTOutput(outputId='admin_format') 
               )
             )
