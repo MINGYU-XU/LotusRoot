@@ -1,13 +1,18 @@
 Data.ID,Related.ProjectID,Data.Name,Description,Date,Path,Data.Repository,Method,Organism,Tissue.Cell,Genotype,Format,Treatment
-14,5,14,14,2021-07-28,14,14,BS-seq,Human,Brain,WT(wildtype),BAM,14
-13,5,13,13,2021-07-28,13,13,ChIP-seq,Human,Lung,KO(knock-out),fastq.gz,13
-12,4,121212,122222,2021-07-27,12222,12,BS-seq,Human,Brain,TG(transgenic),fastq.gz,12
-11,5,11,11,2021-07-26,11,11,ChIP-seq,Mouse,Brain,WT(wildtype),fastq.gz,11
-10,5,10,1111,2021-07-26,110,10,ChIP-seq,Human,Brain,WT(wildtype),fastq.gz,1
-9,5,99,999,2021-07-26,9,9,BS-seq,Mouse,Kidney,WT(wildtype),fastq.gz,9
-8,5,888,88,2021-07-26,8,8,ChIP-seq,Mouse,Liver,TG(transgenic),fastq.gz,888
-7,4,777,777,2021-07-26,777,777,ChIP-seq,Human,Brain,WT(wildtype),fastq.gz,777
-6,7,66,6,2021-07-26,6,6,ChIP-seq,Human,Brain,WT(wildtype),fastq.gz,6
+19,00,00,0,2021-07-28,0,0,ChIP-seq,Pig,Skin,Control,SAM,0
+18,7,18,18,28/07/2021,18,18,BS-seq,Pig,Skin,Control,SAM,18
+17,7,17,17,28/07/2021,1771,17,BS-seq,Pig,Skin,Control,fastq.gz,17
+16,6,16666,16,28/07/2021,16,16,A,Pig,Skin,Control,SAM,16
+15,6,1511,15,28/07/2021,15,15,ChIP-seq,Rat,Skin,Control,SAM,15
+14,5,14,14,28/07/2021,14,14,BS-seq,Human,Brain,WT(wildtype),BAM,14
+13,5,13,13,28/07/2021,13,13,ChIP-seq,Human,Lung,KO(knock-out),fastq.gz,13
+12,4,121212,122222,27/07/2021,12222,12,BS-seq,Human,Brain,TG(transgenic),fastq.gz,12
+11,5,11,11,26/07/2021,11,11,ChIP-seq,Mouse,Brain,WT(wildtype),fastq.gz,11
+10,5,10,1111,26/07/2021,110,10,ChIP-seq,Human,Brain,WT(wildtype),fastq.gz,1
+9,5,99,999,26/07/2021,9,9,BS-seq,Mouse,Kidney,WT(wildtype),fastq.gz,9
+8,5,888,88,26/07/2021,8,8,ChIP-seq,Mouse,Liver,TG(transgenic),fastq.gz,888
+7,4,777,777,26/07/2021,777,777,ChIP-seq,Human,Brain,WT(wildtype),fastq.gz,777
+6,7,66,6,26/07/2021,6,6,ChIP-seq,Human,Brain,WT(wildtype),fastq.gz,6
 1,1,MeCP2_ChIP_1,my data,13/04/2018,/library/Bird/JCW/MeCP2/0001.fq.gz,GEO:GSM120000,ChIP-seq,Human,Brain,WT(wildtype),fastq.gz,
 2,1,MeCP2_ChIP_2,new ,13/04/2018,/library/Bird/JCW/MeCP2/0002.fq.gz,GEO:GSM130000,ChIP-seq,Human,Brain,WT(wildtype),fastq.gz,
 3,2,mCG_BS_WT1,v1,13/05/2019,/library/Bird/SL/MeCP2/B.fq,"",BS-seq,Mouse,Neuron,TG(transgenic),fastq,

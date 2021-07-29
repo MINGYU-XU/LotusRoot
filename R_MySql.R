@@ -33,6 +33,42 @@ library(DBI)
 
 help(package='RMySQL')
 
+
+
+#假设以下数据在您的mysql表employees中
+dput(employees)
+structure(list(id = 1:12, names = structure(1:12, .Label = c("aa", 
+                                                             "bb", "cc", "dd", "ee", "ff", "gg", "hh", "ii", "jj", "kk", "ll"
+), class = "factor"), year = c(2016, 2016, 2017, 2017, 2018, 
+                               2018, 2016, 2018, 2017, 2019, 2019, 2019)), .Names = c("id", 
+                                                                                      "names", "year"), row.names = c(NA, -12L), class = "data.frame")
+library(shiny)
+library(DBI)
+library(pool)
+pool <- dbPool(drv = RMySQL::MySQL(),dbname = "db_name",host = "localhost",username = "user_name",password = "password", port = 3306, unix.sock = "/var/run/mysqld/mysqld.sock")
+
+ui <- fluidPage(
+  uiOutput("years"),
+  tableOutput("mytable")
+)
+
+server <- function(input, output, session) {
+  output$years <- renderUI({
+    unique_values2 <- c(2016:2019)
+    selectInput("year", "select year", choices = unique_values2)
+  })
+  
+  results <- reactive({
+    df <- dbGetQuery(pool, paste0("SELECT * FROM employees WHERE year = ", input$year ," ;"))
+    return(df)
+  })
+  output$mytable <- renderTable(results())
+}
+
+shinyApp(ui, server)
+
+
+
 # 用 root 账户登录连接数据库 lims
 con <- DBI::dbConnect(
   RMySQL::MySQL(),
@@ -57,11 +93,21 @@ dbListTables(con)
 
 
 RMySQL::dbWriteTable(conn=con, 
-                     name="proj", 
-                     value=proj,
+                     name="am_researcher", 
+                     value=am_researcher,
                      row.names = FALSE)
 
+
+
+DBI::dbWriteTable(con, "am_researcher", am_researcher)
+
 RMySQL::dbReadTable(conn,'proj')
+# db_write_table(con, table, types, values, temporary = FALSE, ...)
+dbplyr::db_write_table(
+    con = con,
+    table = am_researcher,
+)
+
 
 #dbListTables(mydb)
 #dbListTables(mydb,'dept')
