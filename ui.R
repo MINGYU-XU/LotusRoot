@@ -42,7 +42,8 @@ library(data.table) ## fwrite: fast
 # dashboard_header -------------------------------------------------------------
 header <- dashboardHeader(
   #titleWidth = '15%',
-  title="My LIMS",
+  #title="LotusRoot",
+  title = tags$img(src = "logo-2.png", height = 60),
   dropdownMenu(
     type="messages",
     #add Items
@@ -65,7 +66,7 @@ sidebar <- dashboardSidebar(
   sidebarMenu(
     menuItem("Home", tabName = "home", 
              icon = icon(name="home")),
-    menuItem("My Project",tabName = "myproject", icon = icon(name="dna"),
+    menuItem("Projects",tabName = "myproject", icon = icon(name="dna"),
              menuSubItem("Create New Project", 
                       tabName = "create_new_project", 
                       icon = icon(name = "plus-circle")),
@@ -73,7 +74,7 @@ sidebar <- dashboardSidebar(
                       tabName = "current_project", 
                       icon = icon(name = "list")),
              startExpanded = TRUE),
-    menuItem("Raw Datasets", tabName = "datasets",icon = icon(name="database"),
+    menuItem("Datasets", tabName = "datasets",icon = icon(name="database"),
              menuSubItem("Create New Dataset", 
                          tabName = "create_new_dataset", 
                          icon = icon(name = "plus-circle")),
@@ -81,25 +82,28 @@ sidebar <- dashboardSidebar(
                          tabName = "current_dataset", 
                          icon = icon(name = "list")),
              startExpanded = TRUE),
+    
     menuItem("About Us", tabName = "aboutus", 
              icon = icon(name="user-friends")),
     menuItem("FAQ", tabName = "FAQ", 
              icon = icon(name="question-circle")),
-    shinyjs::hidden(tags$div(id = 'admin_item',
-                             menuItem("Administrator", tabName = "admin",icon = icon(name="user-cog"),
-                                      menuSubItem("User Information", ##注册权限信息
-                                                  tabName = "admin_user", 
-                                                  icon = icon(name = "id-card")),
-                                      menuSubItem("Project Option", 
-                                                  tabName = "admin_p", 
-                                                  icon = icon(name = "search")),
-                                      menuSubItem("Dataset Option", 
-                                                  tabName = "admin_d", 
-                                                  icon = icon(name = "building")),
-                                      startExpanded = TRUE)
-                                      
-                             )
+    
+    shinyjs::hidden(tags$div(
+      id = 'admin_item',
+      menuItem("Administrator", tabName = "admin",icon = icon(name="user-cog"),
+               menuSubItem("User Information",
+                           tabName = "admin_user", 
+                           icon = icon(name = "id-card")),
+               menuSubItem("Project Options", 
+                           tabName = "admin_p", 
+                           icon = icon(name = "search")),
+               menuSubItem("Dataset Options", 
+                           tabName = "admin_d", 
+                           icon = icon(name = "building")),
+               startExpanded = TRUE)
     )
+    )
+    
   )
 )
 
@@ -190,7 +194,7 @@ body <- dashboardBody(
             fluidRow(
               #useShinyFeedback(),
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
-                  h3("My Projects"),
+                  h3("Projects"),
                   h5(),
                   DTOutput(outputId='x1'),   ## projects table
                   verbatimTextOutput(outputId='y1'), ## list the selected rows and columns / list of current projects
@@ -205,7 +209,7 @@ body <- dashboardBody(
                   )),
             fluidRow(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
-                  h3("Parent project and sub-projects"),
+                  h3("Related projects"),
                   DTOutput(outputId='parent_sub_proj')
               ))
             ),
@@ -256,7 +260,7 @@ body <- dashboardBody(
             h1("DATASET"),
             fluidRow(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
-                  h3("My Datasets"),
+                  h3("Datasets"),
                   h5(),
                   DTOutput(outputId='x2'),  ## the place to output datasets table
                   actionButton('edit_data', 'Edit',style = "color: white; background-color: teal"),
