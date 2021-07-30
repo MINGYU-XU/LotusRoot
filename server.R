@@ -87,9 +87,6 @@ server <- function(input, output,session) {
         passwordInput('registerpw','Password'),
         textInput("email", "Email :",placeholder = "Pleasr enter your email"),
         uiOutput("register_group"),
-        #selectInput(inputId = "group", "Which Group/Lab/research center you belong to?", 
-        #            choices = c('Bird','Hill','Wind','Ed LAB','BioSci','CHEM') 
-        #),
         actionButton('register_ok','New User Register'),
         verbatimTextOutput("successfully_registered")
         )
@@ -97,7 +94,7 @@ server <- function(input, output,session) {
   showModal(login_dialog)
   #register group options
   output$register_group <- renderUI(
-    selectInput(inputId = "group", "Which Group/Lab/research center you belong to?", 
+    selectInput(inputId = "group", "Which Group/Lab/Research center you belong to?", 
                 choices =  am_group[,1]
                 )
   )
@@ -237,16 +234,28 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   
   # proj options
   output$proj_researcher <- renderUI(
-    selectInput("projResearcher", "Researcher:",
-                choices = am_researcher_val()[,1]
+    pickerInput("projResearcher", "Researcher:",
+                choices = am_researcher_val()[,1],
+                multiple = TRUE,
+                options = list(`actions-box` = TRUE)
     )
   )
-  
-  output$proj_bioinfo <- renderUI(
-    selectInput("projBioinformatician", "Bioinformatician:",
-                choices = am_researcher_val()[,1]  ## the same table as researcher
+  observe({
+    ## 'Bioinformatician' synchronize changes with 'Researcher'
+    output$proj_bioinfo <- renderUI(
+      pickerInput("projBioinformatician", "Bioinformatician:",
+                  choices = am_researcher_val()[,1],
+                  selected = input$projResearcher,
+                  multiple = TRUE,
+                  options = list(`actions-box` = TRUE)
+                  )
     )
-  )
+  })
+  #output$proj_bioinfo <- renderUI(
+  #  selectInput("projBioinformatician", "Bioinformatician:",
+  #              choices = am_researcher_val()[,1]  ## the same table as researcher
+  #  )
+  #)
   output$proj_group <- renderUI(
     selectInput("projGroup", "Group:",
                 choices = am_group_val()[,1]
@@ -264,10 +273,13 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   # ADD proj ------------------------
   projVal <- reactiveVal(proj)
   observeEvent(input$add_proj,{
+    # change input:'Project.Name' to 'Project.ID', and store 'Project.ID' into the project table
+    input_parentID <- projVal() %>% filter(Project.Name==input$projParent) %>% pull(Project.ID)
+    
     p <- rbind(data.frame(
       Project.ID = nrow(proj)+1, 
       Project.Name = input$projName, 
-      Parent = input$projParent,
+      Parent = input_parentID,   #　store 'Project.ID' into the project table
       Description = input$projDescription, 
       Start.Date = as.character(input$projDate),
       #End.Date = as.character(input$projDate2),
@@ -277,18 +289,19 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
       Bioinformatician = input$projBioinformatician,
       Group = input$projGroup,
       Report = input$projReport,
-      Status = input$projStatus,
+      Status = input$projStatus, 
       Data.Repository = input$projdataRepository,
       Code.Repository = input$codeRepository,
       Permissions = input$projPermissions),projVal())                   
     projVal(p)
     
+
     # Successfully added
     output$new_proj_added <- renderPrint({
       cat("Successfully added!")
       shinyjs::delay(2000, hide('new_proj_added'))
     })
-      
+    
     #Clear text input after submit
     updateTextInput(session, "projID", value = "")     
     updateTextInput(session, "projName", value = "")     
@@ -334,11 +347,26 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     }
   })
   
+  # data options
+  output$related_project_name <- renderUI(
+    selectInput(
+      'dataprojID', 'Related Project Name(optional):',
+      choices = projVal()[,2],
+      selected = NULL,
+      multiple = TRUE    ## 多选：related_project？？
+    )
+  )
+  
+  
+  
   # ADD data ------------------------
   dataVal <- reactiveVal(datas)
   observeEvent(input$add_data,{
     t <- rbind(data.frame(
       Data.ID = autoDataidVal(),
+      
+      #Related.ProjectID = projVal()[,1] %>% filter(Project.Name %in% input$dataprojID),
+      
       Related.ProjectID = input$dataprojID,
       Data.Name = input$dataName,
       Description = input$dataDescription, 
@@ -703,24 +731,35 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   
 # output proj table -----
   projVal <- reactiveVal(proj)
-  output$x1 <- renderDT(projVal(),
-                        rownames = FALSE,
-                        server = FALSE,     ## client-side processing 
-                        selection = list(target = 'row'),   ## Multiple selection: rows
-                        #editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
-                        filter = list(position = 'top', clear = FALSE),
-                        extensions = c('Buttons'),
-                        options = list(
-                          dom = 'Blfrtip', 
-                          style = 'os', 
-                          items = 'row',
-                          scrollX = TRUE,
-                          buttons = c('csv', 'excel', 'pdf'),
-                          searchHighlight = TRUE,
-                          search = list(regex = TRUE)
-                          #columnDefs = list(list(targets = c(3), searchable = FALSE)) #Disable Searching for Individual Columns
-                        )
-  )
+  output$x1 <- renderDT({
+    datatable(
+    projVal(),
+    rownames = FALSE,
+    #server = FALSE,     ## client-side processing 
+    selection = list(target = 'row'),   ## Multiple selection: rows
+    #editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
+    filter = list(position = 'top', clear = FALSE),
+    extensions = c('Buttons'),
+    options = list(
+      dom = 'Blfrtip', 
+      style = 'os', 
+      items = 'row',
+      scrollX = TRUE,
+      buttons = c('csv', 'excel', 'pdf'),
+      searchHighlight = TRUE,
+      search = list(regex = TRUE)
+      #columnDefs = list(list(targets = c(3), searchable = FALSE)) #Disable Searching for Individual Columns
+    ) 
+                        
+    ) %>% formatStyle(c('Project.Name','Status'),
+                      'Status',                                ## different status,different colours
+                       backgroundColor = styleEqual(
+                         c('On Hold','Ongoing','Complete','Published'), 
+                         c("#C1CDCD", "#FDDBC7", "#92C5DE", "#B4EEB4")
+                       )
+    )
+                          
+  })
   
   ### print the selected projects
   #output$y1 <- renderPrint({
