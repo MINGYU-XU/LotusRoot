@@ -1,20 +1,11 @@
-Data.ID,Related.ProjectID,Data.Name,Description,Date,Path,Data.Repository,Method,Organism,Tissue.Cell,Genotype,Format,Treatment
-19,00,00,0,2021-07-28,0,0,ChIP-seq,Pig,Skin,Control,SAM,0
-18,7,18,18,28/07/2021,18,18,BS-seq,Pig,Skin,Control,SAM,18
-17,7,17,17,28/07/2021,1771,17,BS-seq,Pig,Skin,Control,fastq.gz,17
-16,6,16666,16,28/07/2021,16,16,A,Pig,Skin,Control,SAM,16
-15,6,1511,15,28/07/2021,15,15,ChIP-seq,Rat,Skin,Control,SAM,15
-14,5,14,14,28/07/2021,14,14,BS-seq,Human,Brain,WT(wildtype),BAM,14
-13,5,13,13,28/07/2021,13,13,ChIP-seq,Human,Lung,KO(knock-out),fastq.gz,13
-12,4,121212,122222,27/07/2021,12222,12,BS-seq,Human,Brain,TG(transgenic),fastq.gz,12
-11,5,11,11,26/07/2021,11,11,ChIP-seq,Mouse,Brain,WT(wildtype),fastq.gz,11
-10,5,10,1111,26/07/2021,110,10,ChIP-seq,Human,Brain,WT(wildtype),fastq.gz,1
-9,5,99,999,26/07/2021,9,9,BS-seq,Mouse,Kidney,WT(wildtype),fastq.gz,9
-8,5,888,88,26/07/2021,8,8,ChIP-seq,Mouse,Liver,TG(transgenic),fastq.gz,888
-7,4,777,777,26/07/2021,777,777,ChIP-seq,Human,Brain,WT(wildtype),fastq.gz,777
-6,7,66,6,26/07/2021,6,6,ChIP-seq,Human,Brain,WT(wildtype),fastq.gz,6
-1,1,MeCP2_ChIP_1,my data,13/04/2018,/library/Bird/JCW/MeCP2/0001.fq.gz,GEO:GSM120000,ChIP-seq,Human,Brain,WT(wildtype),fastq.gz,
-2,1,MeCP2_ChIP_2,new ,13/04/2018,/library/Bird/JCW/MeCP2/0002.fq.gz,GEO:GSM130000,ChIP-seq,Human,Brain,WT(wildtype),fastq.gz,
-3,2,mCG_BS_WT1,v1,13/05/2019,/library/Bird/SL/MeCP2/B.fq,"",BS-seq,Mouse,Neuron,TG(transgenic),fastq,
-4,2,mCG_BS_WT2,v2,14/05/2019,/library/Bird/SL/Hum/A.fq,"",BS-seq,Mouse,Neuron,TG(transgenic),fastq,
-5,,Hum,jcw,15/05/2019,/library/Bird/SL/MeCP2/A.fq,"",ChIP-seq,Human,Neuron,TG(transgenic),fastq,
+Data.ID,Related.ProjectID,Data.Name,Description,Date,Path,Data.Repository,Method,Organism,Tissue.Cell,Genotype,Format
+10,5,Hum_2_3,human2,26/05/2021,/library/Wind/SL/Hum/A3.fq,GEO:GSM600,ChIP-seq,Human,Kidney,WT(wildtype),fastq.gz
+9,5,Hum_2_2,human2,26/05/2021,/library/Wind/SL/Hum/A2.fq,GEO:GSM601,ChIP-seq,Human,Kidney,WT(wildtype),fastq.gz
+8,5,Hum_2_1,human2,26/05/2021,/library/Wind/SL/Hum/A1.fq,GEO:GSM602,ChIP-seq,Human,Kidney,TG(transgenic),fastq.gz
+7,4,Hum_1_3,human1,26/07/2019,/library/Hill/SL/Hum/003.fq,GEO:GSM700,ChIP-seq,Human,Liver,WT(wildtype),fastq.gz
+6,4,Hum_1_2,human1,26/07/2019,/library/Hill/SL/Hum/002.fq,GEO:GSM701,ChIP-seq,Human,Liver,WT(wildtype),fastq.gz
+5,4,Hum_1_1,human1,15/05/2019,/library/Hill/SL/Hum/001.fq,GEO:GSM702,ChIP-seq,Human,Liver,TG(transgenic),fastq.gz
+4,2,mCG_BS_WT2,mCG_BS_WT,14/05/2018,/library/Bird/SL/mCG/B2.fq,GEO:GSM1500,BS-seq,Mouse,Neuron,TG(transgenic),fastq
+3,2,mCG_BS_WT1,mCG_BS_WT,13/05/2018,/library/Bird/SL/mCF/B1.fq,GEO:GSM1501,BS-seq,Mouse,Neuron,TG(transgenic),fastq
+2,1,MeCP2_ChIP_2,MeCP2_ChIP,13/04/2018,/library/Bird/JCW/MeCP2/0002.fq.gz,GEO:GSM1300,ChIP-seq,Mouse,Brain,WT(wildtype),fastq.gz
+1,1,MeCP2_ChIP_1,MeCP2_ChIP,13/04/2018,/library/Bird/JCW/MeCP2/0001.fq.gz,GEO:GSM1301,ChIP-seq,Mouse,Brain,WT(wildtype),fastq.gz

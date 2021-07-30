@@ -54,7 +54,17 @@ server <- function(input, output,session) {
   #})
   
   
-  # HOME page登录 注册  -------------  
+  # HOME page  -------------  
+  
+  # links
+  github_url <- a("LotusRoot GitHub Repository", href="https://github.com/MINGYU-XU/LotusRoot")
+  NCBI_url <- a("NCBI", href="https://www.ncbi.nlm.nih.gov/")
+  GEO_url <- a("GEO-NCBI", href="https://www.ncbi.nlm.nih.gov/geo/")
+  output$links <- renderUI({
+    tagList(github_url,br(),NCBI_url,br(),GEO_url)
+    #tagList("GitHub:", github_url)
+  })
+  
 ### show login/register dialog box when initiated
   
   # After logging in, you can visit other pages
@@ -73,23 +83,29 @@ server <- function(input, output,session) {
     box(width = 7,
         h4('Register'),
         useShinyFeedback(), 
-        textInput('registerName','Username'),
+        textInput('registerName','Username', placeholder = "Please enter your full name"),
         passwordInput('registerpw','Password'),
-        textInput("email", "Email :",placeholder = "your email"),
-        selectInput(inputId = "group", "Which Group/Lab/research center you belong to?", 
-                    choices = c('Bird','Hill','Wind','Ed LAB','BioSci','CHEM') 
-        ),
+        textInput("email", "Email :",placeholder = "Pleasr enter your email"),
+        uiOutput("register_group"),
+        #selectInput(inputId = "group", "Which Group/Lab/research center you belong to?", 
+        #            choices = c('Bird','Hill','Wind','Ed LAB','BioSci','CHEM') 
+        #),
         actionButton('register_ok','New User Register'),
         verbatimTextOutput("successfully_registered")
         )
   )  
   showModal(login_dialog)
+  #register group options
+  output$register_group <- renderUI(
+    selectInput(inputId = "group", "Which Group/Lab/research center you belong to?", 
+                choices =  am_group[,1]
+                )
+  )
   
   
   # 登录 validate the login username and password 
   userVal <- reactiveVal(user)
   observeEvent(input$tab_login.login, {
-    
     username <- input$tab_login.username
     password <- input$tab_login.password
     #row.names(user) <- user$Name
@@ -193,7 +209,7 @@ server <- function(input, output,session) {
   
 
 #Proj/Data---------------------------------------------------------------------
-options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
+options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   
 ### ADD new proj/Data row -----------------------------------------------------
   
@@ -219,6 +235,32 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
     }
   })
   
+  # proj options
+  output$proj_researcher <- renderUI(
+    selectInput("projResearcher", "Researcher:",
+                choices = am_researcher_val()[,1]
+    )
+  )
+  
+  output$proj_bioinfo <- renderUI(
+    selectInput("projBioinformatician", "Bioinformatician:",
+                choices = am_researcher_val()[,1]  ## the same table as researcher
+    )
+  )
+  output$proj_group <- renderUI(
+    selectInput("projGroup", "Group:",
+                choices = am_group_val()[,1]
+    )
+  )
+  output$proj_parent <- renderUI(
+  selectInput("projParent","Parent Project Name(optional):",
+              choices = projVal()[,2],
+              selected = NULL,
+              multiple = TRUE
+              )
+  )
+  
+  
   # ADD proj ------------------------
   projVal <- reactiveVal(proj)
   observeEvent(input$add_proj,{
@@ -228,7 +270,7 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
       Parent = input$projParent,
       Description = input$projDescription, 
       Start.Date = as.character(input$projDate),
-      End.Date = as.character(input$projDate2),
+      #End.Date = as.character(input$projDate2),
       Path = input$projPath, 
       Sample.Sheet = input$projSampleSheet,
       Researcher = input$projResearcher, 
@@ -308,7 +350,8 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
       Tissue.Cell = input$cell, 
       Genotype = input$genotype,
       Format = input$format,
-      Treatment = input$treatment),dataVal()) 
+      #Treatment = input$treatment
+      ),dataVal()) 
     dataVal(t)
     
     #Successfully added
@@ -329,7 +372,7 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
     updateTextInput(session, "cell", value = "")   
     updateTextInput(session, "genotype", value = "")
     updateTextInput(session, "format", value = "")     
-    updateTextInput(session, "treatment", value = "")     
+    #updateTextInput(session, "treatment", value = "")     
     
     fwrite(dataVal(),'df_data.csv',row.names = FALSE)
   })
@@ -611,7 +654,7 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
   output$related_datasets <- DT::renderDT({
     pid<-pids()
     ptids <-ptids()
-    
+    if(length(input$x1_rows_selected)==0) {return(NULL)}   ## No output
     ## if: parent proj, output datasets related to all parent&sub-projs
     if(pid %in% ptids){
       subp <- projVal() %>% filter(Parent %in% pid)  # get sub projs
@@ -621,7 +664,7 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
       all_id <- pid   
     }
     ds <- dataVal() %>% filter(Related.ProjectID %in% all_id)   ## Filter the dataset table
-    rd <- DT::datatable(ds, selection="single", options = list(SortClasses = TRUE, scrollX = TRUE))
+    rd <- DT::datatable(ds, rownames = FALSE,selection="single", options = list(SortClasses = TRUE, scrollX = TRUE))
     rd
     
   })
@@ -631,7 +674,7 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
     ds <- projVal() %>% filter(Parent  %in% pid)   ## Filter the table
     ds <- rbind(projVal()[input$x1_rows_selected,],ds)
     ds <- ds[!duplicated(ds),] ## Delete duplicate rows
-    ps <- DT::datatable( ds, selection="single", options = list(SortClasses = TRUE, scrollX = TRUE))
+    ps <- DT::datatable( ds, rownames = FALSE,selection="single", options = list(SortClasses = TRUE, scrollX = TRUE))
     ps
   })
   
@@ -649,7 +692,7 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
   output$related_proj <- DT::renderDT({
     pid2<-pids2()
     ds2 <- projVal() %>% filter(Project.ID  %in% pid2)   ## Filter the table
-    rp2 <- DT::datatable( ds2, selection="single", options = list(SortClasses = TRUE, scrollX = TRUE))
+    rp2 <- DT::datatable( ds2, rownames = FALSE, selection="single", options = list(SortClasses = TRUE, scrollX = TRUE))
     rp2
   })
   
@@ -661,6 +704,7 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
 # output proj table -----
   projVal <- reactiveVal(proj)
   output$x1 <- renderDT(projVal(),
+                        rownames = FALSE,
                         server = FALSE,     ## client-side processing 
                         selection = list(target = 'row'),   ## Multiple selection: rows
                         #editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
@@ -671,7 +715,7 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
                           style = 'os', 
                           items = 'row',
                           scrollX = TRUE,
-                          buttons = c('csv', 'excel', 'pdf', 'print'),
+                          buttons = c('csv', 'excel', 'pdf'),
                           searchHighlight = TRUE,
                           search = list(regex = TRUE)
                           #columnDefs = list(list(targets = c(3), searchable = FALSE)) #Disable Searching for Individual Columns
@@ -679,15 +723,16 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
   )
   
   ### print the selected projects
-  output$y1 <- renderPrint({
-    cat('Projects selected:\n')
-    input$x1_rows_selected
-  })
+  #output$y1 <- renderPrint({
+  #  cat('Projects selected:\n')
+  #  input$x1_rows_selected
+  #})
   
   
 # output dataset table -----
   output$x2 <- renderDT(
     dataVal(),
+    rownames = FALSE,
     server = FALSE,     ## client-side processing
     
     #selection = 'single',  #selection = 'none',
@@ -705,9 +750,9 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
       dom = 'Blfrtip',  ##dom = 'PBlfrtip',
       style = 'os', items = 'row',
       scrollX = TRUE,
-      #buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+      #buttons = c('copy', 'csv', 'excel', 'pdf'),
       buttons = c(#'selectAll', 'selectNone',
-        'csv', 'excel', 'pdf', 'print'),   #'selectRows', 'selectColumns', 'selectCells',
+        'csv', 'excel', 'pdf'),   #'selectRows', 'selectColumns', 'selectCells',
       
       searchHighlight = TRUE,
       
@@ -751,6 +796,13 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
       shinyjs::show("add_user") 
     }
   })
+  
+  # admin user group options
+  output$admin_user_group <- renderUI(
+    column(4, selectInput("userGroup", "Group", choices = am_group[,1]
+                          )
+           )
+  )
   
   observeEvent(input$add_user,{
     u <- rbind(
@@ -810,14 +862,16 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
   
   # output user_info
   output$admin_user_info <- DT::renderDT(
-    userVal(),
+    #userVal(),
+    userVal()[,c(1,3,4,5)], ##hide password col
+    rownames = FALSE,
     server = FALSE,     ## client-side processing 
     selection = list(target = 'row'),   ## Multiple selection: rows
     editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
     filter = list(position = 'top', clear = FALSE),
     extensions = c('Buttons'),
     options = list(dom = 'Blfrtip', style = 'os', items = 'row',
-                   scrollX = TRUE,buttons = c('csv', 'excel', 'pdf', 'print'),
+                   scrollX = TRUE,buttons = c('csv', 'excel', 'pdf'),
                    searchHighlight = TRUE,search = list(regex = TRUE))
   )
   
@@ -832,7 +886,7 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
       selection = list(target = 'row'),
       editable = list(target = "cell", disable = list(columns = c(0))), 
       filter = list(position = 'top', clear = FALSE),
-      options = list(dom = 'Blfrtip', 
+      options = list(#dom = 'Blfrtip', 
                      style = 'os', 
                      items = 'row',
                      scrollX = TRUE,
@@ -843,17 +897,17 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
 
 # admin_proj --------------------------------------------
   
-  # 1 researcher
+  # 1 researcher/ bioinformatician
   am_researcher <- read.table('admin_researcher.csv',sep = ',',header = T)  #am_researcher <- read.csv('admin_researcher.csv')
-  researcherVal <- reactiveVal(am_researcher)
-  #output$admin_researcher <- admin_table_output(researcherVal())
+  am_researcher_val <- reactiveVal(am_researcher)
+  #output$admin_researcher <- admin_table_output(am_researcher_val())
   output$admin_researcher <- renderDT(
-    researcherVal(),
+    am_researcher_val(),
     server = FALSE, 
     selection = list(target = 'row'),
     editable = list(target = "cell", disable = list(columns = c(0))), 
     filter = list(position = 'top', clear = FALSE),
-    options = list(dom = 'Blfrtip', 
+    options = list(#dom = 'Blfrtip', 
                    style = 'os', 
                    items = 'row',
                    scrollX = TRUE,
@@ -929,79 +983,76 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
   
   
   # 2 bioinformatician
-  am_bioinformatician <- read.table('admin_bioinformatician.csv',sep = ',',header = T)  #am_bioinformatician <- read.csv('admin_bioinformatician.csv',header = T)
-  am_bioinformatician_val <- reactiveVal(am_bioinformatician)
-  output$admin_bioinformatician <- renderDT(
-    am_bioinformatician_val(),
-    server = FALSE, 
-    selection = list(target = 'row'),
-    editable = list(target = "cell", disable = list(columns = c(0))), 
-    filter = list(position = 'top', clear = FALSE),
-    options = list(dom = 'Blfrtip', 
-                   style = 'os', 
-                   items = 'row',
-                   scrollX = TRUE,
-                   searchHighlight = TRUE)
-  )
+  #am_bioinformatician <- read.table('admin_bioinformatician.csv',sep = ',',header = T)  #am_bioinformatician <- read.csv('admin_bioinformatician.csv',header = T)
+  #am_bioinformatician_val <- reactiveVal(am_bioinformatician)
+  #output$admin_bioinformatician <- renderDT(
+  #  am_bioinformatician_val(),
+  #  server = FALSE, 
+  #  selection = list(target = 'row'),
+  #  editable = list(target = "cell", disable = list(columns = c(0))), 
+  #  filter = list(position = 'top', clear = FALSE),
+  #  options = list(#dom = 'Blfrtip', 
+  #                 style = 'os', items = 'row',scrollX = TRUE,searchHighlight = TRUE)
+  #)
   
   
-  observeEvent(input$bioinformaticianName, {
-    # check unique user name
-    if(input$bioinformaticianName %in% am_bioinformatician[,1]) {
-      showFeedbackDanger(
-        inputId = "bioinformaticianName",
-        text = "The bioinformatician name is already taken."
-      )
-      shinyjs::hide("add_bioinformatician") 
-    } else {
-      hideFeedback("bioinformaticianName")
-      shinyjs::show("add_bioinformatician") 
-    }
-  })
+  #observeEvent(input$bioinformaticianName, {
+  #  # check unique user name
+  #  if(input$bioinformaticianName %in% am_bioinformatician[,1]) {
+  #    showFeedbackDanger(
+  #      inputId = "bioinformaticianName",
+  #      text = "The bioinformatician name is already taken."
+  #    )
+  #    shinyjs::hide("add_bioinformatician") 
+  #  } else {
+  #    hideFeedback("bioinformaticianName")
+  #    shinyjs::show("add_bioinformatician") 
+  #  }
+  #})
   
-  observeEvent(input$add_bioinformatician,{
-    bio <- rbind(data.frame(Bioinformatician = input$bioinformaticianName),
-                am_bioinformatician_val() )
-    am_bioinformatician_val(bio)
+  #observeEvent(input$add_bioinformatician,{
+  #  bio <- rbind(data.frame(Bioinformatician = input$bioinformaticianName),
+  #              am_bioinformatician_val() )
+  #  am_bioinformatician_val(bio)
     
-    output$bioinformatician_successfully_added <- renderPrint({
-      cat("Successfully added!")
-      shinyjs::delay(2000, hide('bioinformatician_successfully_added'))
-    })
+  #  output$bioinformatician_successfully_added <- renderPrint({
+  #    cat("Successfully added!")
+  #    shinyjs::delay(2000, hide('bioinformatician_successfully_added'))
+  #  })
     
-    updateTextInput(session, "bioinformaticianName", value = "")    #Clear text input after submit  
-    fwrite(am_bioinformatician_val(),'admin_bioinformatician.csv',row.names = FALSE) # save
-  })
+  #  updateTextInput(session, "bioinformaticianName", value = "")    #Clear text input after submit  
+  #  fwrite(am_bioinformatician_val(),'admin_bioinformatician.csv',row.names = FALSE) # save
+  #})
   
-  ## DELETE researcher
-  values_b = reactiveValues(modal_closed=F)
-  observeEvent(input$delete_bioinformatician, {
-    values_b$modal_closed <- F
-    showModal(modalDialog("Are you sure you want to delete?
-                          If you confirm the deletion, click the Delete button below.
-                          If you don't want to delete it, you can click outside the dialog box to cancel.", 
-                          title = "Delete Bioinformatician", 
-                          easyClose = TRUE,  ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
-                          footer = actionButton("delete_bio",label = "Delete"))
-    )
-  })
-  observeEvent(input$delete_bio,{
-    values_b$modal_closed <- T
-    removeModal()
-  })  
-  observe({
-    if(values_b$modal_closed){
-      observeEvent(input$delete_bio, {
-        b <- am_bioinformatician_val()
-        if (!is.null(input$admin_bioinformatician_rows_selected)) {
-          b <- b[-as.numeric(input$admin_bioinformatician_rows_selected),]
-        }
-        am_bioinformatician_val(b)
-        fwrite(am_bioinformatician_val(),'admin_bioinformatician.csv',row.names = FALSE)
-        
-      })
-    }
-  })
+  ## DELETE bioinformatician
+  #values_b = reactiveValues(modal_closed=F)
+  #observeEvent(input$delete_bioinformatician, {
+  #  values_b$modal_closed <- F
+  #  showModal(modalDialog("Are you sure you want to delete?
+  #                        If you confirm the deletion, click the Delete button below.
+  #                        If you don't want to delete it, you can click outside the dialog box to cancel.", 
+  #                        title = "Delete Bioinformatician", 
+  #                        easyClose = TRUE,  ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+  #                        footer = actionButton("delete_bio",label = "Delete"))
+  #  )
+  #})
+  #observeEvent(input$delete_bio,{
+  #  values_b$modal_closed <- T
+  #  removeModal()
+  #})  
+  #observe({
+  #  if(values_b$modal_closed){
+  #    observeEvent(input$delete_bio, {
+  #      b <- am_bioinformatician_val()
+  #      if (!is.null(input$admin_bioinformatician_rows_selected)) {
+  #        b <- b[-as.numeric(input$admin_bioinformatician_rows_selected),]
+  #      }
+  #      am_bioinformatician_val(b)
+  #      fwrite(am_bioinformatician_val(),'admin_bioinformatician.csv',row.names = FALSE)
+  #      
+  #    })
+  #  }
+  #})
   
   
   # 3 group
@@ -1013,7 +1064,7 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
     selection = list(target = 'row'),
     editable = list(target = "cell", disable = list(columns = c(0))), 
     filter = list(position = 'top', clear = FALSE),
-    options = list(dom = 'Blfrtip', 
+    options = list(#dom = 'Blfrtip', 
                    style = 'os', 
                    items = 'row',
                    scrollX = TRUE,
@@ -1090,7 +1141,7 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
     selection = list(target = 'row'),
     editable = list(target = "cell", disable = list(columns = c(0))), 
     filter = list(position = 'top', clear = FALSE),
-    options = list(dom = 'Blfrtip', 
+    options = list(#dom = 'Blfrtip', 
                    style = 'os', 
                    items = 'row',
                    scrollX = TRUE,
@@ -1137,7 +1188,7 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
     selection = list(target = 'row'),
     editable = list(target = "cell", disable = list(columns = c(0))), 
     filter = list(position = 'top', clear = FALSE),
-    options = list(dom = 'Blfrtip', 
+    options = list(#dom = 'Blfrtip', 
                    style = 'os', 
                    items = 'row',
                    scrollX = TRUE,
@@ -1231,7 +1282,7 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
     selection = list(target = 'row'),
     editable = list(target = "cell", disable = list(columns = c(0))), 
     filter = list(position = 'top', clear = FALSE),
-    options = list(dom = 'Blfrtip', 
+    options = list(#dom = 'Blfrtip', 
                    style = 'os', 
                    items = 'row',
                    scrollX = TRUE,
@@ -1278,7 +1329,7 @@ options(DT.options = list(pageLength = 5)) ## The initial display is 10 rows
     selection = list(target = 'row'),
     editable = list(target = "cell", disable = list(columns = c(0))), 
     filter = list(position = 'top', clear = FALSE),
-    options = list(dom = 'Blfrtip', 
+    options = list(#dom = 'Blfrtip', 
                    style = 'os', 
                    items = 'row',
                    scrollX = TRUE,
