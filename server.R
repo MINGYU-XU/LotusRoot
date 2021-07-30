@@ -653,6 +653,21 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   #})
   
   
+  ## Clear selected rows-------------------------------------------------
+  
+  # clear selected proj rows -----
+  x1_proxy <- DT::dataTableProxy("x1")
+  observeEvent(input$clear_selected_proj,{
+    selectRows(x1_proxy, NULL)
+    })
+  
+  # clear selected data rows -----
+  x2_proxy <- DT::dataTableProxy("x2")
+  observeEvent(input$clear_selected_data,{
+    selectRows(x2_proxy, NULL)
+  })
+  
+  
 
   
   
@@ -697,13 +712,24 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     
   })
 
-  output$parent_sub_proj <- DT::renderDT({
+  output$parent_sub_proj <- renderDT({
     pid<-pids()
     ds <- projVal() %>% filter(Parent  %in% pid)   ## Filter the table
     ds <- rbind(projVal()[input$x1_rows_selected,],ds)
     ds <- ds[!duplicated(ds),] ## Delete duplicate rows
-    ps <- DT::datatable( ds, rownames = FALSE,selection="single", options = list(SortClasses = TRUE, scrollX = TRUE))
-    ps
+    datatable(ds, 
+              rownames = FALSE,
+              selection="single", 
+              options = list(SortClasses = TRUE, scrollX = TRUE)
+              ) %>% formatStyle(c('Project.Name','Status'),
+                                'Status',                                
+                                backgroundColor = styleEqual(
+                                  ## different status,different colours
+                                  c('On Hold','Ongoing','Complete','Published'), 
+                                  c("#C1CDCD", "#FDDBC7", "#92C5DE", "#B4EEB4")
+                                )
+              )
+    
   })
   
   
@@ -717,11 +743,22 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     return(pids2)
   })
   
-  output$related_proj <- DT::renderDT({
+  output$related_proj <- renderDT({
     pid2<-pids2()
     ds2 <- projVal() %>% filter(Project.ID  %in% pid2)   ## Filter the table
-    rp2 <- DT::datatable( ds2, rownames = FALSE, selection="single", options = list(SortClasses = TRUE, scrollX = TRUE))
-    rp2
+    #rp2 <- 
+    datatable(ds2,
+              rownames = FALSE, 
+              selection="single", 
+              options = list(SortClasses = TRUE, scrollX = TRUE)
+    ) %>% formatStyle(c('Project.Name','Status'),
+                      'Status',                                
+                      backgroundColor = styleEqual(
+                        ## different status,different colours
+                        c('On Hold','Ongoing','Complete','Published'), 
+                        c("#C1CDCD", "#FDDBC7", "#92C5DE", "#B4EEB4")
+                      )
+    )
   })
   
   
@@ -752,8 +789,9 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     ) 
                         
     ) %>% formatStyle(c('Project.Name','Status'),
-                      'Status',                                ## different status,different colours
+                      'Status',                                
                        backgroundColor = styleEqual(
+                         ## different status,different colours
                          c('On Hold','Ongoing','Complete','Published'), 
                          c("#C1CDCD", "#FDDBC7", "#92C5DE", "#B4EEB4")
                        )

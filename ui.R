@@ -200,7 +200,7 @@ body <- dashboardBody(
                   )),
             fluidRow(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
-                  h3("Related projects"),
+                  h3("Related Projects"),
                   DTOutput(outputId='parent_sub_proj')
               ))
             ),
