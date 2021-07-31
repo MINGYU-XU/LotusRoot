@@ -340,7 +340,7 @@ body <- dashboardBody(
               
               box(width = 6, height = 850,
                   status = "primary",collapsible = FALSE,solidHeader = TRUE,
-                  h3("Researcher/Bioinformatician"), ###
+                  h3("Researcher/Bioinformatician"), 
                   br(),
                   fluidRow(
                     column(8, textInput('researcherName','Name:')),
@@ -440,22 +440,22 @@ body <- dashboardBody(
                                  style = "color: white; background-color: red")
                 )
               ),
-              box(width = 6,height = 850,
-                status = "primary",collapsible = FALSE,solidHeader = TRUE,
-                h3("Genotype"),
-                br(),
-                fluidRow(
-                  column(8, textInput('genotypeName','Genotype Name:')),
-                  column(3, actionButton('add_genotype','Add',style = "color: white; background-color: teal"))
-                ),
-                verbatimTextOutput("genotype_successfully_added"),
-                br(),
-                box(width = 12,
-                    DTOutput(outputId='admin_genotype'),
-                    actionButton('delete_genotype','Delete',
-                                 style = "color: white; background-color: red")
-                )
-              ),
+              #box(width = 6,height = 850,
+              #  status = "primary",collapsible = FALSE,solidHeader = TRUE,
+              #  h3("Genotype"),
+              #  br(),
+              #  fluidRow(
+              #    column(8, textInput('genotypeName','Genotype Name:')),
+              #    column(3, actionButton('add_genotype','Add',style = "color: white; background-color: teal"))
+              #  ),
+              #  verbatimTextOutput("genotype_successfully_added"),
+              #  br(),
+              #  box(width = 12,
+              #      DTOutput(outputId='admin_genotype'),
+              #      actionButton('delete_genotype','Delete',
+              #                   style = "color: white; background-color: red")
+              #  )
+              #),
               box(width = 6,height = 850,
                 status = "primary",collapsible = FALSE,solidHeader = TRUE,
                 h3("Format"),

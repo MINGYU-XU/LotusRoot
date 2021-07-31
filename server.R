@@ -242,7 +242,8 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     selectizeInput("projResearcher", "Researcher:",
                 choices = am_researcher_val()[,1],
                 multiple = F,
-                options = list(`actions-box` = TRUE)
+                selected = NULL
+                #options = list(`actions-box` = TRUE)
     )
   )
   observe({
@@ -251,8 +252,8 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
       selectizeInput("projBioinformatician", "Bioinformatician:",
                   choices = am_researcher_val()[,1],
                   selected = input$projResearcher,
-                  multiple = F,
-                  options = list(`actions-box` = TRUE)
+                  multiple = F
+                  #options = list(`actions-box` = TRUE)
                   )
     )
   })
@@ -260,15 +261,16 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     selectizeInput("projGroup", "Group:",
                 choices = am_group_val()[,1],
                 multiple = F,
-                options = list(`actions-box` = TRUE)
+                selected = NULL
+                #options = list(`actions-box` = TRUE)
     )
   )
   output$proj_parent <- renderUI(
     selectizeInput("projParent","Parent Project Name(optional):",
                 choices = projVal()[,2],
                 selected = NULL,
-                multiple = TRUE,
-                options = list(`actions-box` = TRUE)
+                multiple = TRUE
+                #options = list(`actions-box` = TRUE)
     )
               
   )
@@ -376,7 +378,8 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     selectizeInput("method", "Method:",
                 choices = am_method_val()[,1],
                 multiple = F,
-                options = list(`actions-box` = TRUE)
+                selected = NULL
+                #options = list(`actions-box` = TRUE)
     )
   )
   
@@ -384,7 +387,8 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     selectizeInput("organism", "Organism:",
                 choices = am_organism_val()[,1],
                 multiple = F,
-                options = list(`actions-box` = TRUE)
+                selected = NULL
+                #options = list(`actions-box` = TRUE)
     )
   )
   
@@ -392,7 +396,8 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     selectizeInput("cell", "Tissue/Cell:",
                 choices = am_cell_val()[,1],
                 multiple = F,
-                options = list(`actions-box` = TRUE)
+                selected = NULL
+                #options = list(`actions-box` = TRUE)
     )
   )
   
@@ -400,7 +405,8 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     selectizeInput("format", "Format:",
                 choices = am_format_val()[,1],
                 multiple = F,
-                options = list(`actions-box` = TRUE)
+                selected = NULL
+                #options = list(`actions-box` = TRUE)
     )
   )
   
@@ -463,7 +469,7 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   # Open the modal when delete button clicked
   observeEvent(input$delete_data, {
     values$modal_closed <- F
-    showModal(modalDialog(h4('Are you sure you want to delete this data?'),
+    showModal(modalDialog(h4('Are you sure you want to delete the data?'),
                           h5('If you confirm the deletion, click the Delete button below.'),
                           h5('If you do not want to delete it, you can click outside the dialog box to cancel.'), 
                           title = "Delete Dataset", 
@@ -502,7 +508,7 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   values_p = reactiveValues(modal_closed=F)
   observeEvent(input$delete_proj, {
     values_p$modal_closed <- F
-    showModal(modalDialog("Are you sure you want to delete this project?
+    showModal(modalDialog("Are you sure you want to delete the project?
                           If you confirm the deletion, click the Delete button below.
                           If you don't want to delete it, you can click outside the dialog box to cancel.", 
                           title = "Delete Project", 
@@ -995,7 +1001,7 @@ output$one_proj_datasets <- renderDT({
   values_u = reactiveValues(modal_closed=F)
   observeEvent(input$delete_user, {
     values_u$modal_closed <- F
-    showModal(modalDialog("Are you sure you want to delete this user?
+    showModal(modalDialog("Are you sure you want to delete?
                           If you confirm the deletion, click the Delete button below.
                           If you don't want to delete it, you can click outside the dialog box to cancel.", 
                           title = "Delete User", 
@@ -1043,7 +1049,8 @@ output$one_proj_datasets <- renderDT({
 # admin_proj --------------------------------------------
   
   # 1 researcher/ bioinformatician
-  am_researcher <- read.table('admin_researcher.csv',sep = ',',header = T)  #am_researcher <- read.csv('admin_researcher.csv')
+  #am_researcher <- read.table('admin_researcher.csv',sep = ',',header = T)  #am_researcher <- read.csv('admin_researcher.csv')
+  am_researcher <- read.csv('admin_researcher.csv')
   am_researcher_val <- reactiveVal(am_researcher)
   #output$admin_researcher <- admin_table_output(am_researcher_val())
   output$admin_researcher <- renderDT(
@@ -1075,11 +1082,12 @@ output$one_proj_datasets <- renderDT({
     }
   })
   
-  # add 
+  # add--ok
+  am_researcher_val <- reactiveVal(am_researcher)
   observeEvent(input$add_researcher,{
     re <- rbind(data.frame(Researcher = input$researcherName),
-                researcherVal() )
-    researcherVal(re)
+                am_researcher_val() )
+    am_researcher_val(re)
     
     output$researcher_successfully_added <- renderPrint({
       cat("Successfully added!")
@@ -1087,34 +1095,34 @@ output$one_proj_datasets <- renderDT({
     })
     
     updateTextInput(session, "researcherName", value = "")    #Clear text input after submit  
-    fwrite(researcherVal(),'admin_researcher.csv',row.names = FALSE) # save
+    fwrite(am_researcher_val(),'admin_researcher.csv',row.names = FALSE) # save
   })
   
-  ## DELETE researcher
+  ## DELETE researcher ???
   values_r = reactiveValues(modal_closed=F)
   observeEvent(input$delete_researcher, {
     values_r$modal_closed <- F
     showModal(modalDialog("Are you sure you want to delete?
                           If you confirm the deletion, click the Delete button below.
                           If you don't want to delete it, you can click outside the dialog box to cancel.", 
-                          title = "Delete Researcher", 
+                          title = "Delete Researcher/Bioinformatician", 
                           easyClose = TRUE,  ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
-                          footer = actionButton("delete_re",label = "Delete"))
+                          footer = actionButton("delete_rb",label = "Delete"))
     )
   })
-  observeEvent(input$delete_re,{
+  observeEvent(input$delete_rb,{
     values_r$modal_closed <- T
     removeModal()
   })  
   observe({
     if(values_r$modal_closed){
-      observeEvent(input$delete_re, {
-        re <- researcherVal()
+      observeEvent(input$delete_rb, {
+        rb <- am_researcher_val()
         if (!is.null(input$admin_researcher_rows_selected)) {
-          re <- re[-as.numeric(input$admin_researcher_rows_selected),1]
+          rb <- rb[-as.numeric(input$admin_researcher_rows_selected),]
         }
-        researcherVal(re)
-        fwrite(researcherVal(),'admin_researcher.csv',row.names = FALSE)
+        am_researcher_val(rb)
+        fwrite(am_researcher_val(),'admin_researcher.csv',row.names = FALSE)
         
       })
     }
@@ -1215,9 +1223,8 @@ output$one_proj_datasets <- renderDT({
                    scrollX = TRUE,
                    searchHighlight = TRUE)
   )
-  
+  # check unique user name
   observeEvent(input$groupName, {
-    # check unique user name
     if(input$groupName %in% am_group[,1]) {
       showFeedbackDanger(
         inputId = "groupName",
@@ -1229,22 +1236,23 @@ output$one_proj_datasets <- renderDT({
       shinyjs::show("add_group") 
     }
   })
-  
+  # add--ok
   observeEvent(input$add_group,{
     g <- rbind(data.frame(Group = input$groupName),
-                 am_group_val() )
+              am_group_val() )
     am_group_val(g)
-    
     output$group_successfully_added <- renderPrint({
       cat("Successfully added!")
       shinyjs::delay(2000, hide('group_successfully_added'))
     })
-    
+    #Clear text input after submit
     updateTextInput(session, "groupName", value = "")    #Clear text input after submit  
     fwrite(am_group_val(),'admin_group.csv',row.names = FALSE) # save
   })
   
-  ## DELETE researcher
+  
+  
+  ## DELETE researcher???
   values_g = reactiveValues(modal_closed=F)
   observeEvent(input$delete_group, {
     values_g$modal_closed <- F
@@ -1292,9 +1300,8 @@ output$one_proj_datasets <- renderDT({
                    scrollX = TRUE,
                    searchHighlight = TRUE)
   )
-  
+  # check unique name
   observeEvent(input$methodName, {
-    # check unique name
     if(input$methodName %in% am_method[,1]) {
       showFeedbackDanger(
         inputId = "methodName",
@@ -1306,17 +1313,15 @@ output$one_proj_datasets <- renderDT({
       shinyjs::show("add_method") 
     }
   })
-  
+  # add 
   observeEvent(input$add_method,{
     m <- rbind(data.frame(Method = input$methodName),
                am_method_val() )
     am_method_val(m)
-    
     output$method_successfully_added <- renderPrint({
       cat("Successfully added!")
       shinyjs::delay(2000, hide('method_successfully_added'))
     })
-    
     updateTextInput(session, "methodName", value = "")    #Clear text input after submit  
     fwrite(am_method_val(),'admin_method.csv',row.names = FALSE) # save
   })
@@ -1339,9 +1344,8 @@ output$one_proj_datasets <- renderDT({
                    scrollX = TRUE,
                    searchHighlight = TRUE)
   )
-  
+  # check unique name
   observeEvent(input$organismName, {
-    # check unique name
     if(input$organismName %in% am_organism[,1]) {
       showFeedbackDanger(
         inputId = "organismName",
@@ -1353,17 +1357,15 @@ output$one_proj_datasets <- renderDT({
       shinyjs::show("add_organism") 
     }
   })
-  
+  # add 
   observeEvent(input$add_organism,{
     o <- rbind(data.frame(Organism = input$organismName),
                am_organism_val() )
     am_organism_val(o)
-    
     output$organism_successfully_added <- renderPrint({
       cat("Successfully added!")
       shinyjs::delay(2000, hide('organism_successfully_added'))
     })
-    
     updateTextInput(session, "organismName", value = "")    #Clear text input after submit  
     fwrite(am_organism_val(),'admin_organism.csv',row.names = FALSE) # save
   })
@@ -1385,9 +1387,8 @@ output$one_proj_datasets <- renderDT({
                    scrollX = TRUE,
                    searchHighlight = TRUE)
   )
-  
+  # check unique name
   observeEvent(input$cellName, {
-    # check unique name
     if(input$cellName %in% am_cell[,1]) {
       showFeedbackDanger(
         inputId = "cellName",
@@ -1399,17 +1400,15 @@ output$one_proj_datasets <- renderDT({
       shinyjs::show("add_cell") 
     }
   })
-  
+  # add 
   observeEvent(input$add_cell,{
     c <- rbind(data.frame(Tissue.Cell = input$cellName),
                am_cell_val() )
     am_cell_val(c)
-    
     output$cell_successfully_added <- renderPrint({
       cat("Successfully added!")
       shinyjs::delay(2000, hide('cell_successfully_added'))
     })
-    
     updateTextInput(session, "cellName", value = "")    #Clear text input after submit  
     fwrite(am_cell_val(),'admin_cell.csv',row.names = FALSE) # save
   })
@@ -1418,49 +1417,46 @@ output$one_proj_datasets <- renderDT({
   
   
   
-  ## 4
-  am_genotype <- read.table('admin_genotype.csv',sep = ',',header = T)
-  am_genotype_val <- reactiveVal(am_genotype)
-  output$admin_genotype <- renderDT(
-    am_genotype_val(),
-    server = FALSE, 
-    selection = list(target = 'row'),
-    editable = list(target = "cell", disable = list(columns = c(0))), 
-    filter = list(position = 'top', clear = FALSE),
-    options = list(#dom = 'Blfrtip', 
-                   style = 'os', 
-                   items = 'row',
-                   scrollX = TRUE,
-                   searchHighlight = TRUE)
-  )
-  
-  observeEvent(input$genotypeName, {
-    # check unique name
-    if(input$genotypeName %in% am_genotype[,1]) {
-      showFeedbackDanger(
-        inputId = "genotypeName",
-        text = "The genotype name is already taken."
-      )
-      shinyjs::hide("add_genotype") 
-    } else {
-      hideFeedback("genotypeName")
-      shinyjs::show("add_genotype") 
-    }
-  })
-  
-  observeEvent(input$add_genotype,{
-    g <- rbind(data.frame(Genotype = input$genotypeName),
-               am_genotype_val() )
-    am_genotype_val(g)
-    
-    output$genotype_successfully_added <- renderPrint({
-      cat("Successfully added!")
-      shinyjs::delay(2000, hide('genotype_successfully_added'))
-    })
-    
-    updateTextInput(session, "genotypeName", value = "")    #Clear text input after submit  
-    fwrite(am_genotype_val(),'admin_genotype.csv',row.names = FALSE) # save
-  })
+  ### 4
+  #am_genotype <- read.table('admin_genotype.csv',sep = ',',header = T)
+  #am_genotype_val <- reactiveVal(am_genotype)
+  #output$admin_genotype <- renderDT(
+  #  am_genotype_val(),
+  #  server = FALSE, 
+  #  selection = list(target = 'row'),
+  #  editable = list(target = "cell", disable = list(columns = c(0))), 
+  #  filter = list(position = 'top', clear = FALSE),
+  #  options = list(#dom = 'Blfrtip', 
+  #                 style = 'os', 
+  #                 items = 'row',
+  #                 scrollX = TRUE,
+  #                 searchHighlight = TRUE)
+  #)
+  ## check unique name
+  #observeEvent(input$genotypeName, {
+  #  if(input$genotypeName %in% am_genotype[,1]) {
+  #    showFeedbackDanger(
+  #      inputId = "genotypeName",
+  #      text = "The genotype name is already taken."
+  #    )
+  #    shinyjs::hide("add_genotype") 
+  #  } else {
+  #    hideFeedback("genotypeName")
+  #    shinyjs::show("add_genotype") 
+  #  }
+  #})
+  ## add
+  #observeEvent(input$add_genotype,{
+  #  g <- rbind(data.frame(Genotype = input$genotypeName),
+  #             am_genotype_val() )
+  #  am_genotype_val(g)
+  #  output$genotype_successfully_added <- renderPrint({
+  #    cat("Successfully added!")
+  #    shinyjs::delay(2000, hide('genotype_successfully_added'))
+  #  })
+  #  updateTextInput(session, "genotypeName", value = "")    #Clear text input after submit  
+  #  fwrite(am_genotype_val(),'admin_genotype.csv',row.names = FALSE) # save
+  #})
   
   
   
@@ -1480,9 +1476,8 @@ output$one_proj_datasets <- renderDT({
                    scrollX = TRUE,
                    searchHighlight = TRUE)
   )
-  
+  # check unique name
   observeEvent(input$formatName, {
-    # check unique name
     if(input$formatName %in% am_format[,1]) {
       showFeedbackDanger(
         inputId = "formatName",
@@ -1494,20 +1489,21 @@ output$one_proj_datasets <- renderDT({
       shinyjs::show("add_format") 
     }
   })
-  
   observeEvent(input$add_format,{
     f <- rbind(data.frame(Format = input$formatName),
                am_format_val() )
     am_format_val(f)
-    
     output$format_successfully_added <- renderPrint({
       cat("Successfully added!")
       shinyjs::delay(2000, hide('format_successfully_added'))
     })
-    
     updateTextInput(session, "formatName", value = "")    #Clear text input after submit  
     fwrite(am_format_val(),'admin_format.csv',row.names = FALSE) # save
   })
+  
+  
+  
+
   
   
   
