@@ -411,7 +411,7 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   )
   
   
-  # ADD data ------------------------
+# ADD data ------------------------
   dataVal <- reactiveVal(datas)
   observeEvent(input$add_data,{
     # change input:'Project.Name' to 'Project.ID', and store 'Project.ID' into the project table
@@ -952,7 +952,7 @@ output$one_proj_datasets <- renderDT({
   userVal <- reactiveVal(user)
   observeEvent(input$userName, {
     # check unique user name
-    if(input$userName %in% user[,'Name']) {
+    if(input$userName %in% userVal()[,'Name']) {
       showFeedbackDanger(
         inputId = "userName",
         text = "The user name is already taken."
@@ -1065,12 +1065,9 @@ output$one_proj_datasets <- renderDT({
                    scrollX = TRUE,
                    searchHighlight = TRUE)
   )
-    
-    
   # check unique name
   observeEvent(input$researcherName, {
-    
-    if(input$researcherName %in% am_researcher[,1]) {
+    if(input$researcherName %in% am_researcher_val()[,1]) {
       showFeedbackDanger(
         inputId = "researcherName",
         text = "The researcher name is already taken."
@@ -1081,24 +1078,20 @@ output$one_proj_datasets <- renderDT({
       shinyjs::show("add_researcher") 
     }
   })
-  
-  # add--ok
+  # add
   am_researcher_val <- reactiveVal(am_researcher)
   observeEvent(input$add_researcher,{
     re <- rbind(data.frame(Researcher = input$researcherName),
                 am_researcher_val() )
     am_researcher_val(re)
-    
     output$researcher_successfully_added <- renderPrint({
       cat("Successfully added!")
       shinyjs::delay(2000, hide('researcher_successfully_added'))
     })
-    
     updateTextInput(session, "researcherName", value = "")    #Clear text input after submit  
     fwrite(am_researcher_val(),'admin_researcher.csv',row.names = FALSE) # save
   })
-  
-  ## DELETE researcher ???
+  ## DELETE researcher 
   values_r = reactiveValues(modal_closed=F)
   observeEvent(input$delete_researcher, {
     values_r$modal_closed <- F
@@ -1119,7 +1112,7 @@ output$one_proj_datasets <- renderDT({
       observeEvent(input$delete_rb, {
         rb <- am_researcher_val()
         if (!is.null(input$admin_researcher_rows_selected)) {
-          rb <- rb[-as.numeric(input$admin_researcher_rows_selected),]
+          rb <- data.frame( Researcher = rb[-as.numeric(input$admin_researcher_rows_selected),])
         }
         am_researcher_val(rb)
         fwrite(am_researcher_val(),'admin_researcher.csv',row.names = FALSE)
@@ -1127,12 +1120,6 @@ output$one_proj_datasets <- renderDT({
       })
     }
   })
-  
-  #????error
-  #Warning: Error in fwrite: is.list(x) is not TRUE
-  #[No stack trace available]
-  #chr [1:10] "AA" "WE" "QW" "ER" "FG" "OL" "ABC" "JCW" "SL" "Other"
-  #Warning: Error in <Anonymous>: 'data' must be 2-dimensional (e.g. data frame or matrix)
   
   
   # 2 bioinformatician
@@ -1225,7 +1212,7 @@ output$one_proj_datasets <- renderDT({
   )
   # check unique user name
   observeEvent(input$groupName, {
-    if(input$groupName %in% am_group[,1]) {
+    if(input$groupName %in% am_group_val()[,1]) {
       showFeedbackDanger(
         inputId = "groupName",
         text = "The group name is already taken."
@@ -1236,7 +1223,7 @@ output$one_proj_datasets <- renderDT({
       shinyjs::show("add_group") 
     }
   })
-  # add--ok
+  # add
   observeEvent(input$add_group,{
     g <- rbind(data.frame(Group = input$groupName),
               am_group_val() )
@@ -1249,10 +1236,7 @@ output$one_proj_datasets <- renderDT({
     updateTextInput(session, "groupName", value = "")    #Clear text input after submit  
     fwrite(am_group_val(),'admin_group.csv',row.names = FALSE) # save
   })
-  
-  
-  
-  ## DELETE researcher???
+  ## DELETE group
   values_g = reactiveValues(modal_closed=F)
   observeEvent(input$delete_group, {
     values_g$modal_closed <- F
@@ -1273,7 +1257,7 @@ output$one_proj_datasets <- renderDT({
       observeEvent(input$delete_g, {
         g <- am_group_val()
         if (!is.null(input$admin_group_rows_selected)) {
-          g <- g[-as.numeric(input$admin_group_rows_selected),]
+          g <- data.frame(Group = g[-as.numeric(input$admin_group_rows_selected),]) 
         }
         am_group_val(g)
         fwrite(am_group_val(),'admin_group.csv',row.names = FALSE)
@@ -1302,7 +1286,7 @@ output$one_proj_datasets <- renderDT({
   )
   # check unique name
   observeEvent(input$methodName, {
-    if(input$methodName %in% am_method[,1]) {
+    if(input$methodName %in% am_method_val()[,1]) {
       showFeedbackDanger(
         inputId = "methodName",
         text = "The method name is already taken."
@@ -1326,6 +1310,37 @@ output$one_proj_datasets <- renderDT({
     fwrite(am_method_val(),'admin_method.csv',row.names = FALSE) # save
   })
   
+  ## DELETE 
+  values_m = reactiveValues(modal_closed=F)
+  observeEvent(input$delete_method, {
+    values_m$modal_closed <- F
+    showModal(modalDialog("Are you sure you want to delete?
+                          If you confirm the deletion, click the Delete button below.
+                          If you don't want to delete it, you can click outside the dialog box to cancel.", 
+                          title = "Delete Method", 
+                          easyClose = TRUE,  ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+                          footer = actionButton("delete_m",label = "Delete"))
+    )
+  })
+  observeEvent(input$delete_m,{
+    values_m$modal_closed <- T
+    removeModal()
+  })  
+  observe({
+    if(values_m$modal_closed){
+      observeEvent(input$delete_m, {
+        m <- am_method_val()
+        if (!is.null(input$admin_method_rows_selected)) {
+          m <- data.frame(Method = m[-as.numeric(input$admin_method_rows_selected),])
+        }
+        am_method_val(m)
+        fwrite(am_method_val(),'admin_method.csv',row.names = FALSE)
+        
+      })
+    }
+  })
+  
+  
   
   
   
@@ -1346,7 +1361,7 @@ output$one_proj_datasets <- renderDT({
   )
   # check unique name
   observeEvent(input$organismName, {
-    if(input$organismName %in% am_organism[,1]) {
+    if(input$organismName %in% am_organism_val()[,1]) {
       showFeedbackDanger(
         inputId = "organismName",
         text = "The organism name is already taken."
@@ -1369,7 +1384,35 @@ output$one_proj_datasets <- renderDT({
     updateTextInput(session, "organismName", value = "")    #Clear text input after submit  
     fwrite(am_organism_val(),'admin_organism.csv',row.names = FALSE) # save
   })
-  
+  ## DELETE 
+  values_o = reactiveValues(modal_closed=F)
+  observeEvent(input$delete_organism, {
+    values_o$modal_closed <- F
+    showModal(modalDialog("Are you sure you want to delete?
+                          If you confirm the deletion, click the Delete button below.
+                          If you don't want to delete it, you can click outside the dialog box to cancel.", 
+                          title = "Delete Organism", 
+                          easyClose = TRUE,  ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+                          footer = actionButton("delete_o",label = "Delete"))
+    )
+  })
+  observeEvent(input$delete_o,{
+    values_o$modal_closed <- T
+    removeModal()
+  })  
+  observe({
+    if(values_o$modal_closed){
+      observeEvent(input$delete_o, {
+        o <- am_organism_val()
+        if (!is.null(input$admin_organism_rows_selected)) {
+          o <- data.frame( Organism = o[-as.numeric(input$admin_organism_rows_selected),])
+        }
+        am_organism_val(o)
+        fwrite(am_organism_val(),'admin_organism.csv',row.names = FALSE)
+        
+      })
+    }
+  })
   
   
   ## 3
@@ -1389,7 +1432,7 @@ output$one_proj_datasets <- renderDT({
   )
   # check unique name
   observeEvent(input$cellName, {
-    if(input$cellName %in% am_cell[,1]) {
+    if(input$cellName %in% am_cell_val()[,1]) {
       showFeedbackDanger(
         inputId = "cellName",
         text = "The cell name is already taken."
@@ -1412,7 +1455,35 @@ output$one_proj_datasets <- renderDT({
     updateTextInput(session, "cellName", value = "")    #Clear text input after submit  
     fwrite(am_cell_val(),'admin_cell.csv',row.names = FALSE) # save
   })
-  
+  ## DELETE 
+  values_c = reactiveValues(modal_closed=F)
+  observeEvent(input$delete_cell, {
+    values_c$modal_closed <- F
+    showModal(modalDialog("Are you sure you want to delete?
+                          If you confirm the deletion, click the Delete button below.
+                          If you don't want to delete it, you can click outside the dialog box to cancel.", 
+                          title = "Delete Tissue/Cell", 
+                          easyClose = TRUE,  ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+                          footer = actionButton("delete_c",label = "Delete"))
+    )
+  })
+  observeEvent(input$delete_c,{
+    values_c$modal_closed <- T
+    removeModal()
+  })  
+  observe({
+    if(values_c$modal_closed){
+      observeEvent(input$delete_c, {
+        c <- am_cell_val()
+        if (!is.null(input$admin_cell_rows_selected)) {
+          c <- data.frame( Tissue.Cell = c[-as.numeric(input$admin_cell_rows_selected),])
+        }
+        am_cell_val(c)
+        fwrite(am_cell_val(),'admin_cell.csv',row.names = FALSE)
+        
+      })
+    }
+  })
   
   
   
@@ -1478,7 +1549,7 @@ output$one_proj_datasets <- renderDT({
   )
   # check unique name
   observeEvent(input$formatName, {
-    if(input$formatName %in% am_format[,1]) {
+    if(input$formatName %in% am_format_val()[,1]) {
       showFeedbackDanger(
         inputId = "formatName",
         text = "The format name is already taken."
@@ -1500,7 +1571,35 @@ output$one_proj_datasets <- renderDT({
     updateTextInput(session, "formatName", value = "")    #Clear text input after submit  
     fwrite(am_format_val(),'admin_format.csv',row.names = FALSE) # save
   })
-  
+  ## DELETE 
+  values_f = reactiveValues(modal_closed=F)
+  observeEvent(input$delete_format, {
+    values_f$modal_closed <- F
+    showModal(modalDialog("Are you sure you want to delete?
+                          If you confirm the deletion, click the Delete button below.
+                          If you don't want to delete it, you can click outside the dialog box to cancel.", 
+                          title = "Delete Format", 
+                          easyClose = TRUE,  ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+                          footer = actionButton("delete_f",label = "Delete"))
+    )
+  })
+  observeEvent(input$delete_f,{
+    values_f$modal_closed <- T
+    removeModal()
+  })  
+  observe({
+    if(values_f$modal_closed){
+      observeEvent(input$delete_f, {
+        f <- am_format_val()
+        if (!is.null(input$admin_format_rows_selected)) {
+          f <- data.frame( Format = f[-as.numeric(input$admin_format_rows_selected),])
+        }
+        am_format_val(f)
+        fwrite(am_format_val(),'admin_format.csv',row.names = FALSE)
+        
+      })
+    }
+  })
   
   
 

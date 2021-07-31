@@ -1,8 +1,7 @@
 Format
-BED
-fasta
-SAM
-fastq
 fastq.gz
+fastq
+fasta
+BED
 BAM
-Other
+SAM
