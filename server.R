@@ -234,32 +234,32 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   
   # proj options
   output$proj_researcher <- renderUI(
-    pickerInput("projResearcher", "Researcher:",
+    selectizeInput("projResearcher", "Researcher:",
                 choices = am_researcher_val()[,1],
-                multiple = TRUE,
+                multiple = F,
                 options = list(`actions-box` = TRUE)
     )
   )
   observe({
     ## 'Bioinformatician' synchronize changes with 'Researcher'
     output$proj_bioinfo <- renderUI(
-      pickerInput("projBioinformatician", "Bioinformatician:",
+      selectizeInput("projBioinformatician", "Bioinformatician:",
                   choices = am_researcher_val()[,1],
                   selected = input$projResearcher,
-                  multiple = TRUE,
+                  multiple = F,
                   options = list(`actions-box` = TRUE)
                   )
     )
   })
   output$proj_group <- renderUI(
-    pickerInput("projGroup", "Group:",
+    selectizeInput("projGroup", "Group:",
                 choices = am_group_val()[,1],
-                multiple = TRUE,
+                multiple = F,
                 options = list(`actions-box` = TRUE)
     )
   )
   output$proj_parent <- renderUI(
-    pickerInput("projParent","Parent Project Name(optional):",
+    selectizeInput("projParent","Parent Project Name(optional):",
                 choices = projVal()[,2],
                 selected = NULL,
                 multiple = TRUE,
@@ -273,10 +273,13 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   projVal <- reactiveVal(proj)
   observeEvent(input$add_proj,{
     # change input:'Project.Name' to 'Project.ID', and store 'Project.ID' into the project table
+    if(length(input$projParent) == 0 ){input_parentID=""}
+    else{
     input_parentID <- projVal() %>% filter(Project.Name==input$projParent) %>% pull(Project.ID)
+    }
     
     p <- rbind(data.frame(
-      Project.ID = autoProjidVal(),#nrow(proj)+1, 
+      Project.ID = nrow(projVal())+1, #autoProjidVal(),#nrow(proj)+1, 
       Project.Name = input$projName, 
       Parent = input_parentID,   #　store 'Project.ID' into the project table
       Description = input$projDescription, 
@@ -348,41 +351,41 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   
   # data options
   output$related_project_name <- renderUI(
-    pickerInput('dataprojID', 'Related Project Name(optional):',
+    selectizeInput('dataprojID', 'Related Project Name(optional):',
                 choices = projVal()[,2],
                 selected = NULL,
-                multiple = TRUE   
+                multiple = F   
     )
   )
   
   output$data_method <- renderUI(
-    pickerInput("method", "Method:",
+    selectizeInput("method", "Method:",
                 choices = am_method_val()[,1],
-                multiple = TRUE,
+                multiple = F,
                 options = list(`actions-box` = TRUE)
     )
   )
   
   output$data_organism <- renderUI(
-    pickerInput("organism", "Organism:",
+    selectizeInput("organism", "Organism:",
                 choices = am_organism_val()[,1],
-                multiple = TRUE,
+                multiple = F,
                 options = list(`actions-box` = TRUE)
     )
   )
   
   output$data_cell <- renderUI(
-    pickerInput("cell", "Tissue/Cell:",
+    selectizeInput("cell", "Tissue/Cell:",
                 choices = am_cell_val()[,1],
-                multiple = TRUE,
+                multiple = F,
                 options = list(`actions-box` = TRUE)
     )
   )
   
   output$data_format <- renderUI(
-    pickerInput("format", "Format:",
+    selectizeInput("format", "Format:",
                 choices = am_format_val()[,1],
-                multiple = TRUE,
+                multiple = F,
                 options = list(`actions-box` = TRUE)
     )
   )
