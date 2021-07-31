@@ -76,23 +76,31 @@ sidebar <- dashboardSidebar(
              icon = icon(name="user-friends")),
     menuItem("FAQ", tabName = "FAQ", 
              icon = icon(name="question-circle")),
+    menuItemOutput("admin_item")#???
     
-    shinyjs::hidden(tags$div(
-      id = 'admin_item',
-      menuItem("Administrator", tabName = "admin",icon = icon(name="user-cog"),
-               menuSubItem("User Information",
-                           tabName = "admin_user", 
-                           icon = icon(name = "id-card")),
-               menuSubItem("Project Options", 
-                           tabName = "admin_p", 
-                           icon = icon(name = "search")),
-               menuSubItem("Dataset Options", 
-                           tabName = "admin_d", 
-                           icon = icon(name = "building")),
-               startExpanded = F)
-    )
-    )
-    
+    #shinyjs::hidden(
+    #  tags$div(
+    #    id = 'admin_item',
+    #    style="display:inline-block;text-align: center;margin-left: 8%;align = center",
+    #    #div(style="text-align: left;",
+    #        #padding-bottom: 10px;display:inline-block;
+    #    menuItem("Administrator", tabName = "admin",icon = icon(name="user-cog"),
+    #             #div(style="display:inline-block;text-align: left;",
+    #             menuSubItem("User Information",
+    #                         tabName = "admin_user", 
+    #                         icon = icon(name = "id-card")),
+    #             menuSubItem("Project Options", 
+    #                         tabName = "admin_p", 
+    #                         icon = icon(name = "search")),
+    #             menuSubItem("Dataset Options", 
+    #                         tabName = "admin_d", 
+    #                         icon = icon(name = "building")),
+    #             startExpanded = F)
+                 #)
+        #)
+    #  )
+    #)
+
   )
 )
 
@@ -279,11 +287,11 @@ body <- dashboardBody(
             fluidRow(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
                   h3("Related Projects"),
-                  DTOutput(outputId='related_proj'),
+                  DTOutput(outputId='related_proj')
                   # ???
-                  actionButton('go_to_proj', 'Search Projects',style = "color: white; background-color: green"),
-                  h5("(If you want to know more about the project,
-                     select the project and click 'Search Projects' button then you will go to project page.)")
+                  #actionButton('go_to_proj', 'Search Projects',style = "color: white; background-color: green"),
+                  #h5("(If you want to know more about the project,
+                  #   select the project and click 'Search Projects' button then you will go to project page.)")
               ))
 
             
