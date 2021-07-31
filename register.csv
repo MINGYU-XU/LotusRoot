@@ -1,6 +1,7 @@
 Name,Password,Email,Group.Lab.Center,Permissions
+Debby,dd,debby@ed.ac.uk,Dog,General_Staff
+Emma,ee,emma@ed.ac.uk,Dog,Data_Administrator
 Ying,yy,ying@ed.ac.uk,Cat,General_Staff
-Shaun,ss,Shaun@ed.ac.uk,Bird,System_Maintenance
 a,a,emma@ed.ac.uk,Wind,System_Maintenance
 Mingyu,xmy,xmy@ed.ac.uk,Hill,General_Staff
 Bobby,bb,bb@gmail.com,Bird,Project_Supervisor 

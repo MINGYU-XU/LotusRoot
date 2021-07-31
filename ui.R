@@ -160,7 +160,7 @@ body <- dashboardBody(
                     uiOutput("proj_researcher"),
                     uiOutput("proj_bioinfo"),
                     uiOutput("proj_group"),
-                    textInput('projdataRepository', 'Data Repository:', placeholder = 'web address/GEO number(eg. GEO10000)'),
+                    textInput('projdataRepository', 'Data Repository:', placeholder = 'Web address/GEO number(eg. GEO10000)'),
                     textInput('codeRepository', 'Code Repository:', placeholder = 'Where your code stored (eg.GitHub URL / path'),
                     selectInput("projStatus", "Status:",
                                 c("Complete" = "Complete",
@@ -197,12 +197,23 @@ body <- dashboardBody(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
                   h3("Related Datasets"),
                   DTOutput(outputId='related_datasets')
-                  )),
+              )),
             fluidRow(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
                   h3("Related Projects"),
-                  DTOutput(outputId='parent_sub_proj')
+                  DTOutput(outputId='rp'),
+                  #actionButton('show_data', 'Show datasets',
+                  #             style = "color: white; background-color: green"),
+                  h5("Select one sub-project here then 
+                  you will see the related datasets of this project 
+                  in the below 'Datasets for One Project' table.")
+              )),
+            fluidRow(
+              box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
+                  h3("Datasets for One Project"),
+                  DTOutput(outputId='one_proj_datasets')
               ))
+            
             ),
             
             
@@ -225,18 +236,25 @@ body <- dashboardBody(
                               'Description:', placeholder = 'Brief description of your dataset'),
                     dateInput('dataDate', 'Date:',format = "dd/mm/yyyy",startview = 'month', language = 'en'),
                     textInput('dataPath', 'Path(optional):', placeholder = 'Where the data stored on the server/URL'),
-                    textInput('dataRepository', 'Data Repository:', placeholder = 'web address/GEO number(eg. GEO10000)'),
+                    textInput('dataRepository', 'Data Repository:', placeholder = 'Web address/GEO number(eg. GEO10000)'),
                   ),
                   box(
-                    selectInput("method", "Method:",
-                                choices = am_method[,1]),
-                    selectInput("organism", "Organism:",
-                                choices = am_organism[,1]),
-                    selectInput("cell", "Tissue/Cell:",
-                                choices = am_cell[,1]),
+                    uiOutput("data_method"),
+                    #selectInput("method", "Method:",
+                    #            choices = am_method[,1]),
+                    
+                    uiOutput("data_organism"),
+                    #selectInput("organism", "Organism:",
+                    #            choices = am_organism[,1]),
+                    
+                    uiOutput("data_cell"),
+                    #selectInput("cell", "Tissue/Cell:",
+                    #            choices = am_cell[,1]),
                     textInput("genotype", "Genotype:",placeholder = 'eg. wildtype, knock-out...'),
-                    selectInput("format", "Format:",
-                                choices = am_format[,1]),
+                    
+                    uiOutput("data_format"),
+                    #selectInput("format", "Format:",
+                    #            choices = am_format[,1]),
                     #textInput('treatment', 'Treatment:'),
                     actionButton('add_data', 'Add',
                                  style = "color: white; background-color: teal"),
@@ -250,9 +268,10 @@ body <- dashboardBody(
             h1("DATASET"),
             fluidRow(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
-                  h3("Datasets"),
+                  h3("Dataset Table"),
                   h5(),
                   DTOutput(outputId='x2'),  ## the place to output datasets table
+                  br(),
                   actionButton('edit_data', 'Edit',style = "color: white; background-color: teal"),
                   actionButton('delete_data', 'Delete',style = "color: white; background-color: red"),
                   actionButton('clear_selected_data', 'Clear selected',style = "color: white; background-color: green")
@@ -260,7 +279,11 @@ body <- dashboardBody(
             fluidRow(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
                   h3("Related Projects"),
-                  DTOutput(outputId='related_proj') 
+                  DTOutput(outputId='related_proj'),
+                  # ???
+                  actionButton('go_to_proj', 'Search Projects',style = "color: white; background-color: green"),
+                  h5("(If you want to know more about the project,
+                     select the project and click 'Search Projects' button then you will go to project page.)")
               ))
 
             
@@ -309,7 +332,7 @@ body <- dashboardBody(
               
               box(width = 6, height = 850,
                   status = "primary",collapsible = FALSE,solidHeader = TRUE,
-                  h3("Researcher"), ###
+                  h3("Researcher/Bioinformatician"), ###
                   br(),
                   fluidRow(
                     column(8, textInput('researcherName','Name:')),

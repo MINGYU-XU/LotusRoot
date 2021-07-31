@@ -57,7 +57,7 @@ server <- function(input, output,session) {
   # HOME page  -------------  
   
   # links
-  github_url <- a("LotusRoot GitHub Repository", href="https://github.com/MINGYU-XU/LotusRoot")
+  github_url <- a("GitHub Repository", href="https://github.com/MINGYU-XU/LotusRoot")
   NCBI_url <- a("NCBI", href="https://www.ncbi.nlm.nih.gov/")
   GEO_url <- a("GEO-NCBI", href="https://www.ncbi.nlm.nih.gov/geo/")
   output$links <- renderUI({
@@ -251,22 +251,21 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
                   )
     )
   })
-  #output$proj_bioinfo <- renderUI(
-  #  selectInput("projBioinformatician", "Bioinformatician:",
-  #              choices = am_researcher_val()[,1]  ## the same table as researcher
-  #  )
-  #)
   output$proj_group <- renderUI(
-    selectInput("projGroup", "Group:",
-                choices = am_group_val()[,1]
+    pickerInput("projGroup", "Group:",
+                choices = am_group_val()[,1],
+                multiple = TRUE,
+                options = list(`actions-box` = TRUE)
     )
   )
   output$proj_parent <- renderUI(
-  selectInput("projParent","Parent Project Name(optional):",
-              choices = projVal()[,2],
-              selected = NULL,
-              multiple = TRUE
-              )
+    pickerInput("projParent","Parent Project Name(optional):",
+                choices = projVal()[,2],
+                selected = NULL,
+                multiple = TRUE,
+                options = list(`actions-box` = TRUE)
+    )
+              
   )
   
   
@@ -277,7 +276,7 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     input_parentID <- projVal() %>% filter(Project.Name==input$projParent) %>% pull(Project.ID)
     
     p <- rbind(data.frame(
-      Project.ID = nrow(proj)+1, 
+      Project.ID = autoProjidVal(),#nrow(proj)+1, 
       Project.Name = input$projName, 
       Parent = input_parentID,   #　store 'Project.ID' into the project table
       Description = input$projDescription, 
@@ -349,25 +348,56 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   
   # data options
   output$related_project_name <- renderUI(
-    selectInput(
-      'dataprojID', 'Related Project Name(optional):',
-      choices = projVal()[,2],
-      selected = NULL,
-      multiple = TRUE    ## 多选：related_project？？
+    pickerInput('dataprojID', 'Related Project Name(optional):',
+                choices = projVal()[,2],
+                selected = NULL,
+                multiple = TRUE   
     )
   )
   
+  output$data_method <- renderUI(
+    pickerInput("method", "Method:",
+                choices = am_method_val()[,1],
+                multiple = TRUE,
+                options = list(`actions-box` = TRUE)
+    )
+  )
+  
+  output$data_organism <- renderUI(
+    pickerInput("organism", "Organism:",
+                choices = am_organism_val()[,1],
+                multiple = TRUE,
+                options = list(`actions-box` = TRUE)
+    )
+  )
+  
+  output$data_cell <- renderUI(
+    pickerInput("cell", "Tissue/Cell:",
+                choices = am_cell_val()[,1],
+                multiple = TRUE,
+                options = list(`actions-box` = TRUE)
+    )
+  )
+  
+  output$data_format <- renderUI(
+    pickerInput("format", "Format:",
+                choices = am_format_val()[,1],
+                multiple = TRUE,
+                options = list(`actions-box` = TRUE)
+    )
+  )
   
   
   # ADD data ------------------------
   dataVal <- reactiveVal(datas)
   observeEvent(input$add_data,{
+    # change input:'Project.Name' to 'Project.ID', and store 'Project.ID' into the project table
+    input_related_parentID <- projVal() %>% filter(Project.Name==input$dataprojID) %>% pull(Project.ID)
+    
     t <- rbind(data.frame(
-      Data.ID = autoDataidVal(),
-      
-      #Related.ProjectID = projVal()[,1] %>% filter(Project.Name %in% input$dataprojID),
-      
-      Related.ProjectID = input$dataprojID,
+      Data.ID = nrow(datas)+1,  # autoDataidVal(),
+      Related.ProjectID = input_related_parentID,  #store 'Project.ID' into the table
+      #Related.ProjectID = input$dataprojID,
       Data.Name = input$dataName,
       Description = input$dataDescription, 
       Date = as.character(input$dataDate),
@@ -515,10 +545,10 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
         DT::datatable(ed, escape = FALSE,
                       editable = list(target = "cell", disable = list(columns = c(0,1,5))), 
                       # cannot edit project id, saart date
-                      
+                      extensions = "FixedColumns",
                       options = list(SortClasses = TRUE,
                                      scrollX = TRUE,
-                                     LengthMenu = c(1,5,10,20,50), 
+                                     fixedColumns = list(leftColumns = 1),
                                      pageLength = 10)
         )
       }),
@@ -580,10 +610,10 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
         datatable(ep, escape = FALSE,
                   editable = list(target = "cell", disable = list(columns = c(0,1,5))), 
                   # cannot edit project id, saart date
-                  
+                  extensions = "FixedColumns",
                   options = list(SortClasses = TRUE,
                                  scrollX = TRUE,
-                                 LengthMenu = c(1,5,10,20,50), 
+                                 fixedColumns = list(leftColumns = 1),
                                  pageLength = 10)
         )
         
@@ -623,38 +653,12 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   #    proj <<- editData(projVal(), input$x1_row_edit, 'x1') ## double <
   #  })
   
+
   
   
-  
-  
-### Save tables ----------------------------------------------------
-  # SAVE the table into a file, and then load the file 
-  # save as rds???
-  # function ???
-  save_to_csv <- function(btn,Val,csv_file){
-    observeEvent(input$btn,{
-      fwrite(Val,csv_file,row.names = FALSE)
-    })
-  }
-  
-  # save data after add --------------------------------------------------
-  #observeEvent(input$add_data,{
-  #  fwrite(dataVal(),'df_data.csv',row.names = FALSE)
-  #  #df_data<-read.csv('df_data.csv')
-  #})
-  # save proj after add --------------------------------------------------
-  #observeEvent(input$add_proj,{  
-  #  fwrite(projVal(),'df_proj.csv',row.names = FALSE)
-  #  #df_proj<-read.csv('df_proj.csv')
-  #})
-  # save user information after add to 'register.csv'----------------------
-  #observeEvent(input$register_ok,{
-  #  fwrite(userVal(),'register.csv',row.names = FALSE)
-  #})
   
   
   ## Clear selected rows-------------------------------------------------
-  
   # clear selected proj rows -----
   x1_proxy <- DT::dataTableProxy("x1")
   observeEvent(input$clear_selected_proj,{
@@ -670,6 +674,9 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   
 
   
+  
+  
+
   
   
 ### Associating two tables ---------------------------------------------------------
@@ -694,7 +701,7 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     return(ptids)
   })
   
-  output$related_datasets <- DT::renderDT({
+  output$related_datasets <- renderDT({
     pid<-pids()
     ptids <-ptids()
     if(length(input$x1_rows_selected)==0) {return(NULL)}   ## No output
@@ -707,20 +714,30 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
       all_id <- pid   
     }
     ds <- dataVal() %>% filter(Related.ProjectID %in% all_id)   ## Filter the dataset table
-    rd <- DT::datatable(ds, rownames = FALSE,selection="single", options = list(SortClasses = TRUE, scrollX = TRUE))
-    rd
-    
+    datatable(ds,
+              rownames = FALSE,
+              selection=list(target = 'row'),#"single", 
+              extensions = "FixedColumns",
+              options = list(SortClasses = TRUE, 
+                             scrollX = TRUE,
+                             fixedHeader=TRUE,
+                             fixedColumns = list(leftColumns = 1))
+    )
   })
 
-  output$parent_sub_proj <- renderDT({
+  output$rp <- renderDT({
     pid<-pids()
     ds <- projVal() %>% filter(Parent  %in% pid)   ## Filter the table
     ds <- rbind(projVal()[input$x1_rows_selected,],ds)
-    ds <- ds[!duplicated(ds),] ## Delete duplicate rows
+    ds <<- ds[!duplicated(ds),] ## Delete duplicate rows
     datatable(ds, 
               rownames = FALSE,
               selection="single", 
-              options = list(SortClasses = TRUE, scrollX = TRUE)
+              extensions = "FixedColumns",
+              options = list(SortClasses = TRUE, 
+                             scrollX = TRUE,
+                             fixedColumns = list(leftColumns = 1)
+                             )
               ) %>% formatStyle(c('Project.Name','Status'),
                                 'Status',                                
                                 backgroundColor = styleEqual(
@@ -729,9 +746,59 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
                                   c("#C1CDCD", "#FDDBC7", "#92C5DE", "#B4EEB4")
                                 )
               )
+  })
     
+    
+output$one_proj_datasets <- renderDT({
+    if(length(input$rp_rows_selected)==0) {return(NULL)}   ## No output 
+    else { 
+      show_id <- ds[input$rp_rows_selected,"Project.ID"]
+      show_ds <- dataVal() %>% filter(Related.ProjectID %in% show_id)   ## Filter the dataset table
+      datatable(show_ds,
+                rownames = FALSE,
+                selection=list(target = 'row'),#"single", 
+                extensions = "FixedColumns",
+                options = list(SortClasses = TRUE, 
+                               scrollX = TRUE,
+                               fixedHeader=TRUE,
+                               fixedColumns = list(leftColumns = 1))
+      )
+    }
+      
+})
+    
+
+  
+  
+  # related proj -> related dataset
+  show_ids <- reactive({
+    if(length(input$rp_rows_selected)==0) {return(NULL)}   ## No output
+    else { show_ids <- projVal()[input$rp_rows_selected,"Project.ID"] }
+    return(show_ids)
   })
   
+  #observeEvent(input$show_data,{
+  #output$one_proj_datasets <- renderDT({
+  #  if(length(input$rp_rows_selected)==0) {return(NULL)}   ## No output
+  #  else { show_id <- projVal()[input$rp_rows_selected,"Project.ID"]}
+    
+  #  show_ds <- dataVal() %>% filter(Related.ProjectID %in% show_id)   ## Filter the dataset table
+  #  datatable(show_ds,
+  #            rownames = FALSE,
+  #            selection=list(target = 'row'),#"single", 
+  #            extensions = "FixedColumns",
+  #            options = list(SortClasses = TRUE, 
+  #                           scrollX = TRUE,
+  #                           fixedHeader=TRUE,
+  #                           fixedColumns = list(leftColumns = 1))
+  #  )
+    
+  
+     
+    
+    
+ 
+
   
 # data -> proj  ----------------------------
   ## if no row(in x1) selected, No table
@@ -750,7 +817,8 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     datatable(ds2,
               rownames = FALSE, 
               selection="single", 
-              options = list(SortClasses = TRUE, scrollX = TRUE)
+              extensions = "FixedColumns",
+              options = list(SortClasses = TRUE, scrollX = TRUE,fixedColumns = list(leftColumns = 1))
     ) %>% formatStyle(c('Project.Name','Status'),
                       'Status',                                
                       backgroundColor = styleEqual(
@@ -761,7 +829,14 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     )
   })
   
+  # related data -> go to project page -----
+  observeEvent(input$go_to_proj,{
+    updateTabItems(session,
+                   inputId = "myproject",
+                   selected = "current_project")
+    })
   
+
   
   
 ### output tables --------------------------------------------------------------
@@ -769,23 +844,27 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
 # output proj table -----
   projVal <- reactiveVal(proj)
   output$x1 <- renderDT({
+    server = FALSE    ## client-side processing
     datatable(
     projVal(),
     rownames = FALSE,
-    #server = FALSE,     ## client-side processing 
+     
     selection = list(target = 'row'),   ## Multiple selection: rows
     #editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
     filter = list(position = 'top', clear = FALSE),
-    extensions = c('Buttons'),
+    extensions = c('Buttons','FixedColumns','Select', 'SearchPanes'),
     options = list(
-      dom = 'Blfrtip', 
+      dom = 'PBlfrtip', 
       style = 'os', 
       items = 'row',
       scrollX = TRUE,
+      fixedColumns = list(leftColumns = 1),
       buttons = c('csv', 'excel', 'pdf'),
       searchHighlight = TRUE,
-      search = list(regex = TRUE)
-      #columnDefs = list(list(targets = c(3), searchable = FALSE)) #Disable Searching for Individual Columns
+      search = list(regex = TRUE),
+      #columnDefs = list(list(targets = c(3), searchable = FALSE)) 
+      #Disable Searching for Individual Columns
+      columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:2)) ## ???no searchPanes
     ) 
                         
     ) %>% formatStyle(c('Project.Name','Status'),
@@ -811,34 +890,22 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     dataVal(),
     rownames = FALSE,
     server = FALSE,     ## client-side processing
-    
-    #selection = 'single',  #selection = 'none',
-    selection = list(target = 'row'),   ## Multiple selection: rows
-    
+    selection = list(target = 'row'),   ## Multiple selection: rows  #selection = 'single',  #selection = 'none',
     #editable = 'cell', 
     #editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
-    
-    # search options
     filter = list(position = 'top', clear = FALSE),
-    
-    extensions = c('Buttons'),
+    extensions = c('Buttons','FixedColumns','Select', 'SearchPanes'),
     options = list(
-      
-      dom = 'Blfrtip',  ##dom = 'PBlfrtip',
-      style = 'os', items = 'row',
+      dom = 'PBlfrtip',  ##dom = 'PBlfrtip',
+      style = 'os', 
+      items = 'row',
       scrollX = TRUE,
-      #buttons = c('copy', 'csv', 'excel', 'pdf'),
-      buttons = c(#'selectAll', 'selectNone',
-        'csv', 'excel', 'pdf'),   #'selectRows', 'selectColumns', 'selectCells',
-      
+      fixedColumns = list(leftColumns = 1),
+      buttons = c('csv', 'excel', 'pdf'),   #'selectRows', 'selectColumns', 'selectCells',#'selectAll', 'selectNone',
       searchHighlight = TRUE,
-      
-      search = list(regex = TRUE)
-      #columnDefs = list(list(targets = c(1), searchable = FALSE))  
-      #Disable Searching for Individual Columns
-      
-      ## ??? no searchPanes
-      #columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3))
+      search = list(regex = TRUE),
+      #columnDefs = list(list(targets = c(1), searchable = FALSE))   #Disable Searching for Individual Columns
+      columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:3)) ##searchPanes
     )         
     
   )  
@@ -948,28 +1015,12 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     filter = list(position = 'top', clear = FALSE),
     extensions = c('Buttons'),
     options = list(dom = 'Blfrtip', style = 'os', items = 'row',
-                   scrollX = TRUE,buttons = c('csv', 'excel', 'pdf'),
+                   scrollX = TRUE,
+                   buttons = c('csv', 'excel', 'pdf'),
                    searchHighlight = TRUE,search = list(regex = TRUE))
   )
   
-                                      
-  
-  
-  ##　admin_table_output function ??
-  admin_table_output = function(adminVal){
-    DT::renderDT(
-      adminVal,
-      server = FALSE, 
-      selection = list(target = 'row'),
-      editable = list(target = "cell", disable = list(columns = c(0))), 
-      filter = list(position = 'top', clear = FALSE),
-      options = list(#dom = 'Blfrtip', 
-                     style = 'os', 
-                     items = 'row',
-                     scrollX = TRUE,
-                     searchHighlight = TRUE)
-    )
-  }
+
   
 
 # admin_proj --------------------------------------------
@@ -1445,3 +1496,40 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   
 }
 
+
+
+### Save tables ----------------------------------------------------
+# SAVE the table into a file, and then load the file 
+# save as rds???
+# function ???
+#save_to_csv <- function(btn,Val,csv_file){
+#  observeEvent(input$btn,{
+#    fwrite(Val,csv_file,row.names = FALSE)
+#  })
+#}
+# save data after add --------------------------------------------------
+#observeEvent(input$add_data,{
+#  fwrite(dataVal(),'df_data.csv',row.names = FALSE)
+#  #df_data<-read.csv('df_data.csv')
+#})
+
+
+
+
+
+
+##　admin_table_output function ??
+#admin_table_output = function(adminVal){
+#  DT::renderDT(
+#    adminVal,
+#    server = FALSE, 
+#    selection = list(target = 'row'),
+#    editable = list(target = "cell", disable = list(columns = c(0))), 
+#    filter = list(position = 'top', clear = FALSE),
+#    options = list(#dom = 'Blfrtip', 
+#                   style = 'os', 
+#                   items = 'row',
+#                   scrollX = TRUE,
+#                   searchHighlight = TRUE)
+#  )
+#}
