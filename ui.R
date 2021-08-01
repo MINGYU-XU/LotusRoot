@@ -119,33 +119,38 @@ body <- dashboardBody(
   # ui- Home- Log in page  
   tabItems(
     tabItem(tabName = "home",
-            h1("HOME"),
+            h3("HOME"),
             
             # hide the welcome message at the first place
             shinyjs::hidden(tags$div(
               id = 'tab_login.welcome_div',
               class = 'login-text', 
               textOutput('tab_login.welcome_text', container = tags$h3),
-              textOutput('tab_login.permissions_text', container = tags$h3),
+              textOutput('tab_login.permissions_text', container = tags$h5),
               h5('Please contact your administrator if you want to change your permissions.')
               )
             ),
-            br(),br(),
+            br(),
             h5("Click here to get LotusRoot manual:"),
             uiOutput("home_manual"),
-            br(),
             h5("If you have any problems about using this App, please turn to the FAQ page."),
             h5("If the FAQ page does not solve your problem, please contact s2045156@ed.ac.uk. We are very happy to help you!"),
             #verbatimTextOutput("auth_output")
             br(),
             h5("Related Links:"),
-            uiOutput("links")
+            uiOutput("links"),
+            br(),
+            fluidRow(
+              column(5),
+              column(2,tags$img(src = "logo.png", height = 100)),
+              column(5)
+            )
     ),
     
     
     
     tabItem(tabName = "create_new_project",
-            h1("PROJECT"),
+            h3("PROJECT"),
             
             fluidRow(
               #useShinyFeedback(),
@@ -191,7 +196,7 @@ body <- dashboardBody(
               )),
     
     tabItem(tabName = "current_project",
-            h1("PROJECT"),
+            h3("PROJECT"),
             fluidRow(
               #useShinyFeedback(),
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
@@ -231,7 +236,7 @@ body <- dashboardBody(
             
 
     tabItem(tabName = "create_new_dataset",
-            h1("DATASET"),
+            h3("DATASET"),
             
             fluidRow(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
@@ -262,7 +267,7 @@ body <- dashboardBody(
     
     
     tabItem(tabName = "current_dataset",
-            h1("DATASET"),
+            h3("DATASET"),
             fluidRow(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
                   h3("Dataset Table"),
@@ -287,7 +292,7 @@ body <- dashboardBody(
     ),
     
     tabItem(tabName = "aboutus",
-            h1("About Us"),
+            h3("About Us"),
             fluidRow(
               column(4),
               column(4,tags$img(src = "logo.png", height = 180)),
@@ -311,14 +316,60 @@ body <- dashboardBody(
             )
     ),
     tabItem(tabName = "FAQ",
-            h1("FAQ"),
-            h5()
+            h3("FAQ"),
+            fluidRow(
+              
+              column(11,
+                     box(width = 12,
+                         h4("Question: "),
+                         h5("What are the different permissions? What can I do with my permissions?"),
+                         h4("Answer: "),
+                         tags$img(src = "permissions_intro.png", height = 250),
+                         ),
+                     box(width = 12,
+                         h4("Question: "),
+                         h5("How to find the datasets related to a project?"),
+                         h4("Answer: "),
+                         h5("Go to 'Projects' page --> 
+                            Select the project you want --> 
+                            Find the related datasets in the 'Related Datasets' table")
+                         ),
+                     box(width = 12,
+                         h4("Question: "),
+                         h5("How to find the C related to a dataset?"),
+                         h4("Answer: "),
+                         h5("Go to 'Datasets' page --> 
+                            Select the dataset you want --> 
+                            Find the related project in the 'Related Projects' table")
+                     ),
+                     box(width = 12,
+                         h4("Question: "),
+                         h5("I cannot find the group option I want. What can I do?"),
+                         h4("Answer: "),
+                         h5("If you have the permissions to add group options, 
+                            just go to 'Project Options' page to add the group you want."),
+                         h5("If you do not have permissions to add group options,
+                            contact your System_Maintenance or Project_Supervisor to do that for you.
+                            And you can choose 'Other' in the group input box for the time being.")
+                     ),
+                     #h5(""), 
+                     #h5(""),
+                     h5("")
+              ),
+              column(1),
+              
+            ),
+            fluidRow(
+              column(5),
+              column(2,tags$img(src = "logo.png", height = 100)),
+              column(5)
+            )
     ),
     
     
     
     tabItem(tabName = "admin_user",
-            h1("System Management —— User"),
+            h3("System Management —— User"),
             h5(),
             fluidRow(
               box(width = 12,
@@ -342,7 +393,7 @@ body <- dashboardBody(
               ))
     ),
     tabItem(tabName = "admin_p",
-            h1("System Management —— Project Options"),
+            h3("System Management —— Project Options"),
             h5(),
             fluidRow(
               
@@ -397,7 +448,7 @@ body <- dashboardBody(
             )
     ),
     tabItem(tabName = "admin_d",
-            h1("System Management —— Dataset Options"),
+            h3("System Management —— Dataset Options"),
             h5(),
             fluidRow(
               box(width = 6,height = 850,

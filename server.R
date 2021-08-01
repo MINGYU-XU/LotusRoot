@@ -489,7 +489,7 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   # Open the modal when delete button clicked
   observeEvent(input$delete_data, {
     values$modal_closed <- F
-    showModal(modalDialog(h4('Are you sure you want to delete the data?'),
+    showModal(modalDialog(h5('Are you sure you want to delete the data?'),
                           h5('If you confirm the deletion, click the Delete button below.'),
                           h5('If you do not want to delete it, you can click outside the dialog box to cancel.'), 
                           title = "Delete Dataset", 
