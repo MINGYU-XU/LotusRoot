@@ -130,7 +130,10 @@ body <- dashboardBody(
               h5('Please contact your administrator if you want to change your permissions.')
               )
             ),
-            br(),br(),br(),
+            br(),br(),
+            h5("Click here to get LotusRoot manual:"),
+            uiOutput("home_manual"),
+            br(),
             h5("If you have any problems about using this App, please turn to the FAQ page."),
             h5("If the FAQ page does not solve your problem, please contact s2045156@ed.ac.uk. We are very happy to help you!"),
             #verbatimTextOutput("auth_output")
@@ -299,8 +302,27 @@ body <- dashboardBody(
     
     tabItem(tabName = "aboutus",
             h1("About Us"),
-            h5("LIMS is a modularised web-based laboratory information management system built to centrally track projects and data with standardised metadata, while still maintaining appropriate access and permissions to users and groups."), 
-            h5("This system will make our analyses more findable, accessible, interoperable and reproducible based on the FAIR data principles.")
+            fluidRow(
+              column(4),
+              column(4,tags$img(src = "logo.png", height = 180)),
+              column(4)
+            ),
+            fluidRow(
+              column(1),
+              column(10,
+                     h5("LotusRoot is a sequencing data tracking system. 
+                        It can track projects and datasets with standardised metadata, while 
+                        still maintaining appropriate access and permissions to users and groups."), 
+                     h5("LotusRoot system will make our projects/datasets more 
+                        findable, accessible, interoperable and reproducible 
+                        based on the FAIR data principles."),
+                     br(),
+                     h5("Click here to get LotusRoot manual:"),
+                     uiOutput("LotusRoot_manual")
+                     ),
+              column(1),
+            
+            )
     ),
     tabItem(tabName = "FAQ",
             h1("FAQ"),

@@ -107,30 +107,35 @@ server <- function(input, output,session) {
     password <- input$tab_login.password
     #row.names(user) <- user$Name
     
-    if(username %in% userVal()[,'Name']) {
+    if(username %in% userVal()[,'Name'] 
+       & password == userVal() %>% filter(Name==username) %>% pull(Password)) 
+      {
       # real time login
-      if(password == userVal() %>% filter(Name==username) %>% pull(Password)){
+      #if(password == userVal() %>% filter(Name==username) %>% pull(Password)){
         # succesfully log in
         removeModal() # remove login dialog
         output$tab_login.welcome_text <- renderText(
           paste0('Welcome,', ' ',username,'!')
           )
-          
         shinyjs::show('tab_login.welcome_div') # show welcome message
-      } else {
+      } else if (username %in% userVal()[,'Name'] 
+                 & !(password == userVal() %>% filter(Name==username) %>% pull(Password)))
+        {
         # password incorrect, show the warning message
         # warning message disappear in 1 sec
         output$tab_login.login_msg <- renderText('Incorrect Password')
         shinyjs::show('tab_login.login_msg')
         shinyjs::delay(2000, hide('tab_login.login_msg')) ##Delay disappear
-      }
-    } else {
-      # username not found, show the warning message
-      # warning message disappear in 1 sec
-      output$tab_login.login_msg <- renderText('Username Not Found. Please register.')
-      shinyjs::show('tab_login.login_msg')
-      shinyjs::delay(2000, hide('tab_login.login_msg'))  ##Delay disappear
-    }
+      } else #if( !(username %in% userVal()[,'Name']) )
+        {
+        # username not found, show the warning message
+        # warning message disappear in 2 sec
+        output$tab_login.login_msg <- renderText('Username Not Found. Please register.')
+        shinyjs::show('tab_login.login_msg')
+        shinyjs::delay(2000, hide('tab_login.login_msg'))  ##Delay disappear
+        }
+    # When the wrong name is entered, an error is reported
+    ###Warning: Error in if: argument is of length zero ???????????
   })
   
 
@@ -1602,7 +1607,20 @@ output$one_proj_datasets <- renderDT({
   })
   
   
+  # about us page  -------------  
+  # manual
+  manual_link <- a("LotusRoot Manual", href="https://github.com/MINGYU-XU/YUMI/blob/master/LotusRoot_Manual.pdf")
 
+  output$LotusRoot_manual <- renderUI({
+    #tabItem("aboutus", 
+    #         tags$iframe(style="height:600px; width:100%; scrolling=yes", 
+    #                     src="https://github.com/MINGYU-XU/YUMI/blob/master/LotusRoot_Manual.pdf"))
+    tagList(manual_link)
+  })
+  
+  output$home_manual <- renderUI({
+    tagList(manual_link)
+  })
   
   
   
