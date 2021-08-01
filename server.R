@@ -194,9 +194,9 @@ server <- function(input, output,session) {
                  menuSubItem("User Information", tabName = "admin_user", 
                              icon = icon(name = "id-card")),
                  menuSubItem("Project Options", tabName = "admin_p", 
-                             icon = icon(name = "search")),
+                             icon = icon(name = "project-diagram")),
                  menuSubItem("Dataset Options", tabName = "admin_d", 
-                             icon = icon(name = "building")),
+                             icon = icon(name = "server")),
                  startExpanded = F)
       })
     } else if(pm == 'General_Staff'){  
@@ -206,17 +206,27 @@ server <- function(input, output,session) {
       shinyjs::hide("add_data")
       shinyjs::hide("edit_data")
       shinyjs::hide("delete_data")
-      #shinyjs::hide("admin")
+      #shinyjs::hide("admin_item")
     } else if(pm == 'Project_Supervisor'){
       shinyjs::hide("add_data")
       shinyjs::hide("edit_data")
       shinyjs::hide("delete_data")
-      #shinyjs::hide("admin")
+      output$admin_item <- renderMenu({
+        menuItem("Administrator", tabName = "admin",icon = icon(name="user-cog"),
+                 menuSubItem("Project Options", tabName = "admin_p", 
+                             icon = icon(name = "project-diagram")),
+                 startExpanded = F)
+      })
     } else if(pm == 'Data_Administrator'){
       shinyjs::hide("add_proj")
       shinyjs::hide("edit_proj")
       shinyjs::hide("delete_proj")
-      #shinyjs::hide("admin")
+      output$admin_item <- renderMenu({
+        menuItem("Administrator", tabName = "admin",icon = icon(name="user-cog"),
+                 menuSubItem("Dataset Options", tabName = "admin_d", 
+                             icon = icon(name = "server")),
+                 startExpanded = F)
+      })
     } 
   })
   
@@ -1614,12 +1624,12 @@ output$one_proj_datasets <- renderDT({
   
   # about us page  -------------  
   # manual
-  manual_link <- a("LotusRoot Manual", href="https://github.com/MINGYU-XU/YUMI/blob/master/LotusRoot_Manual.pdf")
+  manual_link <- a("LotusRoot Manual", href="https://github.com/MINGYU-XU/LotusRoot/blob/master/www/LotusRoot_Manual.pdf")
 
   output$LotusRoot_manual <- renderUI({
     #tabItem("aboutus", 
     #         tags$iframe(style="height:600px; width:100%; scrolling=yes", 
-    #                     src="https://github.com/MINGYU-XU/YUMI/blob/master/LotusRoot_Manual.pdf"))
+    #                     src="https://github.com/MINGYU-XU/LotusRoot/blob/master/www/LotusRoot_Manual.pdf"))
     tagList(manual_link)
   })
   
