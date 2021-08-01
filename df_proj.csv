@@ -1,5 +1,7 @@
 Project.ID,Project.Name,Parent,Description,Start.Date,Path,Sample.Sheet,Researcher,Bioinformatician,Group,Report,Status,Data.Repository,Code.Repository,Permissions
-12,www_qq_pp,"",we,2021-07-31,"","",JCW,JCW,Dog,"",Ongoing,we,we,Group
+14,tt_oo,"",tt,2021-08-01,"","",Lucy,Lucy,Fire,"",Complete,tt,tt,Individual
+13,cc_nn,"",cn,2021-08-01,"","",Mia,Mia,BioC,"",Ongoing,cn,cn,Group
+12,www_qq_pp,,we,2021-07-31,"","",JCW,JCW,Dog,"",Ongoing,we,we,Group
 11,eeeeeeee_rt,,ee,2021-07-31,"","",JCW,JCW,Dog,"",Ongoing,e,e,Group
 10,y_u_i,3,yui,2021-07-31,"","",Mingyu,Mingyu,Wind,"",Ongoing,yui,yui,Group
 9,q_w_e,6,qwe,2021-07-31,"","",Mingyu,Mingyu,Wind,"",On Hold,qwe,qwe,Open
