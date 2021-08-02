@@ -582,18 +582,21 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
     showModal(modalDialog(
       title = "Edit Dataset", 
       
-      DT::renderDataTable({
+      renderDataTable({
         ed <- data[input$x2_rows_selected,]
-        
-        DT::datatable(ed, escape = FALSE,
-                      editable = list(target = "cell", disable = list(columns = c(0,1,5))), 
-                      # cannot edit project id, saart date
-                      extensions = "FixedColumns",
-                      options = list(SortClasses = TRUE,
-                                     scrollX = TRUE,
-                                     fixedColumns = list(leftColumns = 1),
-                                     pageLength = 10)
+        datatable(ed,
+                  escape = FALSE,
+                  rownames = FALSE, # hide row names
+                  editable = list(target = "row", 
+                                  disable = list(columns = c(0,1,5))), 
+                  # cannot edit project id, saart date
+                  extensions = "FixedColumns",
+                  options = list(SortClasses = TRUE,
+                                 scrollX = TRUE,
+                                 fixedColumns = list(leftColumns = 1),
+                                 pageLength = 10)
         )
+                      
       }),
       
       
@@ -630,58 +633,86 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
   #  })
   
   
+  # edit proj row --------????????????????????????
+  p1 <- projVal()
+  p1$Date = Sys.time() + seq_len(nrow(p1)
+  
+  #edit a single cell
+  #proxy5=dataTableProxy('x1')
+  observeEvent(input$edit_proj,{
+    #if(input$edit_proj){
+      info=input$x1_cell_edit
+      str(info)
+      p1<<-editData(p1,info)
+      replaceData(proxy5,p1,resetPaging = FALSE)
+    #}
+  })
   
   
   
-  
-  # edit proj row -----------------------
-  
-  #function：让用户选择一行，点击“编辑”按钮，然后在另一个框中编辑并保存更改。
-  # select one proj --> click 'edit' --> pop-up window --> edit and save
-  
+  # function：select one proj --> click 'edit' --> pop-up window --> edit and save
   # actionButton: edit_proj
   
-  edit_value_p = reactiveValues(modal_closed=F)
+  #edit_value_p = reactiveValues(modal_closed=F)
   
-  observeEvent(input$edit_proj, {
-    edit_value_p$modal_closed <- F
-    showModal(modalDialog(
-      title = "Edit Project", 
-      renderDataTable({
-        ep <- proj[input$x1_rows_selected,]
-        #print(ep)
-        datatable(ep, escape = FALSE,
-                  editable = list(target = "cell", disable = list(columns = c(0,1,5))), 
-                  # cannot edit project id, saart date
-                  extensions = "FixedColumns",
-                  options = list(SortClasses = TRUE,
-                                 scrollX = TRUE,
-                                 fixedColumns = list(leftColumns = 1),
-                                 pageLength = 10)
-        )
-        
-        
-      }) ,
-      easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
-      footer = actionButton("save_p",label = "Save")
+  #observeEvent(input$edit_proj, {
+  #  edit_value_p$modal_closed <- F
+  #  showModal(modalDialog(
       
+  #    #uiOutput("edit_proj_table"),
       
-    )
-    )
-  })
+  #    title = "Edit Project(double click the project row to edit)", 
+      
+  #    output$edit_proj_table <-renderDT({
+  #      ep <<- projVal()[input$x1_rows_selected,]
+  #      #print(ep)
+  #      datatable(ep, 
+  #                escape = FALSE,
+  #                rownames = FALSE, # hide row names
+  #                editable = list(target = "row", 
+  #                                disable = list(columns = c(0,1,4))
+  #                                # cannot edit project id, start date
+  #                                ), 
+  #                
+  #                extensions = "FixedColumns",
+  #                options = list(SortClasses = TRUE,
+  #                               scrollX = TRUE,
+  #                               fixedColumns = list(leftColumns = 1),
+  #                               pageLength = 10)
+  #      )
+  #      #projVal(ep)
+  #      
+  #    }),
+  #    easyClose = TRUE, 
+  #    ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+  #    footer = actionButton("save_p",label = "Save")
+  #  ))
+  #})
+  ## click save then close pop-up window
+  #observeEvent(input$save_p,{
+  #  edit_value_p$modal_closed <- T
+  #  removeModal()
+  #})
   
-  observeEvent(input$save_p,{
-    edit_value_p$modal_closed <- T
-    removeModal()
-  })
-  
-  #projVal <- reactiveVal(proj)
-  observe({
-    if(edit_value_p$modal_closed){
-      proj <<- editData(projVal(), input$x1_row_edit, 'x1')
-    }
-    projVal()
-  })
+  ##projVal <- reactiveVal(proj)
+  #observe({
+  #  if(edit_value_p$modal_closed){
+  #    
+  #    # after pop-up window closed
+  #    
+  #    observeEvent(input$save_p, {
+  #      #p <- projVal()
+  #      #if (!is.null(input$x1_rows_selected)) {
+  #      #  p <- p[-as.numeric(input$x1_rows_selected),]
+  #      #}
+  #      if (!is.null(input$edit_proj_table_row_edit)){
+  #        save_ep <- editData(ep, input$edit_proj_table_row_edit) ##???
+  #      }
+  #      projVal(save_ep)
+  #      fwrite(projVal(),'df_proj.csv',row.names = FALSE)
+  #  })
+  #  }
+  #})
   
   ## ??? pop-up window cannot save
   ## Warning: Error in split.default: first argument must be a vector 
@@ -785,7 +816,7 @@ options(DT.options = list(pageLength = 10)) ## The initial display is 10 rows
                                 'Status',                                
                                 backgroundColor = styleEqual(
                                   ## different status,different colours
-                                  c('On Hold','Ongoing','Complete','Published'), 
+                                  c('On Hold','Ongoing','Completed','Published'), 
                                   c("#C1CDCD", "#FDDBC7", "#92C5DE", "#B4EEB4")
                                 )
               )
@@ -866,7 +897,7 @@ output$one_proj_datasets <- renderDT({
                       'Status',                                
                       backgroundColor = styleEqual(
                         ## different status,different colours
-                        c('On Hold','Ongoing','Complete','Published'), 
+                        c('On Hold','Ongoing','Completed','Published'), 
                         c("#C1CDCD", "#FDDBC7", "#92C5DE", "#B4EEB4")
                       )
     )
@@ -890,10 +921,11 @@ output$one_proj_datasets <- renderDT({
     server = FALSE    ## client-side processing
     datatable(
     projVal(),
-    rownames = FALSE,
+    rownames = FALSE, # hide row names
      
     selection = list(target = 'row'),   ## Multiple selection: rows
-    #editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
+    ###
+    editable = list(target = "cell", disable = list(columns = c(0,1,4))), ## cannot edit column1
     filter = list(position = 'top', clear = FALSE),
     extensions = c('Buttons','FixedColumns','Select', 'SearchPanes'),
     options = list(
@@ -907,14 +939,15 @@ output$one_proj_datasets <- renderDT({
       search = list(regex = TRUE),
       #columnDefs = list(list(targets = c(3), searchable = FALSE)) 
       #Disable Searching for Individual Columns
-      columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:2)) ## ???no searchPanes
+      columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:2)) 
+      ## ???no searchPanes
     ) 
                         
     ) %>% formatStyle(c('Project.Name','Status'),
                       'Status',                                
                        backgroundColor = styleEqual(
                          ## different status,different colours
-                         c('On Hold','Ongoing','Complete','Published'), 
+                         c('On Hold','Ongoing','Completed','Published'), 
                          c("#C1CDCD", "#FDDBC7", "#92C5DE", "#B4EEB4")
                        )
     )

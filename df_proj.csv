@@ -1,11 +1,9 @@
 Project.ID,Project.Name,Parent,Description,Start.Date,Path,Sample.Sheet,Researcher,Bioinformatician,Group,Report,Status,Data.Repository,Code.Repository,Permissions
-14,tt_oo,"",tt,2021-08-01,"","",Lucy,Lucy,Fire,"",Complete,tt,tt,Individual
-13,cc_nn,"",cn,2021-08-01,"","",Mia,Mia,BioC,"",Ongoing,cn,cn,Group
+13,eee_tt_Tttttt,6,wetr,2021-08-02,"","",Mia,Mia,BioC,"",Completed,wef,wfe,Group
 12,www_qq_pp,,we,2021-07-31,"","",JCW,JCW,Dog,"",Ongoing,we,we,Group
 11,eeeeeeee_rt,,ee,2021-07-31,"","",JCW,JCW,Dog,"",Ongoing,e,e,Group
 10,y_u_i,3,yui,2021-07-31,"","",Mingyu,Mingyu,Wind,"",Ongoing,yui,yui,Group
 9,q_w_e,6,qwe,2021-07-31,"","",Mingyu,Mingyu,Wind,"",On Hold,qwe,qwe,Open
-8,d_e_f,6,dd,2021-07-30,"","",Emma,Emma,Wind,"",On Hold,dd,dd,Group
 7,a_b_c,3,aa,2021-07-30,"","",Mingyu,Mingyu,Wind,"",Ongoing,aa,aa,Group
 1,Bird_JCW_Shaun_2018,3,"",13/04/2018,/homes/swebb/data/Bird/JCW/MeCP2_April18,www.bifx-core.bio.ed.ac.uk/swebb/Bird/,JCW,Shaun,Bird,www.bifx-core.bio.ed.ac.uk/swebb/Bird/,Published,GEO: GSE1000,www.github.com/swebb/MeCP2,Group
 2,Bird_SL_Shaun_2019,3,"",19/05/2019,/homes/swebb/data/Bird/SL/mCG_BS-seq_May19,www.bifx-core.bio.ed.ac.uk/swebb/Bird/,SL,Shaun,Bird,www.bifx-core.bio.ed.ac.uk/swebb/Bird/,Published,GEO: GSE1000,www.github.com/swebb/Me3,Group

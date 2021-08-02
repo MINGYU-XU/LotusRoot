@@ -1,7 +1,6 @@
 #
-# This is my laboratory information management system (LIMS)
-# Shiny web application
-# 
+# This is LotusRoot Shiny web application
+# tracking sequencing data
 #--------------------------------------------------------------------
 # problems:
 
@@ -12,17 +11,8 @@
 #   Edit tables by pop-up window or fixed blanks
 
 #   A button back to initial state
-#   Help page
 
-
-#PROBLEM
-# real time login???
-# check if it is not unique -> hide button ??
-
-
-#  !/User permissions
 #   Editable permissions???
-
 
 #---------------------------------------------------------------------
 
@@ -177,9 +167,9 @@ body <- dashboardBody(
                     uiOutput("proj_bioinfo"),
                     uiOutput("proj_group"),
                     textInput('projdataRepository', 'Data Repository:', placeholder = 'Web address/GEO number(eg. GEO10000)'),
-                    textInput('codeRepository', 'Code Repository:', placeholder = 'Where your code stored (eg.GitHub URL / path'),
+                    textInput('codeRepository', 'Code Repository:', placeholder = 'Where your code stored (eg.GitHub URL / path)'),
                     selectInput("projStatus", "Status:",
-                                c("Complete" = "Complete",
+                                c("Completed" = "Completed",
                                   "On Hold"="On Hold",              ## different colours:blue,gray,green,yellow
                                   "Published" = "Published",
                                   "Ongoing" = "Ongoing"), selected = 'Ongoing'),
@@ -352,8 +342,7 @@ body <- dashboardBody(
                             contact your System_Maintenance or Project_Supervisor to do that for you.
                             And you can choose 'Other' in the group input box for the time being.")
                      ),
-                     #h5(""), 
-                     #h5(""),
+                     
                      h5("")
               ),
               column(1),
