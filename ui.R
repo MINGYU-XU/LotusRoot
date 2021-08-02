@@ -83,7 +83,7 @@ body <- dashboardBody(
             h5("Click here to get LotusRoot manual:"),
             uiOutput("home_manual"),
             helpText("If you have any problems about using this App, please turn to the FAQ page."),
-            helpText("If the FAQ page does not solve your problem, please contact s2045156@ed.ac.uk. We are very happy to help you!"),
+            helpText("If the FAQ page does not solve your problem, please contact s1234567@ed.ac.uk. We are very happy to help you!"),
             #verbatimTextOutput("auth_output")
             br(),
             h5("Related Links:"),
