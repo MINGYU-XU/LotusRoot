@@ -11,7 +11,7 @@ library(tidyverse)
 #library(shinymanager)
 library(DT)
 library(readr)
-library(dplyr)
+#library(dplyr)
 library(tidyr)
 library(shinyFeedback)
 library(data.table) ## fwrite: fast
