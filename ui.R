@@ -8,14 +8,14 @@ library(shiny)
 library(shinydashboard)
 library(shinyjs)
 library(tidyverse)
-library(shinymanager)
+#library(shinymanager)
 library(DT)
 library(readr)
 library(dplyr)
 library(tidyr)
 library(shinyFeedback)
 library(data.table) ## fwrite: fast
-library(rhandsontable)
+#library(rhandsontable)
 
 # ui
 # dashboard_header -----

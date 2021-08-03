@@ -178,9 +178,9 @@ server <- function(input, output,session) {
       shinyjs::hide("delete_data")
       #shinyjs::hide("admin_item")
     } else if(pm == 'Project_Supervisor'){
-      shinyjs::hide("add_data")
-      shinyjs::hide("edit_data")
-      shinyjs::hide("delete_data")
+      #shinyjs::hide("add_data")
+      #shinyjs::hide("edit_data")
+      #shinyjs::hide("delete_data")
       output$admin_item <- renderMenu({
         menuItem("Administrator", tabName = "admin",icon = icon(name="user-cog"),
                  menuSubItem("Project Options", tabName = "admin_p", 
@@ -188,9 +188,9 @@ server <- function(input, output,session) {
                  startExpanded = F)
       })
     } else if(pm == 'Data_Administrator'){
-      shinyjs::hide("add_proj")
-      shinyjs::hide("edit_proj")
-      shinyjs::hide("delete_proj")
+      #shinyjs::hide("add_proj")
+      #shinyjs::hide("edit_proj")
+      #shinyjs::hide("delete_proj")
       output$admin_item <- renderMenu({
         menuItem("Administrator", tabName = "admin",icon = icon(name="user-cog"),
                  menuSubItem("Dataset Options", tabName = "admin_d", 
@@ -537,7 +537,7 @@ options(DT.options = list(pageLength = 8)) ## The initial display is 8 rows
       title = "Edit Dataset", 
       
       renderDataTable({
-        ed <- data[input$x2_rows_selected,]
+        ed <- datas[input$x2_rows_selected,]
         datatable(ed,
                   escape = FALSE,
                   rownames = FALSE, # hide row names
@@ -565,7 +565,7 @@ options(DT.options = list(pageLength = 8)) ## The initial display is 8 rows
   
   observe({
     if(edit_value_d$modal_closed){
-      data <<- editData(dataVal(), input$x2_row_edit, 'x2')
+      datas <<- editData(dataVal(), input$x2_row_edit, 'x2')
     }
   })
   
@@ -711,14 +711,19 @@ options(DT.options = list(pageLength = 8)) ## The initial display is 8 rows
     else { pids <- projVal()[input$x1_rows_selected,"Project.ID"] }
     return(pids)
   })
-  
+  # Parent ID
+  parent_ids <- reactive({
+    if(length(input$x1_rows_selected)==0) {return(NULL)}   ## No output
+    else { parent_ids <- projVal()[input$x1_rows_selected,"Parent"] }
+    return(parent_ids)
+  })
   # all parent IDs
   ptids <- reactive({
     if(length(input$x1_rows_selected)==0) {return(NULL)}   
     else { ptids <- projVal()[,"Parent"] }
     return(ptids)
   })
-  
+  # related datasets -----
   output$related_datasets <- renderDT({
     pid<-pids()
     ptids <-ptids()
@@ -742,11 +747,13 @@ options(DT.options = list(pageLength = 8)) ## The initial display is 8 rows
                              fixedColumns = list(leftColumns = 1))
     )
   })
-
+  # related projects -----
   output$rp <- renderDT({
     pid<-pids()
-    ds <- projVal() %>% filter(Parent  %in% pid)   ## Filter the table
-    ds <- rbind(projVal()[input$x1_rows_selected,],ds)
+    parent_id <- parent_ids()
+    ds1 <- projVal() %>% filter(Parent  %in% pid)   ## Filter the table
+    ds2 <- projVal() %>% filter(Project.ID  %in% parent_id) 
+    ds <- rbind(ds2,projVal()[input$x1_rows_selected,])
     ds <<- ds[!duplicated(ds),] ## Delete duplicate rows
     datatable(ds, 
               rownames = FALSE,
@@ -765,8 +772,8 @@ options(DT.options = list(pageLength = 8)) ## The initial display is 8 rows
                                 )
               )
   })
-    
-output$one_proj_datasets <- renderDT({
+  # Datasets for One Project
+  output$one_proj_datasets <- renderDT({
     if(length(input$rp_rows_selected)==0) {return(NULL)}   ## No output 
     else { 
       show_id <- ds[input$rp_rows_selected,"Project.ID"]
@@ -785,14 +792,13 @@ output$one_proj_datasets <- renderDT({
 })
     
   # related proj -> related dataset -----
-  show_ids <- reactive({
-    if(length(input$rp_rows_selected)==0) {return(NULL)}   ## No output
-    else { show_ids <- projVal()[input$rp_rows_selected,"Project.ID"] }
-    return(show_ids)
-  })
+  #show_ids <- reactive({
+  #  if(length(input$rp_rows_selected)==0) {return(NULL)}   ## No output
+  #  else { show_ids <- projVal()[input$rp_rows_selected,"Project.ID"] }
+  #  return(show_ids)
+  #})
     
-    
- 
+
 # data -> proj  -----
   ## if no row(in x1) selected, No table
   ## if select one row, display the projs include the data
