@@ -1,10 +1,8 @@
 Data.ID,Related.ProjectID,Data.Name,Description,Date,Path,Data.Repository,Method,Organism,Tissue.Cell,Genotype,Format
-12,1,m_BS_2,BS2,2021-08-04,"",GEO222222,BS-seq,Other,Brain,KO,Other
-11,1,m_BS_1,BS1,2021-08-04,"",GEO111111,BS-seq,Other,Brain,WT,Other
+8,5,Hum_2_1,human2-1,26/07/2019,/library/Hill/SL/Hum/A1.fq,GEO:GSM800,ChIP-seq,Human,Liver,WT(wildtype),fastq.gz
+7,4,Hum_1_3,human1-3,26/07/2019,/library/Hill/SL/Hum/003.fq,GEO:GSM700,ChIP-seq,Human,Liver,WT(wildtype),fastq.gz
 10,5,Hum_2_3,human2,26/05/2021,/library/Wind/SL/Hum/A3.fq,GEO:GSM600,ChIP-seq,Human,Kidney,WT(wildtype),fastq.gz
 9,5,Hum_2_2,human2,26/05/2021,/library/Wind/SL/Hum/A2.fq,GEO:GSM601,ChIP-seq,Human,Kidney,WT(wildtype),fastq.gz
-8,5,Hum_2_1,human2,26/05/2021,/library/Wind/SL/Hum/A1.fq,GEO:GSM602,ChIP-seq,Human,Kidney,TG(transgenic),fastq.gz
-7,4,Hum_1_3,human1,26/07/2019,/library/Hill/SL/Hum/003.fq,GEO:GSM700,ChIP-seq,Human,Liver,WT(wildtype),fastq.gz
 6,4,Hum_1_2,human1,26/07/2019,/library/Hill/SL/Hum/002.fq,GEO:GSM701,ChIP-seq,Human,Liver,WT(wildtype),fastq.gz
 5,4,Hum_1_1,human1,15/05/2019,/library/Hill/SL/Hum/001.fq,GEO:GSM702,ChIP-seq,Human,Liver,TG(transgenic),fastq.gz
 4,2,mCG_BS_WT2,mCG_BS_WT,14/05/2018,/library/Bird/SL/mCG/B2.fq,GEO:GSM1500,BS-seq,Mouse,Neuron,TG(transgenic),fastq
