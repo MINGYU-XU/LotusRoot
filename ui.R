@@ -50,8 +50,9 @@ sidebar <- dashboardSidebar(
              icon = icon(name="user-friends")),
     menuItem("FAQ", tabName = "FAQ", 
              icon = icon(name="question-circle")),
-    menuItemOutput("admin_item")
-
+    menuItemOutput("admin_item"),
+    menuItem("Logout", tabName = "logout", 
+             icon = icon(name="sign-out"))
   )
 )
 
@@ -165,7 +166,7 @@ body <- dashboardBody(
               )),
             fluidRow(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
-                  h3("Datasets for One Project"),
+                  h3("Datasets per project"),
                   DTOutput(outputId='one_proj_datasets')
               ))
             ),
@@ -257,7 +258,7 @@ body <- dashboardBody(
                          helpText("Question: "),
                          h5("What are the different permissions? What can I do with my permissions?"),
                          helpText("Answer: "),
-                         tags$img(src = "permissions_intro.png", height = 250),
+                         tags$img(src = "permissions_intro2.png", height = 250),
                          ),
                      box(width = 12,
                          helpText("Question: "),
@@ -269,7 +270,7 @@ body <- dashboardBody(
                          ),
                      box(width = 12,
                          helpText("Question: "),
-                         h5("How to find the C related to a dataset?"),
+                         h5("How to find the project related to a dataset?"),
                          helpText("Answer: "),
                          h5("Go to 'Datasets' page --> 
                             Select the dataset you want --> 
@@ -430,7 +431,12 @@ body <- dashboardBody(
                 )
               )
             )
-    )
+    ),
+    tabItem(tabName = "logout",
+            h3("Want to Log Out?"),
+            h5(),
+            actionButton('logout_btn','Logout')
+            )
   )
 )
   

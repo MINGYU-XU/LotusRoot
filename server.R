@@ -40,6 +40,9 @@ server <- function(input, output,session) {
     #tagList("GitHub:", github_url)
   })
   
+  
+  
+  
 # show login/register dialog box when initiated
   # define the ui of the login dialog box
   login_dialog <- modalDialog(
@@ -74,6 +77,7 @@ server <- function(input, output,session) {
 # validate the login username and password 
   userVal <- reactiveVal(user)
   observeEvent(input$tab_login.login, {
+    
     username <- input$tab_login.username
     password <- input$tab_login.password
     #row.names(user) <- user$Name
@@ -343,40 +347,40 @@ options(DT.options = list(pageLength = 10))
   # data options 
   output$related_project_name <- renderUI(
     selectizeInput('dataprojID', 'Related Project Name(optional):',
-                choices = projVal()[,2],
-                selected = NULL,
-                multiple = FALSE
+                choices = projVal()[,2]
+                #selected = NULL
+                #multiple = FALSE
     )
   )
   output$data_method <- renderUI(
     selectizeInput("method", "Method:",
                 choices = am_method_val()[,1],
-                multiple = F,
-                selected = NULL
+                multiple = F
+                #selected = NULL
                 #options = list(`actions-box` = TRUE)
     )
   )
   output$data_organism <- renderUI(
     selectizeInput("organism", "Organism:",
-                choices = am_organism_val()[,1],
-                multiple = F,
-                selected = NULL
+                choices = am_organism_val()[,1]
+                #multiple = F,
+                #selected = NULL
                 #options = list(`actions-box` = TRUE)
     )
   )
   output$data_cell <- renderUI(
     selectizeInput("cell", "Tissue/Cell:",
-                choices = am_cell_val()[,1],
-                multiple = F,
-                selected = NULL
+                choices = am_cell_val()[,1]
+                #multiple = F,
+                #selected = NULL
                 #options = list(`actions-box` = TRUE)
     )
   )
   output$data_format <- renderUI(
     selectizeInput("format", "Format:",
-                choices = am_format_val()[,1],
-                multiple = F,
-                selected = NULL
+                choices = am_format_val()[,1]
+                #multiple = F,
+                #selected = NULL
                 #options = list(`actions-box` = TRUE)
     )
   )
@@ -393,8 +397,13 @@ options(DT.options = list(pageLength = 10))
   
   #dataVal <- reactiveVal(datas)
   observeEvent(input$add_data,{
-    # change input:'Project.Name' to 'Project.ID', and store 'Project.ID' into the project table
-    input_related_parentID <- projVal() %>% filter(Project.Name==input$dataprojID) %>% pull(Project.ID)
+    if(!is.null(input$dataprojID)) {
+      # change input:'Project.Name' to 'Project.ID', and store 'Project.ID' into the project table
+      input_related_parentID <- projVal() %>% filter(Project.Name==input$dataprojID) %>% pull(Project.ID)
+    } else {
+      input_related_parentID <- 'NA'  #### ???
+      
+    }
     
     t <- rbind(data.frame(
       Data.ID = cd,#counter_d(),#nrow(datas)+1
@@ -709,6 +718,7 @@ options(DT.options = list(pageLength = 10))
     else { ptids <- projVal()[,"Parent"] }
     return(ptids)
   })
+  
   # related datasets -----
   output$related_datasets <- renderDT({
     pid<-pids()
@@ -733,17 +743,44 @@ options(DT.options = list(pageLength = 10))
                              fixedColumns = list(leftColumns = 1))
     )
   })
+  
   # related projects -----
   output$rp <- renderDT({
-    pid<-pids()
-    parent_id <- parent_ids()
-    rp1 <- projVal() %>% filter(Parent  %in% pid)   ## Filter subs, 选parent才显示sub，选sbu不显示
-    rp2 <- projVal() %>% filter(Project.ID  %in% parent_id) ## Filter parent, 选sub才显示sub，选parent不显示
-    #if(!is.null(input$admin_user_info_rows_selected)){
-    rp0 <- rbind(rp2,projVal()[input$x1_rows_selected,],rp1)#,rp2) #,projVal()[input$x1_rows_selected,])
-    rp0 <<- rp0[!duplicated(rp0),] ## Delete duplicate rows
-    #}
-    datatable(rp0, 
+    pid<-pids() #seleted project id(s)
+    parent_id <- parent_ids() # selected parent id(s)
+    all_parent_id <- ptids() # all parent IDs
+    
+    rp_all <- NULL
+  
+  if(length(input$x1_rows_selected)==0){
+    return(NULL)
+  }
+  
+  for (id in pid){
+    if(id %in% all_parent_id){
+      rp1 <- projVal() %>% filter(Parent %in% pid) 
+      rp2 <- projVal() %>% filter(Project.ID==pid)
+      rp0 <- rbind(rp2,rp1)
+    } else {
+      rp1 <- projVal() %>% filter(Parent  %in% parent_id)
+      rp2 <- projVal() %>% filter(Project.ID==parent_id)
+      rp0 <- rbind(rp2,rp1)
+    }
+    rp_all <- rbind(rp_all,rp0)
+  }
+    
+    
+    #rp1 <- projVal() %>% filter(Parent  %in% pid)   
+    ## Filter subs, 选parent才显示sub，选sbu不显示
+    
+    #rp2 <- projVal() %>% filter(Project.ID  %in% parent_id) 
+    ## Filter parent, 选sub才显示，选parent不显示
+    
+    #rp0 <- rbind(rp2,projVal()[input$x1_rows_selected,],rp1)#,rp2) #,projVal()[input$x1_rows_selected,])
+    
+    rp_all <<- rp_all[!duplicated(rp_all),] ## Delete duplicate rows
+    
+    datatable(rp_all, 
               rownames = FALSE,
               selection="single", 
               #extensions = "FixedColumns",
@@ -760,11 +797,11 @@ options(DT.options = list(pageLength = 10))
                                 )
               )
   })
-  # Datasets for One Project
+  # Datasets per project
   output$one_proj_datasets <- renderDT({
     if(length(input$rp_rows_selected)==0) {return(NULL)}   ## No output 
     else { 
-      show_id <- rp0[input$rp_rows_selected,"Project.ID"]
+      show_id <- rp_all[input$rp_rows_selected,"Project.ID"]
       show_ds <- dataVal() %>% filter(Related.ProjectID %in% show_id)   ## Filter the dataset table
       datatable(show_ds,
                 rownames = FALSE,
@@ -1449,6 +1486,30 @@ options(DT.options = list(pageLength = 10))
     tagList(manual_link)
   })
 
+  
+  
+# *Log out
+  observeEvent(input$logout_btn,{
+    showModal(modalDialog(
+      "You successfully logged out! Thanks for using LotueRoot!", 
+      title = "Logout", 
+      easyClose = F,  ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+      footer = list(
+        actionButton("close_page",label = "Close App"),
+        actionButton("go_to_login",label = "Login again")
+      ))
+    )
+  })
+  observeEvent(input$close_page,{
+    stopApp()
+  })
+  observeEvent(input$go_to_login,{
+    showModal(login_dialog)
+  })
+  
+  
+  
+  
 }
 
 

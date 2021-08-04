@@ -1,13 +1,14 @@
-Name,Email,Group.Lab.Center,Permissions,Password
-g,gg@ed.ac.uk,Wind,General_Staff,g
-d,dd@gmail.com,Wind,Data_Administrator,d
-p,pp@ed.ac.uk,Dog,Project_Supervisor ,p
-Debby,debby@ed.ac.uk,Bird,General_Staff,dd
-Emma,emma@ed.ac.uk,Bird,Data_Administrator,ee
-a,aa@ed.ac.uk,Wind,System_Maintenance,a
-Bobby,bb@gmail.com,Hill,Project_Supervisor ,bb
-xmy,123@qq.com,Hill,System_Maintenance,xmy
-zz,zz@ed.ac.uk,Bird,Data_Administrator,zz
-Lucy,lucy@ed.ac.uk,Wind,Project_Supervisor,ll
-Kate,kk@ed.ac.uk,Hill,General_Staff,kk
-David,David@ed.ac.uk,Bird,Data_Administrator,dd
+Name,Password,Email,Group.Lab.Center,Permissions
+Amy,aa,amy@gmail.com,Dog,General_Staff
+g,g,gg@ed.ac.uk,Wind,General_Staff
+d,d,dd@gmail.com,Wind,Data_Administrator
+p,p,pp@ed.ac.uk,Dog,Project_Supervisor 
+Debby,dd,debby@ed.ac.uk,Bird,General_Staff
+Emma,ee,emma@ed.ac.uk,Bird,Data_Administrator
+a,a,aa@ed.ac.uk,Wind,System_Maintenance
+Bobby,bb,bb@gmail.com,Hill,Project_Supervisor 
+xmy,xmy,123@qq.com,Hill,System_Maintenance
+zz,zz,zz@ed.ac.uk,Bird,Data_Administrator
+Lucy,ll,lucy@ed.ac.uk,Wind,Project_Supervisor
+Kate,kk,kk@ed.ac.uk,Hill,General_Staff
+David,dd,David@ed.ac.uk,Bird,Data_Administrator
