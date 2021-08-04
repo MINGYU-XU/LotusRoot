@@ -142,6 +142,7 @@ body <- dashboardBody(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
                   h3("Project Table"),
                   h5(),
+                  helpText("Select sub-projects OR parent projects to see related datasets below."),
                   DTOutput(outputId='x1'),   ## projects table
                   #rHandsontableOutput("hot"),
                   actionButton('edit_proj', 'Edit',style = "color: white; background-color: teal"),
@@ -315,7 +316,10 @@ body <- dashboardBody(
                   ),
                   br(),
                   box(width = 12, 
+                      helpText("To edit user information, please double-click where you want to edit."),
+                      helpText("The changes are automatically saved!"),
                       DTOutput(outputId='admin_user_info'),
+                      #actionButton('edit_user','Edit',style = "color: white; background-color: teal"),
                       actionButton('delete_user','Delete',style = "color: white; background-color: red"))
               ))
     ),

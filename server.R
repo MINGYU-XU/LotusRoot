@@ -578,7 +578,7 @@ options(DT.options = list(pageLength = 10))
           d <- d[-as.numeric(input$x2_rows_selected),]
         }
         # then add edited rows
-        ed <- rbind(edited_data_popup,d)	
+        ed <<- rbind(edited_data_popup,d)	
         dataVal(ed)
         # save to file
         fwrite(dataVal(),'df_data.csv',row.names = FALSE)
@@ -649,14 +649,14 @@ options(DT.options = list(pageLength = 10))
   
   observe({
     if(edit_value_p$modal_closed){
-      observeEvent(input$save_peoj.popup, {
+      observeEvent(input$save_proj.popup, {
         p = projVal()
         # delete old rows
         if (!is.null(input$x1_rows_selected)) {
           p <- p[-as.numeric(input$x1_rows_selected),]
         }
         # then add edited rows
-        edited_p <- rbind(edited_proj_popup,p)	
+        edited_p <<- rbind(edited_proj_popup,p)	
         projVal(edited_p)
         # save to file
         fwrite(projVal(),'df_proj.csv',row.names = FALSE)
@@ -737,17 +737,19 @@ options(DT.options = list(pageLength = 10))
   output$rp <- renderDT({
     pid<-pids()
     parent_id <- parent_ids()
-    ds1 <- projVal() %>% filter(Parent  %in% pid)   ## Filter the table
-    ds2 <- projVal() %>% filter(Project.ID  %in% parent_id) 
-    ds <- rbind(ds2,projVal()[input$x1_rows_selected,])
-    ds <<- ds[!duplicated(ds),] ## Delete duplicate rows
-    datatable(ds, 
+    rp1 <- projVal() %>% filter(Parent  %in% pid)   ## Filter subs, 选parent才显示sub，选sbu不显示
+    rp2 <- projVal() %>% filter(Project.ID  %in% parent_id) ## Filter parent, 选sub才显示sub，选parent不显示
+    #if(!is.null(input$admin_user_info_rows_selected)){
+    rp0 <- rbind(rp2,projVal()[input$x1_rows_selected,],rp1)#,rp2) #,projVal()[input$x1_rows_selected,])
+    rp0 <<- rp0[!duplicated(rp0),] ## Delete duplicate rows
+    #}
+    datatable(rp0, 
               rownames = FALSE,
               selection="single", 
-              extensions = "FixedColumns",
+              #extensions = "FixedColumns",
               options = list(SortClasses = TRUE, 
-                             scrollX = TRUE,
-                             fixedColumns = list(leftColumns = 1)
+                             scrollX = TRUE
+                             #fixedColumns = list(leftColumns = 1)
                              )
               ) %>% formatStyle(c('Project.Name','Status'),
                                 'Status',                                
@@ -762,16 +764,17 @@ options(DT.options = list(pageLength = 10))
   output$one_proj_datasets <- renderDT({
     if(length(input$rp_rows_selected)==0) {return(NULL)}   ## No output 
     else { 
-      show_id <- ds[input$rp_rows_selected,"Project.ID"]
+      show_id <- rp0[input$rp_rows_selected,"Project.ID"]
       show_ds <- dataVal() %>% filter(Related.ProjectID %in% show_id)   ## Filter the dataset table
       datatable(show_ds,
                 rownames = FALSE,
                 selection=list(target = 'row'),#"single", 
-                extensions = "FixedColumns",
+                #extensions = "FixedColumns",
                 options = list(SortClasses = TRUE, 
                                scrollX = TRUE,
-                               fixedHeader=TRUE,
-                               fixedColumns = list(leftColumns = 1))
+                               fixedHeader=TRUE
+                               #fixedColumns = list(leftColumns = 1)
+                               )
       )
     }
       
@@ -920,10 +923,10 @@ options(DT.options = list(pageLength = 10))
     u <- rbind(
       data.frame(
         Name = input$userName,  
-        Password = input$userPW,
         Email = input$userEmail,  
         Group.Lab.Center = input$userGroup, 
-        Permissions = input$userPermissions
+        Permissions = input$userPermissions,
+        Password = input$userPW
         ),userVal()) 
       
     userVal(u)
@@ -973,18 +976,38 @@ options(DT.options = list(pageLength = 10))
   
   # output user_info
   output$admin_user_info <- DT::renderDT(
-    userVal()[,c(1,3,4,5)], ##hide password col
+    userVal()[,c(1,2,3,4)], ##hide password col
     rownames = FALSE,
     server = FALSE,     ## client-side processing 
     selection = list(target = 'row'),   ## Multiple selection: rows
-    editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit column1
+    editable = list(target = "cell"), # disable = list(columns = c(0))# cannot edit column1
     filter = list(position = 'top', clear = FALSE),
     extensions = c('Buttons'),
-    options = list(dom = 'Blfrtip', style = 'os', items = 'row',
+    options = list(dom = 'lfrtip', style = 'os', items = 'row',
                    scrollX = TRUE,
-                   buttons = c('csv', 'excel', 'pdf'),
+                   #buttons = c('csv', 'excel', 'pdf'),
                    searchHighlight = TRUE,search = list(regex = TRUE))
   )
+  
+  # edit user information (no edit button)
+  proxy_admin_user_info <- dataTableProxy("admin_user_info")
+  observeEvent(input$admin_user_info_cell_edit, {
+    edit_user_table <<- userVal()
+    
+    info <- input$admin_user_info_cell_edit
+    str(info)
+    i <- info$row
+    j <- info$col+1  # column index offset by 1
+    v <- info$value
+    edit_user_table[i,j] <<- DT::coerceValue(v,edit_user_table[i,j])
+    replaceData(proxy_admin_user_info, edit_user_table, resetPaging = FALSE, rownames = FALSE)  # important
+    
+    edited_user_table <<- edit_user_table  # after edit
+    
+    userVal(edited_user_table)
+    
+    fwrite(userVal(),'register.csv',row.names = FALSE)
+  })
   
   
 # admin_proj -----
@@ -1281,7 +1304,7 @@ options(DT.options = list(pageLength = 10))
     selection = list(target = 'row'),
     editable = list(target = "cell", disable = list(columns = c(0))), 
     filter = list(position = 'top', clear = FALSE),
-    options = list(dom = 'Blfrtip', 
+    options = list(dom = 'lfrtip', 
                    style = 'os', 
                    items = 'row',
                    scrollX = TRUE,
