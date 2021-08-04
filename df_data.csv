@@ -1,4 +1,7 @@
 Data.ID,Related.ProjectID,Data.Name,Description,Date,Path,Data.Repository,Method,Organism,Tissue.Cell,Genotype,Format
+12,13,ni_2,nihaoa222,2021-08-04,"","",ChIP-seq,Other,Brain,"",Other
+11,13,ni_1,nihaoa111,2021-08-04,"","",ChIP-seq,Other,Brain,"",Other
+13,13,ni_3,"",2021-08-04,"","",ChIP-seq,Other,Brain,"",Other
 8,5,Hum_2_1,human2-1,26/07/2019,/library/Hill/SL/Hum/A1.fq,GEO:GSM800,ChIP-seq,Human,Liver,WT(wildtype),fastq.gz
 7,4,Hum_1_3,human1-3,26/07/2019,/library/Hill/SL/Hum/003.fq,GEO:GSM700,ChIP-seq,Human,Liver,WT(wildtype),fastq.gz
 10,5,Hum_2_3,human2,26/05/2021,/library/Wind/SL/Hum/A3.fq,GEO:GSM600,ChIP-seq,Human,Kidney,WT(wildtype),fastq.gz

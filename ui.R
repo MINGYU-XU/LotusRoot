@@ -204,6 +204,8 @@ body <- dashboardBody(
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
                   h3("Dataset Table"),
                   h5(),
+                  helpText("Note: If you want to select multiple options for the same class, 
+                           hold down the 'Ctrl' key to select."),
                   DTOutput(outputId='x2'),  ## the place to output datasets table
                   br(),
                   actionButton('edit_data', 'Edit',style = "color: white; background-color: teal"),

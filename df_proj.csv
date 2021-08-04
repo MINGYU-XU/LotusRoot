@@ -1,4 +1,8 @@
 Project.ID,Project.Name,Parent,Description,Start.Date,Path,Sample.Sheet,Researcher,Bioinformatician,Group,Report,Status,Data.Repository,Code.Repository,Permissions
+16,malemale,"","",2021-08-04,"","",Bobby,Bobby,"","",Ongoing,"","",Group
+15,baole,"","",2021-08-04,"","",Emma,Emma,"","",Completed,"","",Group
+14,chilema,"","",2021-08-04,"","",Lucy,Lucy,BioC,"",Completed,"","",Group
+13,nihao,"","",2021-08-04,"","",Mia,Mia,BioC,"",Ongoing,"","",Group
 12,a_b_y,7,"",02/08/2021,"","",Emma,Emma,Cat,"",Ongoing,aa,aa,Open
 8,e_t_i,,"",02/08/2021,"","",Mia,Mia,BioC,"",Completed,eti,eti,Group
 7,a_b_c,,"",30/07/2021,"","",Mingyu,Mingyu,Cat,"",Ongoing,aa,aa,Group

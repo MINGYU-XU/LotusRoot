@@ -846,10 +846,10 @@ options(DT.options = list(pageLength = 10))
       #fixedColumns = list(leftColumns = 1),
       buttons = c('csv', 'excel', 'pdf'),
       searchHighlight = TRUE,
-      search = list(regex = TRUE),
+      search = list(regex = TRUE)
       #columnDefs = list(list(targets = c(3), searchable = FALSE)) 
       #Disable Searching for Individual Columns
-      columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:2)) 
+      #columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:2)) 
       ## ??? no searchPanes
     ) 
                         
