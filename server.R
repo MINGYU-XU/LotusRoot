@@ -67,8 +67,7 @@ server <- function(input, output,session) {
   #register group options
   output$register_group <- renderUI(
     selectInput(inputId = "group", "Which Group/Lab/Research center you belong to?", 
-                choices =  am_group[,1]
-                )
+                choices =  am_group[,1])
   )
   
   
@@ -525,46 +524,94 @@ options(DT.options = list(pageLength = 8)) ## The initial display is 8 rows
   #  datas <<- editData(dataVal(), input$x2_row_edit, 'x2') ## double <
   #})
   
+  #-------------------------------------------------------
+  edit_data_dialog <- modalDialog(
+    title = 'Edit Datasets',
+    footer = actionButton('useless','  '), #这个footer为空
+    size = 'l', # large
+    easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+    helpText("To modify, please double-click where you want to edit."),
+    helpText('Press "Enter" or "Ctrl+Enter" to confirm your changes.'),
+    helpText("Note: Your changes are NOT automatically saved. Please click the save button after editing!!!"),
+    box(
+      width = 12,
+      uiOutput("edit_popup_x4"), #x4: edit data table # 这里放要编辑的rows_df
+      actionButton('save_data.popup','Save!',style = "color: white; background-color: red")
+      #verbatimTextOutput("successfully_edited_data")  ## 保存成功提示  
+      )  
+  )  
+  # showModal(edit_data_dialog) 
   
-  edit_value_d = reactiveValues(modal_closed=F)
+  output$edit_popup_x4 <- renderUI(
+    DTOutput(outputId='x4')
+  )
   
-  observeEvent(input$edit_data, {
-    edit_value_d$modal_closed <- F
-    showModal(modalDialog(
-      title = "Edit Dataset", 
-      
-      renderDataTable({
-        ed <- datas[input$x2_rows_selected,]
-        datatable(ed,
-                  escape = FALSE,
-                  rownames = FALSE, # hide row names
-                  editable = list(target = "row", 
-                                  disable = list(columns = c(0,1,5))), 
-                  # cannot edit project id, saart date
-                  extensions = "FixedColumns",
-                  options = list(SortClasses = TRUE,
-                                 scrollX = TRUE,
-                                 fixedColumns = list(leftColumns = 1)
-                                 )
-        )
-                      
-      }),
-      easyClose = TRUE, ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
-      footer = actionButton("save_d",label = "Save")
-    )
-    )
+  output$x4 <-
+    renderDT({
+      edit_data_popup <<- dataVal()[input$x2_rows_selected,]    #修改前的状态
+      datatable(
+        edit_data_popup,  #在x2里选中的想要编辑的行
+        escape = FALSE,
+        rownames = FALSE, # hide row names
+        editable = list(target = "cell",  ## 单个cell编辑
+                        disable = list(columns = c(0,1,4))), 
+        # cannot edit project id, start date
+        #extensions = "FixedColumns",
+        options = list(SortClasses = TRUE,
+                       scrollX = TRUE,
+                       dom = 'frtip')
+                       #fixedColumns = list(leftColumns = 1)
+      )
+    })
+  proxy_x4 <- dataTableProxy("x4")
+  
+  observeEvent(input$x4_cell_edit, {
+    info <- input$x4_cell_edit
+    str(info)
+    i <- info$row
+    j <- info$col+1  # column index offset by 1
+    v <- info$value
+    edit_data_popup[i,j] <<- DT::coerceValue(v,edit_data_popup[i,j])
+    replaceData(proxy_x4, edit_data_popup, resetPaging = FALSE, rownames = FALSE)  # important
+    
+    edited_data_popup <<- edit_data_popup
   })
   
-  observeEvent(input$save_d,{
+
+  
+  
+  
+  edit_value_d = reactiveValues(modal_closed=F)
+  observeEvent(input$edit_data, {
+    edit_value_d$modal_closed <- F
+    showModal(edit_data_dialog)
+  })
+  # 点击了popup里面的save按钮之后，popup关闭
+  observeEvent(input$save_data.popup,{  
     edit_value_d$modal_closed <- T
-    removeModal()
+    removeModal()  
   })  
+  # popup关闭之后，要把x4里的行 覆盖掉 x2里对应的行
   
   observe({
     if(edit_value_d$modal_closed){
-      datas <<- editData(dataVal(), input$x2_row_edit, 'x2')
+      ### edit_data_popup <- datas[input$x2_rows_selected,]    #修改前的状态
+      
+      observeEvent(input$save_data.popup, {
+        d = dataVal()
+        # 先删除选中的行
+        if (!is.null(input$x2_rows_selected)) {
+          d <- d[-as.numeric(input$x2_rows_selected),]
+        }
+        # 再把x4里面编辑过的，加到data table里
+        ed <- rbind(edited_data_popup,d)	
+        dataVal(ed)
+        
+        fwrite(dataVal(),'df_data.csv',row.names = FALSE)
+      })
     }
   })
+  
   
 
   
@@ -854,7 +901,7 @@ options(DT.options = list(pageLength = 8)) ## The initial display is 8 rows
       style = 'os', 
       items = 'row',
       scrollX = TRUE,
-      fixedColumns = list(leftColumns = 1),
+      #fixedColumns = list(leftColumns = 1),
       buttons = c('csv', 'excel', 'pdf'),
       searchHighlight = TRUE,
       search = list(regex = TRUE),
@@ -891,7 +938,7 @@ options(DT.options = list(pageLength = 8)) ## The initial display is 8 rows
       style = 'os', 
       items = 'row',
       scrollX = TRUE,
-      fixedColumns = list(leftColumns = 1),
+      #fixedColumns = list(leftColumns = 1),
       buttons = c('csv', 'excel', 'pdf'), 
       searchHighlight = TRUE,
       search = list(regex = TRUE),
