@@ -201,7 +201,7 @@ server <- function(input, output,session) {
   
 
 #Proj/Data
-options(DT.options = list(pageLength = 10)) ## The initial display is 8 rows
+options(DT.options = list(pageLength = 10)) 
   
 # *ADD -----
   
