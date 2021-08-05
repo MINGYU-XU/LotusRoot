@@ -109,7 +109,7 @@ body <- dashboardBody(
                     textInput("projName","Project Name:",placeholder = 'Project Name (eg. BioCenter_Lucy_2021)'),
                     uiOutput("proj_parent"),
                     textInput('projDescription', 'Description:', placeholder = 'Brief description of your project'),
-                    dateInput('projDate', 'Start Date:',format = "dd/mm/yyyy",startview = 'month', language = 'en'),
+                    dateInput('projDate', 'Start Date:',format = "yyyy-mm-dd",startview = 'month', language = 'en'),
                     textInput('projPath', 'Path(optional):', placeholder = 'Where the project stored on the server/URL'),
                     textInput('projSampleSheet', 'Sample Sheet(optional):', placeholder = 'Path/URL where the sample sheet stored'),
                     textInput('projReport', 'Report(optional):',placeholder = 'Path/URL where the project report stored')
@@ -183,7 +183,7 @@ body <- dashboardBody(
                     textInput('dataName', 'Dataset Name:', placeholder = 'eg. mCG_BS_WT1, mCG_BS_WT1'),
                     textInput('dataDescription', 
                               'Description:', placeholder = 'Brief description of your dataset'),
-                    dateInput('dataDate', 'Date:',format = "dd/mm/yyyy",startview = 'month', language = 'en'),
+                    dateInput('dataDate', 'Date:',format = "yyyy-mm-dd",startview = 'month', language = 'en'),
                     textInput('dataPath', 'Path(optional):', placeholder = 'Where the data stored on the server/URL'),
                     textInput('dataRepository', 'Data Repository:', placeholder = 'Web address/GEO number(eg. GEO10000)'),
                   ),

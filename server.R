@@ -346,7 +346,7 @@ options(DT.options = list(pageLength = 10))
   
   # data options 
   output$related_project_name <- renderUI(
-    selectizeInput('dataprojID', 'Related Project Name(optional):',
+    selectizeInput('dataprojID', 'Related Project Name(required):',
                 choices = projVal()[,2]
                 #selected = NULL
                 #multiple = FALSE
@@ -397,13 +397,10 @@ options(DT.options = list(pageLength = 10))
   
   #dataVal <- reactiveVal(datas)
   observeEvent(input$add_data,{
-    if(!is.null(input$dataprojID)) {
+    #if(!is.null(input$dataprojID)) {
+    if(!input$dataprojID==""){
       # change input:'Project.Name' to 'Project.ID', and store 'Project.ID' into the project table
       input_related_parentID <- projVal() %>% filter(Project.Name==input$dataprojID) %>% pull(Project.ID)
-    } else {
-      input_related_parentID <- 'NA'  #### ???
-      
-    }
     
     t <- rbind(data.frame(
       Data.ID = cd,#counter_d(),#nrow(datas)+1
@@ -442,6 +439,14 @@ options(DT.options = list(pageLength = 10))
     #updateTextInput(session, "treatment", value = "")     
     
     fwrite(dataVal(),'df_data.csv',row.names = FALSE)
+    } else {
+      #input_related_parentID <- 'NA'
+      output$new_data_added <- renderPrint({
+        cat("Please choose a project!")
+        #shinyjs::delay(5000, hide('new_data_added'))
+      })
+      
+    }
   })
   
  
@@ -762,8 +767,8 @@ options(DT.options = list(pageLength = 10))
       rp2 <- projVal() %>% filter(Project.ID==pid)
       rp0 <- rbind(rp2,rp1)
     } else {
-      rp1 <- projVal() %>% filter(Parent  %in% parent_id)
-      rp2 <- projVal() %>% filter(Project.ID==parent_id)
+      rp1 <- projVal() %>% filter(Parent  %in% na.omit(parent_id)) ##Remove NAs
+      rp2 <- projVal() %>% filter(Project.ID %in% na.omit(parent_id)) ###Remove NAs and use %in% #(Project.ID==parent_id)
       rp0 <- rbind(rp2,rp1)
     }
     rp_all <- rbind(rp_all,rp0)
@@ -772,15 +777,15 @@ options(DT.options = list(pageLength = 10))
     
     #rp1 <- projVal() %>% filter(Parent  %in% pid)   
     ## Filter subs, 选parent才显示sub，选sbu不显示
-    
     #rp2 <- projVal() %>% filter(Project.ID  %in% parent_id) 
     ## Filter parent, 选sub才显示，选parent不显示
     
     #rp0 <- rbind(rp2,projVal()[input$x1_rows_selected,],rp1)#,rp2) #,projVal()[input$x1_rows_selected,])
     
-    rp_all <<- rp_all[!duplicated(rp_all),] ## Delete duplicate rows
+    rp_all.new <<- rp_all[!duplicated(rp_all),] ## Delete duplicate rows
+    #rp_all <<- unique(rp_all)
     
-    datatable(rp_all, 
+    datatable(rp_all.new, 
               rownames = FALSE,
               selection="single", 
               #extensions = "FixedColumns",
@@ -801,7 +806,7 @@ options(DT.options = list(pageLength = 10))
   output$one_proj_datasets <- renderDT({
     if(length(input$rp_rows_selected)==0) {return(NULL)}   ## No output 
     else { 
-      show_id <- rp_all[input$rp_rows_selected,"Project.ID"]
+      show_id <- rp_all.new[input$rp_rows_selected,"Project.ID"]
       show_ds <- dataVal() %>% filter(Related.ProjectID %in% show_id)   ## Filter the dataset table
       datatable(show_ds,
                 rownames = FALSE,
