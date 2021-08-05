@@ -262,6 +262,16 @@ body <- dashboardBody(
                          ),
                      box(width = 12,
                          helpText("Question: "),
+                         h5("What is Parent project?"),
+                         helpText("Answer: "),
+                         h5("The number in the column named “Parent” means the ID number of its parent project. 
+                            For example, the project(ID:1) has a parent project with the Project ID 3. 
+                            In other words, Project 1 is a sub-project of Project 3 and Project 3 is the parent-project of Project 1.")
+                     ),
+                     
+                     
+                     box(width = 12,
+                         helpText("Question: "),
                          h5("How to find the datasets related to a project?"),
                          helpText("Answer: "),
                          h5("Go to 'Projects' page --> 
