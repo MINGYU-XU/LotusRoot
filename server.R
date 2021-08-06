@@ -486,6 +486,7 @@ options(DT.options = list(pageLength = 10))
         }
         dataVal(d)
         fwrite(dataVal(),'df_data.csv',row.names = FALSE)
+        values$modal_closed <- F
       })
     }
   })
@@ -509,15 +510,15 @@ options(DT.options = list(pageLength = 10))
   })  
   
   observe({
-    r = projVal() ###
     if(values_p$modal_closed){
       observeEvent(input$delete_p, {
-        
+        dp = projVal() 
         if (!is.null(input$x1_rows_selected)) {
-          r <- r[-as.numeric(input$x1_rows_selected),]
+          dp <- dp[-as.numeric(input$x1_rows_selected),]
         }
-        projVal(r)
+        projVal(dp)
         fwrite(projVal(),'df_proj.csv',row.names = FALSE)
+        values_p$modal_closed <- F
       })
     }
   })
@@ -1014,6 +1015,7 @@ options(DT.options = list(pageLength = 10))
         }
         userVal(r)
         fwrite(userVal(),'register.csv',row.names = FALSE)
+        values_u$modal_closed <- F
       })
     }
   })
@@ -1115,13 +1117,13 @@ options(DT.options = list(pageLength = 10))
   observe({
     if(values_r$modal_closed){
       observeEvent(input$delete_rb, {
-        rb <- am_researcher_val()
+       rb <- am_researcher_val()
         if (!is.null(input$admin_researcher_rows_selected)) {
           rb <- data.frame( Researcher = rb[-as.numeric(input$admin_researcher_rows_selected),])
         }
         am_researcher_val(rb)
         fwrite(am_researcher_val(),'admin_researcher.csv',row.names = FALSE)
-        
+        values_r$modal_closed <- F
       })
     }
   })
@@ -1192,7 +1194,7 @@ options(DT.options = list(pageLength = 10))
         }
         am_group_val(g)
         fwrite(am_group_val(),'admin_group.csv',row.names = FALSE)
-        
+        values_g$modal_closed <- F
       })
     }
   })
@@ -1239,35 +1241,35 @@ options(DT.options = list(pageLength = 10))
     fwrite(am_method_val(),'admin_method.csv',row.names = FALSE) # save
   })
   ## DELETE 
-  #values_m = reactiveValues(modal_closed=F)
+  values_m = reactiveValues(modal_closed=F)
   observeEvent(input$delete_method, {
-    #values_m$modal_closed <- F
-    #showModal(modalDialog("Are you sure you want to delete?
-    #                      If you confirm the deletion, click the Delete button below.
-    #                      If you don't want to delete it, you can click outside the dialog box to cancel.", 
-    #                      title = "Delete Method", 
-    #                      easyClose = TRUE,  ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
-    #                      footer = actionButton("delete_m",label = "Delete"))
-    #)
-  #})
-  #observeEvent(input$delete_m,{
-  #  values_m$modal_closed <- T
-  #  removeModal()
-  #})  
-  #observe({
-  #  if(values_m$modal_closed){
-  #    observeEvent(input$delete_m, {
+    values_m$modal_closed <- F
+    showModal(modalDialog("Are you sure you want to delete?
+                          If you confirm the deletion, click the Delete button below.
+                          If you don't want to delete it, you can click outside the dialog box to cancel.", 
+                          title = "Delete Method", 
+                          easyClose = TRUE,  ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+                          footer = actionButton("delete_m",label = "Delete"))
+    )
+  })
+  observeEvent(input$delete_m,{
+    values_m$modal_closed <- T
+    removeModal()
+  })  
+  observe({
+    if(values_m$modal_closed){
+      observeEvent(input$delete_m, {
         m <- am_method_val()
         if (!is.null(input$admin_method_rows_selected)) {
           m <- data.frame(Method = m[-as.numeric(input$admin_method_rows_selected),])
         }
         am_method_val(m)
         fwrite(am_method_val(),'admin_method.csv',row.names = FALSE)
-        
+        values_m$modal_closed <- F
       })
       
-  #  }
-  #})
+    }
+  })
   
   
   ## 2 organism-----
@@ -1335,7 +1337,7 @@ options(DT.options = list(pageLength = 10))
         }
         am_organism_val(o)
         fwrite(am_organism_val(),'admin_organism.csv',row.names = FALSE)
-        
+        values_o$modal_closed <- F
       })
     }
   })
@@ -1406,7 +1408,7 @@ options(DT.options = list(pageLength = 10))
         }
         am_cell_val(c)
         fwrite(am_cell_val(),'admin_cell.csv',row.names = FALSE)
-        
+        values_c$modal_closed <- F
       })
     }
   })
@@ -1475,7 +1477,7 @@ options(DT.options = list(pageLength = 10))
         }
         am_format_val(f)
         fwrite(am_format_val(),'admin_format.csv',row.names = FALSE)
-        
+        values_f$modal_closed <- F
       })
     }
   })
