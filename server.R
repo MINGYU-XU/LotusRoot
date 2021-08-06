@@ -97,17 +97,17 @@ server <- function(input, output,session) {
                  & !(password == userVal() %>% filter(Name==username) %>% pull(Password)))
         {
         # password incorrect, show the warning message
-        # warning message disappear in 1 sec
+        # warning message disappear in 5 sec
         output$tab_login.login_msg <- renderText('Incorrect Password')
         shinyjs::show('tab_login.login_msg')
-        shinyjs::delay(2000, hide('tab_login.login_msg')) ##Delay disappear
+        shinyjs::delay(5000, hide('tab_login.login_msg')) ##Delay disappear
       } else #if( !(username %in% userVal()[,'Name']) )
         {
         # username not found, show the warning message
-        # warning message disappear in 2 sec
+        # warning message disappear in 5 sec
         output$tab_login.login_msg <- renderText('Username Not Found. Please register.')
         shinyjs::show('tab_login.login_msg')
-        shinyjs::delay(2000, hide('tab_login.login_msg'))  ##Delay disappear
+        shinyjs::delay(5000, hide('tab_login.login_msg'))  ##Delay disappear
         }
     # When the wrong name is entered, an error is reported
     ###Warning: Error in if: argument is of length zero ???????????
@@ -507,10 +507,12 @@ options(DT.options = list(pageLength = 10))
     values_p$modal_closed <- T
     removeModal()
   })  
+  
   observe({
+    r = projVal() ###
     if(values_p$modal_closed){
       observeEvent(input$delete_p, {
-        r = projVal()
+        
         if (!is.null(input$x1_rows_selected)) {
           r <- r[-as.numeric(input$x1_rows_selected),]
         }
@@ -1237,24 +1239,24 @@ options(DT.options = list(pageLength = 10))
     fwrite(am_method_val(),'admin_method.csv',row.names = FALSE) # save
   })
   ## DELETE 
-  values_m = reactiveValues(modal_closed=F)
+  #values_m = reactiveValues(modal_closed=F)
   observeEvent(input$delete_method, {
-    values_m$modal_closed <- F
-    showModal(modalDialog("Are you sure you want to delete?
-                          If you confirm the deletion, click the Delete button below.
-                          If you don't want to delete it, you can click outside the dialog box to cancel.", 
-                          title = "Delete Method", 
-                          easyClose = TRUE,  ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
-                          footer = actionButton("delete_m",label = "Delete"))
-    )
-  })
-  observeEvent(input$delete_m,{
-    values_m$modal_closed <- T
-    removeModal()
-  })  
-  observe({
-    if(values_m$modal_closed){
-      observeEvent(input$delete_m, {
+    #values_m$modal_closed <- F
+    #showModal(modalDialog("Are you sure you want to delete?
+    #                      If you confirm the deletion, click the Delete button below.
+    #                      If you don't want to delete it, you can click outside the dialog box to cancel.", 
+    #                      title = "Delete Method", 
+    #                      easyClose = TRUE,  ##If TRUE, the modal dialog can be dismissed by clicking outside the dialog box
+    #                      footer = actionButton("delete_m",label = "Delete"))
+    #)
+  #})
+  #observeEvent(input$delete_m,{
+  #  values_m$modal_closed <- T
+  #  removeModal()
+  #})  
+  #observe({
+  #  if(values_m$modal_closed){
+  #    observeEvent(input$delete_m, {
         m <- am_method_val()
         if (!is.null(input$admin_method_rows_selected)) {
           m <- data.frame(Method = m[-as.numeric(input$admin_method_rows_selected),])
@@ -1263,8 +1265,10 @@ options(DT.options = list(pageLength = 10))
         fwrite(am_method_val(),'admin_method.csv',row.names = FALSE)
         
       })
-    }
-  })
+      
+  #  }
+  #})
+  
   
   ## 2 organism-----
   am_organism <- read.table('admin_organism.csv',sep = ',',header = T)
