@@ -8,14 +8,14 @@ library(shiny)
 library(shinydashboard)
 library(shinyjs)
 library(tidyverse)
-#library(shinymanager)
-library(DT)
-library(readr)
+#library(readr)
 #library(dplyr)
-library(tidyr)
+#library(tidyr)
+library(DT)
 library(shinyFeedback)
 library(data.table) ## fwrite: fast
 #library(rhandsontable)
+#library(shinymanager)
 
 # ui
 # dashboard_header -----
@@ -100,7 +100,6 @@ body <- dashboardBody(
     tabItem(tabName = "create_new_project",
             h3("PROJECT"),
             fluidRow(
-              #useShinyFeedback(),
               box(width = 12,status = "primary",collapsible = FALSE,solidHeader = TRUE,
                   h3("Create New Project"),
                   box(
@@ -457,6 +456,7 @@ ui <- dashboardPage(
   sidebar,
   body,
   useShinyjs()
+  
 )
 
 # (optional check_credentials) ui <- secure_app(ui, choose_language = TRUE)
