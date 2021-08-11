@@ -408,6 +408,7 @@ options(DT.options = list(pageLength = 10))
       Related.ProjectID = input_related_parentID,  #store 'Project.ID' into the table
       Data.Name = input$dataName,
       Description = input$dataDescription, 
+      Replication = input$dataReplication,
       Date = as.character(input$dataDate),
       Path = input$dataPath, 
       Data.Repository = input$dataRepository,
@@ -429,6 +430,7 @@ options(DT.options = list(pageLength = 10))
     updateTextInput(session, "dataprojID", value = "")     
     updateTextInput(session, "dataName", value = "")   
     updateTextInput(session, "dataDescription", value = "")
+    updateTextInput(session, "dataReplication", value = "")
     updateTextInput(session, "dataDate", value = "")     
     updateTextInput(session, "dataPath", value = "")     
     updateTextInput(session, "dataRepository", value = "")
