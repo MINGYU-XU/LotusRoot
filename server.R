@@ -285,6 +285,7 @@ options(DT.options = list(pageLength = 10))
       Parent = input_parentID,   #　store 'Project.ID' into the project table
       Description = input$projDescription, 
       Start.Date = as.character(input$projDate),
+      Deadline= as.character(input$projDDL),
       Path = input$projPath, 
       Sample.Sheet = input$projSampleSheet,
       Researcher = input$projResearcher, 
@@ -310,7 +311,7 @@ options(DT.options = list(pageLength = 10))
     updateTextInput(session, "projParent", value = "")   
     updateTextInput(session, "projDescription", value = "")
     updateTextInput(session, "projDate", value = "")     
-    updateTextInput(session, "projDate2", value = "")     
+    updateTextInput(session, "projDDL", value = "")     
     updateTextInput(session, "projPath", value = "")   
     updateTextInput(session, "projSampleSheet", value = "")
     updateTextInput(session, "projResearcher", value = "")     
@@ -1494,6 +1495,9 @@ options(DT.options = list(pageLength = 10))
     tagList(manual_link)
   })
   output$home_manual <- renderUI({
+    tagList(manual_link)
+  })
+  output$LotusRoot_manual_faq <- renderUI({
     tagList(manual_link)
   })
 

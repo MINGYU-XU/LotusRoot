@@ -109,6 +109,7 @@ body <- dashboardBody(
                     uiOutput("proj_parent"),
                     textInput('projDescription', 'Description:', placeholder = 'Brief description of your project'),
                     dateInput('projDate', 'Start Date:',format = "yyyy-mm-dd",startview = 'month', language = 'en'),
+                    dateInput('projDDL','Deadline Date',format = 'yyyy-mm-dd',startview = 'month', language = 'en'),
                     textInput('projPath', 'Path(optional):', placeholder = 'Where the project stored on the server/URL'),
                     textInput('projSampleSheet', 'Sample Sheet(optional):', placeholder = 'Path/URL where the sample sheet stored'),
                     textInput('projReport', 'Report(optional):',placeholder = 'Path/URL where the project report stored')
@@ -182,8 +183,8 @@ body <- dashboardBody(
                     textInput('dataName', 'Dataset Name:', placeholder = 'eg. mCG_BS_WT1, mCG_BS_WT1'),
                     textInput('dataDescription', 
                               'Description:', placeholder = 'Brief description of your dataset'),
-                    dateInput('dataDate', 'Date:',format = "yyyy-mm-dd",startview = 'month', language = 'en'),
-                    textInput('dataPath', 'Path(optional):', placeholder = 'Where the data stored on the server/URL'),
+                    dateInput('dataDate', 'Creation Date:',format = "yyyy-mm-dd",startview = 'month', language = 'en'),
+                    textInput('dataPath', 'Path(required):', placeholder = 'Where the data stored on the server/URL'),
                     textInput('dataRepository', 'Data Repository:', placeholder = 'Web address/GEO number(eg. GEO10000)'),
                   ),
                   box(
@@ -236,8 +237,7 @@ body <- dashboardBody(
               column(1),
               column(10,
                      h5("LotusRoot is a sequencing data tracking system. 
-                        It can track projects and datasets with standardised metadata, while 
-                        still maintaining appropriate access and permissions to users and groups."), 
+                        It can track projects and datasets with standardised metadata."), 
                      h5("LotusRoot system will make our projects/datasets more 
                         findable, accessible, interoperable and reproducible 
                         based on the FAIR data principles."),
@@ -251,6 +251,10 @@ body <- dashboardBody(
     ),
     tabItem(tabName = "FAQ",
             h3("FAQ"),
+            helpText("Click here to get LotusRoot manual:"),
+            uiOutput("LotusRoot_manual_faq"),
+            br(),
+            helpText("If you still have problems, please contact s1234567@ed.ac.uk. We are very happy to help you!"),
             fluidRow(
               column(11,
                      box(width = 12,
