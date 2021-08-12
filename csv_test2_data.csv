@@ -1,5 +1,0 @@
-Data.ID,Project.ID,Sample.Name,Description,Date,Method,Organism,Tissue/Cell,Genotype,Treatment,Path,Format,Data.Repository
-1,1,MeCP2_ChIP_1,my data,13/04/2018,ChIP-seq,Human,Brain,WT(wildtype),,/library/Bird/JCW/MeCP2/0001.fq.gz,fastq.gz,GEO:GSM120000
-2,1,MeCP2_ChIP_2,new ,13/04/2018,ChIP-seq,Human,Brain,WT(wildtype),,/library/Bird/JCW/MeCP2/0002.fq.gz,fastq.gz,GEO:GSM130000
-3,2,mCG_BS_WT,v1,13/05/2019,BS-seq,Mouse,Neuron,TG(transgenic),,/library/Bird/SL/MeCP2/A.fq,fastq,
-4,2,mCG_BS_KO,v2,13/05/2019,BS-seq,Mouse,Neuron,KO(knock-out),,/library/Bird/SL/MeCP2/B.fq,fastq,
