@@ -1,4 +1,0 @@
-Project.ID,Parent,Researcher,Group,Project.Name,Description,Start.Date,End.Date,Status,Bioinformatician,Path,Sample.Sheet,Report,Data.Repository,Code.Repository,Permissions
-1,3,JCW,Bird,MeCP2,Some text,13/04/2018,13/10/2019,Published,Shaun,/homes/swebb/data/Bird/JCW/MeCP2_April18,www.bifx-core.bio.ed.ac.uk/swebb/Bird/,www.bifx-core.bio.ed.ac.uk/swebb/Bird/,GEO: GSE1000,www.github.com/swebb/MeCP2,Group
-2,3,SL,Bird,Me3,Some text,13/05/2019,13/10/2020,Complete,Shaun,/homes/swebb/data/Bird/SL/mCG_BS-seq_May19,www.bifx-core.bio.ed.ac.uk/swebb/Bird/,www.bifx-core.bio.ed.ac.uk/swebb/Bird/,GEO: GSE1000,www.github.com/swebb/Me3,Individual
-3,,M,Bird,MeCP2_Me3,qqqqqqqqq,13/07/2020,13/09/2020,Ongoing,Shaun,/homes/swebb/data/Bird/SL/mCG_BS-seq_May19,www.bifx-core.bio.ed.ac.uk/swebb/Bird/ ,,GEO: GSE1000,www.github.com/swebb/MeCP2_Me3,Group
