@@ -1,11 +1,12 @@
 #
-# This is my laboratory information management system (LIMS)
-# Shiny web application server 
+# This is LotusRoot Shiny web application -- server
+# tracking sequencing data
+# A prototype Shiny app for an MSc project
 #
+#-----------------------------------------------
 
 
-## Functions --------------------------------------------------------------------
-# print_rows_cols
+## Function -- print_rows_cols
 # print row+column selected
 print_rows_cols = function(id) {
   cat('Rows selected:\n')
@@ -15,21 +16,17 @@ print_rows_cols = function(id) {
 }
 
 
-
-## Read files---------------------------------------------------------------
-
-# future work: datas<-readRDS("df_data.rds") 
-datas <- read.csv('df_data.csv')
-proj <- read.csv('df_proj.csv')
-user <- read.csv('register.csv')
-# admin tables
-am_method <- read.table('admin_method.csv',sep = ',',header = T)  
+## Read files -----
+datas <- read.csv('df_data.csv')   # data table
+proj <- read.csv('df_proj.csv')    # project table
+user <- read.csv('register.csv')   # user information table
+am_method <- read.table('admin_method.csv',sep = ',',header = T)  # admin tables
 
 
 
 server <- function(input, output,session) {
   
-## *HOME page  ------
+## *HOME page  -----
   
 # links
   github_url <- a("GitHub Repository", href="https://github.com/MINGYU-XU/LotusRoot")
@@ -39,8 +36,6 @@ server <- function(input, output,session) {
     tagList(github_url,br(),NCBI_url,br(),GEO_url)
     #tagList("GitHub:", github_url)
   })
-  
-  
   
   
 # show login/register dialog box when initiated
@@ -80,13 +75,10 @@ server <- function(input, output,session) {
     
     username <- input$tab_login.username
     password <- input$tab_login.password
-    #row.names(user) <- user$Name
     
     if(username %in% userVal()[,'Name'] 
        & password == userVal() %>% filter(Name==username) %>% pull(Password)) 
       {
-      # real time login
-      #if(password == userVal() %>% filter(Name==username) %>% pull(Password)){
         # succesfully log in
         removeModal() # remove login dialog
         output$tab_login.welcome_text <- renderText(
@@ -101,7 +93,7 @@ server <- function(input, output,session) {
         output$tab_login.login_msg <- renderText('Incorrect Password')
         shinyjs::show('tab_login.login_msg')
         shinyjs::delay(5000, hide('tab_login.login_msg')) ##Delay disappear
-      } else #if( !(username %in% userVal()[,'Name']) )
+      } else
         {
         # username not found, show the warning message
         # warning message disappear in 5 sec
@@ -109,8 +101,6 @@ server <- function(input, output,session) {
         shinyjs::show('tab_login.login_msg')
         shinyjs::delay(5000, hide('tab_login.login_msg'))  ##Delay disappear
         }
-    # When the wrong name is entered, an error is reported
-    ###Warning: Error in if: argument is of length zero ???????????
   })
   
 
@@ -154,7 +144,7 @@ server <- function(input, output,session) {
   })
   
   
-### User permissions ------
+## User permissions ------
   observeEvent(input$tab_login.login,{
     pm <- userVal() %>% filter(Name==input$tab_login.username) %>% pull(Permissions)
     output$tab_login.permissions_text <- renderText(paste0('Your permissions: ',pm))
@@ -235,13 +225,12 @@ options(DT.options = list(pageLength = 10))
     )
   )
   observe({
-    ## 'Bioinformatician' synchronize changes with 'Researcher'
+    # 'Bioinformatician' synchronize changes with 'Researcher'
     output$proj_bioinfo <- renderUI(
       selectizeInput("projBioinformatician", "Bioinformatician:",
                   choices = am_researcher_val()[,1],
                   selected = input$projResearcher,
                   multiple = F
-                  #options = list(`actions-box` = TRUE)
                   )
     )
   })
@@ -250,7 +239,6 @@ options(DT.options = list(pageLength = 10))
                 choices = am_group_val()[,1],
                 multiple = F,
                 selected = NULL
-                #options = list(`actions-box` = TRUE)
     )
   )
   output$proj_parent <- renderUI(
@@ -258,7 +246,6 @@ options(DT.options = list(pageLength = 10))
                 choices = projVal()[,2],
                 selected = NULL,
                 multiple = TRUE
-                #options = list(`actions-box` = TRUE)
     )
               
   )
@@ -333,7 +320,7 @@ options(DT.options = list(pageLength = 10))
   observeEvent(input$dataName, {
     datas <- dataVal() 
     if(input$dataName %in% datas[,'Data.Name']) {
-      ## feedback
+      # feedback
       showFeedbackDanger(
         inputId = "dataName",
         text = "The sample name is already taken."
@@ -349,24 +336,17 @@ options(DT.options = list(pageLength = 10))
   output$related_project_name <- renderUI(
     selectizeInput('dataprojID', 'Related Project Name(required):',
                 choices = projVal()[,2]
-                #selected = NULL
-                #multiple = FALSE
     )
   )
   output$data_method <- renderUI(
     selectizeInput("method", "Method:",
                 choices = am_method_val()[,1],
                 multiple = F
-                #selected = NULL
-                #options = list(`actions-box` = TRUE)
     )
   )
   output$data_organism <- renderUI(
     selectizeInput("organism", "Organism:",
                 choices = am_organism_val()[,1]
-                #multiple = F,
-                #selected = NULL
-                #options = list(`actions-box` = TRUE)
     )
   )
   output$data_cell <- renderUI(
@@ -380,9 +360,6 @@ options(DT.options = list(pageLength = 10))
   output$data_format <- renderUI(
     selectizeInput("format", "Format:",
                 choices = am_format_val()[,1]
-                #multiple = F,
-                #selected = NULL
-                #options = list(`actions-box` = TRUE)
     )
   )
   
@@ -452,7 +429,6 @@ options(DT.options = list(pageLength = 10))
     }
   })
   
- 
 
 # *DELETE  -----
   
@@ -635,7 +611,7 @@ options(DT.options = list(pageLength = 10))
         escape = FALSE,
         rownames = FALSE, # hide row names
         editable = list(target = "cell",  
-                        disable = list(columns = c(0,4))), ###
+                        disable = list(columns = c(0,4))), 
         # cannot edit project id, start date
         options = list(SortClasses = TRUE,
                        scrollX = TRUE,
@@ -685,10 +661,6 @@ options(DT.options = list(pageLength = 10))
   })
   
   
- 
-  
-  
-  
 # *Clear selected rows -----
   # clear selected proj rows 
   x1_proxy <- DT::dataTableProxy("x1")
@@ -701,8 +673,6 @@ options(DT.options = list(pageLength = 10))
     selectRows(x2_proxy, NULL)
   })
   
-  
-
   
 # *Associating two tables -----
 
@@ -780,16 +750,7 @@ options(DT.options = list(pageLength = 10))
     rp_all <- rbind(rp_all,rp0)
   }
     
-    
-    #rp1 <- projVal() %>% filter(Parent  %in% pid)   
-    ## Filter subs, 选parent才显示sub，选sbu不显示
-    #rp2 <- projVal() %>% filter(Project.ID  %in% parent_id) 
-    ## Filter parent, 选sub才显示，选parent不显示
-    
-    #rp0 <- rbind(rp2,projVal()[input$x1_rows_selected,],rp1)#,rp2) #,projVal()[input$x1_rows_selected,])
-    
     rp_all.new <<- rp_all[!duplicated(rp_all),] ## Delete duplicate rows
-    #rp_all <<- unique(rp_all)
     
     datatable(rp_all.new, 
               rownames = FALSE,
@@ -797,7 +758,6 @@ options(DT.options = list(pageLength = 10))
               #extensions = "FixedColumns",
               options = list(SortClasses = TRUE, 
                              scrollX = TRUE
-                             #fixedColumns = list(leftColumns = 1)
                              )
               ) %>% formatStyle(c('Project.Name','Status'),
                                 'Status',                                
@@ -816,26 +776,17 @@ options(DT.options = list(pageLength = 10))
       show_ds <- dataVal() %>% filter(Related.ProjectID %in% show_id)   ## Filter the dataset table
       datatable(show_ds,
                 rownames = FALSE,
-                selection=list(target = 'row'),#"single", 
-                #extensions = "FixedColumns",
+                selection=list(target = 'row'),
                 options = list(SortClasses = TRUE, 
                                scrollX = TRUE,
                                fixedHeader=TRUE
-                               #fixedColumns = list(leftColumns = 1)
                                )
       )
     }
       
 })
     
-  # related proj -> related dataset -----
-  #show_ids <- reactive({
-  #  if(length(input$rp_rows_selected)==0) {return(NULL)}   ## No output
-  #  else { show_ids <- projVal()[input$rp_rows_selected,"Project.ID"] }
-  #  return(show_ids)
-  #})
     
-
 # data -> proj  -----
   ## if no row(in x1) selected, No table
   ## if select one row, display the projs include the data
@@ -865,28 +816,17 @@ options(DT.options = list(pageLength = 10))
     )
   })
   
-  # future work: related data -> go to project page
-  #observeEvent(input$go_to_proj,{
-  #  updateTabItems(session,
-  #                 inputId = "myproject",
-  #                 selected = "current_project")
-  #  })
-  
-
-  
   
 # *output -----
   
 # output proj table -----
   projVal <- reactiveVal(proj)
   output$x1 <- renderDT({
-  #output$x1 <- renderRHandsontable({
     server = FALSE    ## client-side processing
     datatable(
     projVal(),
     rownames = FALSE, # hide row names
     selection = list(target = 'row'),   ## Multiple selection: rows
-    #editable = list(target = "cell", disable = list(columns = c(0,1,4))), # cannot edit somr columns
     filter = list(position = 'top', clear = FALSE),
     extensions = c('Buttons','Select', 'SearchPanes'), # 'FixedColumns',
     options = list(
@@ -894,14 +834,9 @@ options(DT.options = list(pageLength = 10))
       style = 'os', 
       items = 'row',
       scrollX = TRUE,
-      #fixedColumns = list(leftColumns = 1),
       buttons = c('csv', 'excel', 'pdf'),
       searchHighlight = TRUE,
       search = list(regex = TRUE)
-      #columnDefs = list(list(targets = c(3), searchable = FALSE)) 
-      #Disable Searching for Individual Columns
-      #columnDefs = list(list(searchPanes = list(show = FALSE), targets = 1:2)) 
-      ## ??? no searchPanes
     ) 
                         
     ) %>% formatStyle(c('Project.Name','Status'),
@@ -921,22 +856,17 @@ options(DT.options = list(pageLength = 10))
     dataVal(),
     rownames = FALSE,
     server = FALSE,     ## client-side processing
-    selection = list(target = 'row'),   ## Multiple selection: rows  #selection = 'single',  #selection = 'none',
-    #editable = 'cell', 
-    #editable = list(target = "cell", disable = list(columns = c(0))), ## cannot edit some columns
+    selection = list(target = 'row'),   ## Multiple selection: rows  #selection = 'single',  #selection = 'none'
     filter = list(position = 'top', clear = FALSE),
     extensions = c('Buttons','FixedColumns','Select', 'SearchPanes'),
     options = list(
-      dom = 'PBlfrtip',  ##dom = 'PBlfrtip',P:searchpane,B:button
+      dom = 'PBlfrtip',  #P:searchpane,B:button
       style = 'os', 
       items = 'row',
       scrollX = TRUE,
-      #fixedColumns = list(leftColumns = 1),
       buttons = c('csv', 'excel', 'pdf'), 
       searchHighlight = TRUE,
       search = list(regex = TRUE),
-      #columnDefs = list(list(targets = c(1), searchable = FALSE))   
-      #Disable Searching for Individual Columns
       columnDefs = list(list(searchPanes = list(show = F), targets = 1:7)) ##searchPanes
     )         
     
@@ -946,7 +876,6 @@ options(DT.options = list(pageLength = 10))
 # *Administrator -----
   
 # admin_user ------
-  
   # ADD user info
   userVal <- reactiveVal(user)
   observeEvent(input$userName, {
@@ -1504,7 +1433,6 @@ options(DT.options = list(pageLength = 10))
   })
 
   
-  
 # *Log out
   observeEvent(input$logout_btn,{
     showModal(modalDialog(
@@ -1523,25 +1451,6 @@ options(DT.options = list(pageLength = 10))
   observeEvent(input$go_to_login,{
     showModal(login_dialog)
   })
-  
-  
-  
+
   
 }
-
-
-## secure credentials info (optional)
-#if (interactive()) {
-#  # define some credentials
-#  credentials <- data.frame(
-#    user = c("test", "123"),
-#    password = c("test", "123"),
-#    stringsAsFactors = FALSE
-#  )}
-# (optional)check_credentials returns a function to authenticate users
-#res_auth <- secure_server(
-#  check_credentials = check_credentials(credentials)
-#)
-#output$auth_output <- renderPrint({
-#  reactiveValuesToList(res_auth)
-#})
