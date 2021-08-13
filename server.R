@@ -408,7 +408,7 @@ options(DT.options = list(pageLength = 10))
       Related.ProjectID = input_related_parentID,  #store 'Project.ID' into the table
       Data.Name = input$dataName,
       Description = input$dataDescription, 
-      Replication = input$dataReplication,
+      Replicate = input$dataReplication,
       Date = as.character(input$dataDate),
       Path = input$dataPath, 
       Data.Repository = input$dataRepository,

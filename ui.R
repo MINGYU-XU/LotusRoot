@@ -188,7 +188,7 @@ body <- dashboardBody(
                     textInput('dataRepository', 'Data Repository:', placeholder = 'Web address/GEO number(eg. GEO10000)'),
                   ),
                   box(
-                    numericInput('dataReplication','Replication',1,min = 1,step = 1),
+                    numericInput('dataReplication','Replicate',1,min = 1,step = 1),
                     uiOutput("data_method"),
                     uiOutput("data_organism"),
                     uiOutput("data_cell"),
