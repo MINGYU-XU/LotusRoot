@@ -20,7 +20,8 @@ print_rows_cols = function(id) {
 datas <- read.csv('df_data.csv')   # data table
 proj <- read.csv('df_proj.csv')    # project table
 user <- read.csv('register.csv')   # user information table
-am_method <- read.table('admin_method.csv',sep = ',',header = T)  # admin tables
+# admin tables
+am_method <- read.table('admin_method.csv',sep = ',',header = T)  
 
 
 
