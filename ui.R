@@ -1,5 +1,5 @@
 #
-# This is LotusRoot Shiny web application
+# This is LotusRoot Shiny web application -- UI
 # tracking sequencing data
 # A prototype Shiny app for an MSc project
 #
