@@ -1,22 +1,19 @@
 #
 # This is LotusRoot Shiny web application
 # tracking sequencing data
+# A prototype Shiny app for an MSc project
 #
-#--------------------------------------------------------------------
+#-----------------------------------------------
 
 
 library(shiny)
 library(shinydashboard)
 library(shinyjs)
 library(tidyverse)
-#library(readr)
-#library(dplyr)
-#library(tidyr)
 library(DT)
 library(shinyFeedback)
-library(data.table) ## fwrite: fast
-#library(rhandsontable)
-#library(shinymanager)
+library(data.table)
+
 
 # ui
 # dashboard_header -----
@@ -98,6 +95,7 @@ body <- dashboardBody(
             )
     ),
     
+    # ui- PROJECT
     tabItem(tabName = "create_new_project",
             h3("PROJECT"),
             fluidRow(
@@ -138,6 +136,7 @@ body <- dashboardBody(
                   )
               )),
     
+    # ui- PROJECT
     tabItem(tabName = "current_project",
             h3("PROJECT"),
             fluidRow(
@@ -171,7 +170,8 @@ body <- dashboardBody(
                   DTOutput(outputId='one_proj_datasets')
               ))
             ),
-            
+     
+    # ui- DATASET       
     tabItem(tabName = "create_new_dataset",
             h3("DATASET"),
             fluidRow(
@@ -202,6 +202,7 @@ body <- dashboardBody(
               )
             )),
     
+    # ui- DATASET
     tabItem(tabName = "current_dataset",
             h3("DATASET"),
             fluidRow(
@@ -228,6 +229,7 @@ body <- dashboardBody(
 
     ),
     
+    # ui- About Us
     tabItem(tabName = "aboutus",
             h3("About Us"),
             fluidRow(
@@ -251,6 +253,8 @@ body <- dashboardBody(
             
             )
     ),
+    
+    # ui- FAQ
     tabItem(tabName = "FAQ",
             h3("FAQ"),
             helpText("Click here to get LotusRoot manual:"),
@@ -312,6 +316,7 @@ body <- dashboardBody(
             )
     ),
     
+    # ui- Management
     tabItem(tabName = "admin_user",
             h3("System Management —— User"),
             h5(),
@@ -447,6 +452,8 @@ body <- dashboardBody(
               )
             )
     ),
+    
+    # ui-Logout
     tabItem(tabName = "logout",
             h3("Want to Log Out?"),
             h5(),
@@ -464,5 +471,3 @@ ui <- dashboardPage(
   useShinyjs()
   
 )
-
-# (optional check_credentials) ui <- secure_app(ui, choose_language = TRUE)
